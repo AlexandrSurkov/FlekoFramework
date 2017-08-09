@@ -7,7 +7,7 @@ namespace Flekosoft.Common
         #region IDisposable Members
         private bool _disposed;
 
-        public bool Disposed
+        public bool IsDisposed
         {
             // ReSharper disable once ConvertPropertyToExpressionBody
             get { return _disposed; }

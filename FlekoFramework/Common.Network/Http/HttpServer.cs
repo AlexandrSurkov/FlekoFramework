@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Net;
-using System.Reflection;
 using System.Text;
 using System.Threading;
 using Flekosoft.Common.Logging;
@@ -35,7 +34,7 @@ namespace Flekosoft.Common.Network.Http
                 if (_prefix != value)
                 {
                     _prefix = value;
-                    OnPropertyChanged(MethodBase.GetCurrentMethod().Name);
+                    OnPropertyChanged(nameof(Prefix));
                 }
             }
         }
@@ -48,7 +47,7 @@ namespace Flekosoft.Common.Network.Http
                 if (_isListening != value)
                 {
                     _isListening = value;
-                    OnPropertyChanged(MethodBase.GetCurrentMethod().Name);
+                    OnPropertyChanged(nameof(IsListening));
                 }
             }
         }

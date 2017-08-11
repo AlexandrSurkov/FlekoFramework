@@ -68,7 +68,7 @@ namespace Flekosoft.Common.Network.Tcp
                 if (_isConnected != value)
                 {
                     _isConnected = value;
-                    OnPropertyChanged(MethodBase.GetCurrentMethod().Name);
+                    OnPropertyChanged(nameof(IsConnected));
                 }
             }
         }
@@ -83,7 +83,9 @@ namespace Flekosoft.Common.Network.Tcp
                 if (_isStarted != value)
                 {
                     _isStarted = value;
-                    OnPropertyChanged(MethodBase.GetCurrentMethod().Name);
+                    OnPropertyChanged(nameof(IsStarted));
+                    if (_isStarted) OnStartedEvent();
+                    else OnStoppedEvent();
                 }
             }
         }
@@ -98,7 +100,7 @@ namespace Flekosoft.Common.Network.Tcp
                 if (_pollFailLimit != value)
                 {
                     _pollFailLimit = value;
-                    OnPropertyChanged(MethodBase.GetCurrentMethod().Name);
+                    OnPropertyChanged(nameof(PollFailLimit));
                 }
             }
         }
@@ -113,7 +115,7 @@ namespace Flekosoft.Common.Network.Tcp
                 if (_pollInterval != value)
                 {
                     _pollInterval = value;
-                    OnPropertyChanged(MethodBase.GetCurrentMethod().Name);
+                    OnPropertyChanged(nameof(PollInterval));
                 }
             }
         }
@@ -128,7 +130,7 @@ namespace Flekosoft.Common.Network.Tcp
                 if (_connectInterval != value)
                 {
                     _connectInterval = value;
-                    OnPropertyChanged(MethodBase.GetCurrentMethod().Name);
+                    OnPropertyChanged(nameof(ConnectInterval));
                 }
             }
         }
@@ -147,7 +149,7 @@ namespace Flekosoft.Common.Network.Tcp
                     {
                         _readBuffer = new byte[_readBufferSize];
                     }
-                    OnPropertyChanged(MethodBase.GetCurrentMethod().Name);
+                    OnPropertyChanged(nameof(ReadBufferSize));
                 }
             }
         }
@@ -383,6 +385,8 @@ namespace Flekosoft.Common.Network.Tcp
         public void Stop()
         {
             IsStarted = false;
+            IpAddress = string.Empty;
+            Port = 0;
         }
 
         #endregion
@@ -402,19 +406,31 @@ namespace Flekosoft.Common.Network.Tcp
         public event EventHandler DisconnectedEvent;
         protected void OnDisconnectedEvent()
         {
-            DisconnectedEvent?.Invoke(this, EventArgs.Empty);
+            DisconnectedEvent?.Invoke(this, System.EventArgs.Empty);
         }
 
         public event EventHandler ReconnectingEvent;
         protected void OnReconnectingEvent()
         {
-            ReconnectingEvent?.Invoke(this, EventArgs.Empty);
+            ReconnectingEvent?.Invoke(this, System.EventArgs.Empty);
         }
 
         public event EventHandler<ConnectionFailEventArgs> ConnectionFailEvent;
         protected void OnConnectionFailEvent(string result)
         {
             ConnectionFailEvent?.Invoke(this, new ConnectionFailEventArgs(result));
+        }
+
+        public event EventHandler StartedEvent;
+        private void OnStartedEvent()
+        {
+            StartedEvent?.Invoke(this, System.EventArgs.Empty);
+        }
+
+        public event EventHandler StoppedEvent;
+        private void OnStoppedEvent()
+        {
+            StoppedEvent?.Invoke(this, System.EventArgs.Empty);
         }
         #endregion
 
@@ -453,6 +469,8 @@ namespace Flekosoft.Common.Network.Tcp
                 ConnectionFailEvent = null;
                 DisconnectedEvent = null;
                 ReconnectingEvent = null;
+                StartedEvent = null;
+                StoppedEvent = null;
             }
             base.Dispose(disposing);
         }

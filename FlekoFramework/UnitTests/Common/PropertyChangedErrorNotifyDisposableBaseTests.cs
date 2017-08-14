@@ -8,6 +8,15 @@ namespace Flekosoft.UnitTests.Common
 {
     class TestClass : PropertyChangedErrorNotifyDisposableBase
     {
+        public TestClass()
+        {
+
+        }
+
+        public TestClass(string name) : base(name)
+        {
+
+        }
         public void SendPropertyChanged(string propName)
         {
             OnPropertyChanged(propName);
@@ -37,6 +46,7 @@ namespace Flekosoft.UnitTests.Common
         public void Test()
         {
             var tc = new TestClass();
+            Assert.IsTrue(string.IsNullOrEmpty(tc.Name));
 
             tc.ErrorEvent += Tc_ErrorEvent;
             ErrorEvent = null;
@@ -67,6 +77,10 @@ namespace Flekosoft.UnitTests.Common
             Assert.IsFalse(tc.DisposeCalled);
             tc.Dispose();
             Assert.IsFalse(tc.DisposeCalled);
+
+            var className = "ClassName";
+            tc = new TestClass(className);
+            Assert.AreEqual(className, tc.Name);
         }
 
         public PropertyChangedEventArgs PropertyChangedEvent { get; set; }

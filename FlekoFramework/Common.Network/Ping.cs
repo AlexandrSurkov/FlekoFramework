@@ -11,7 +11,6 @@ namespace Flekosoft.Common.Network
             return Send(url, out reply);
         }
 
-
         public static bool Send(string url, out System.Net.NetworkInformation.PingReply reply)
         {
             reply = null;

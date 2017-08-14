@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using Flekosoft.Common.Logging;
 
 namespace Flekosoft.Common
 {
@@ -15,10 +16,11 @@ namespace Flekosoft.Common
             Name = string.Empty;
         }
 
-        public string Name { get;}
+        public string Name { get; }
         public event EventHandler<ErrorEventArgs> ErrorEvent;
         protected void OnErrorEvent(Exception exception)
         {
+            Logger.Instance.AppendException(new Exception(Name, exception));
             // ReSharper disable once UseNullPropagation
             ErrorEvent?.Invoke(this, new ErrorEventArgs(exception));
         }

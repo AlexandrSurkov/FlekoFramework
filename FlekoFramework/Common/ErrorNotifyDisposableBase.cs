@@ -5,6 +5,17 @@ namespace Flekosoft.Common
 {
     public abstract class ErrorNotifyDisposableBase : DisposableBase
     {
+        protected ErrorNotifyDisposableBase(string name)
+        {
+            Name = name;
+        }
+
+        protected ErrorNotifyDisposableBase()
+        {
+            Name = string.Empty;
+        }
+
+        public string Name { get;}
         public event EventHandler<ErrorEventArgs> ErrorEvent;
         protected void OnErrorEvent(Exception exception)
         {

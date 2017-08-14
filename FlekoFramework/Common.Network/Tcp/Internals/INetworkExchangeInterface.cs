@@ -2,7 +2,7 @@
 
 namespace Flekosoft.Common.Network.Tcp.Internals
 {
-    public interface INetworkInterface
+    public interface INetworkExchangeInterface
     {
         int Read(byte[] data);
         int Write(byte[] data);

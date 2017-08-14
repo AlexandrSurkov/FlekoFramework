@@ -56,6 +56,7 @@
     <Reference Include="System.Windows.Forms" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Common.Network\AsyncNetworkExchangeDriverTest.cs" />
     <Compile Include="Common\Logging\LoggingTests.cs" />
     <Compile Include="Common\PropertyChangedErrorNotifyDisposableBaseTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -68,11 +69,16 @@
       <Project>{3c2060d8-6036-491b-8e6f-f75f05f1e450}</Project>
       <Name>Common.Logging.Windows</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Common.Network\Common.Network.csproj">
+      <Project>{41D3FED6-A0E5-481B-A84F-8E6E409466ED}</Project>
+      <Name>Common.Network</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Common\Common.csproj">
       <Project>{c1c745ec-463e-49dc-a457-ee232a4d59e2}</Project>
       <Name>Common</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets" Condition="Exists('$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets')" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

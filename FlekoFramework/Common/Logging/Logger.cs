@@ -30,12 +30,12 @@ namespace Flekosoft.Common.Logging
         public void AppendException(Exception ex)
         {
             List<string> strings = new List<string>();
-            FillExceprionStrings(strings, ex);
+            FillExceprtionStrings(strings, ex);
             var logrec = new LogRecord(DateTime.Now, strings, LogRecordLevel.Error, ConsoleColor.Red);
             AppendLog(logrec);
         }
 
-        void FillExceprionStrings(List<string> strings, Exception ex)
+        void FillExceprtionStrings(List<string> strings, Exception ex)
         {
             strings.Add("Type:\t" + ex.GetType());
             strings.Add("Message:\t" + ex.Message);
@@ -45,7 +45,7 @@ namespace Flekosoft.Common.Logging
             {
                 strings.Add(String.Empty);
                 strings.Add("Inner exception:");
-                FillExceprionStrings(strings, ex.InnerException);
+                FillExceprtionStrings(strings, ex.InnerException);
             }
         }
         public void AppendDebug(ICollection<string> strings)

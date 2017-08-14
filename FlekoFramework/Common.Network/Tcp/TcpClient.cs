@@ -2,7 +2,6 @@
 using System.Collections.Concurrent;
 using System.Net;
 using System.Net.Sockets;
-using System.Reflection;
 using System.Threading;
 
 namespace Flekosoft.Common.Network.Tcp
@@ -324,6 +323,7 @@ namespace Flekosoft.Common.Network.Tcp
         #endregion
 
         #region Methods
+
         private bool ConnectToServer()
         {
             try
@@ -389,6 +389,8 @@ namespace Flekosoft.Common.Network.Tcp
             Port = 0;
         }
 
+
+
         #endregion
 
         protected abstract void ProcessByteInternal(byte dataByte);
@@ -406,13 +408,13 @@ namespace Flekosoft.Common.Network.Tcp
         public event EventHandler DisconnectedEvent;
         protected void OnDisconnectedEvent()
         {
-            DisconnectedEvent?.Invoke(this, System.EventArgs.Empty);
+            DisconnectedEvent?.Invoke(this, EventArgs.Empty);
         }
 
         public event EventHandler ReconnectingEvent;
         protected void OnReconnectingEvent()
         {
-            ReconnectingEvent?.Invoke(this, System.EventArgs.Empty);
+            ReconnectingEvent?.Invoke(this, EventArgs.Empty);
         }
 
         public event EventHandler<ConnectionFailEventArgs> ConnectionFailEvent;
@@ -424,13 +426,13 @@ namespace Flekosoft.Common.Network.Tcp
         public event EventHandler StartedEvent;
         private void OnStartedEvent()
         {
-            StartedEvent?.Invoke(this, System.EventArgs.Empty);
+            StartedEvent?.Invoke(this, EventArgs.Empty);
         }
 
         public event EventHandler StoppedEvent;
         private void OnStoppedEvent()
         {
-            StoppedEvent?.Invoke(this, System.EventArgs.Empty);
+            StoppedEvent?.Invoke(this, EventArgs.Empty);
         }
         #endregion
 

@@ -389,6 +389,18 @@ namespace Flekosoft.Common.Network.Tcp
             Port = 0;
         }
 
+        protected bool Write(byte[] data)
+        {
+            if (IsConnected & _netStream != null)
+            {
+                if (_netStream.CanWrite)
+                {
+                    _netStream.Write(data, 0, data.Length);
+                    return true;
+                }
+            }
+            return false;
+        }
 
 
         #endregion

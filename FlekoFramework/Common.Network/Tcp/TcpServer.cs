@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
-using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using Flekosoft.Common.Network.Tcp.Internals;
@@ -14,9 +12,10 @@ namespace Flekosoft.Common.Network.Tcp
         private readonly List<ListenSocket> _listenSockets = new List<ListenSocket>();
         private bool _isStarted;
         
-        private Thread _waitConnectionThread;
+        private readonly Thread _waitConnectionThread;
         private readonly object _listenSocketsSyncObject = new object();
         private readonly object _connectedSocketsListSyncObject = new object();
+        private readonly ObservableCollection<NetworkExchangeDriver> _connectedSockets = new ObservableCollection<NetworkExchangeDriver>();
 
 
         public TcpServer()
@@ -95,7 +94,7 @@ namespace Flekosoft.Common.Network.Tcp
 
                         foreach (var connection in removeList)
                         {
-                            OnDisconnectedEvent(new ConnectionEventArgs(connection.RemoteEndpoint));
+                            OnDisconnectedEvent(new ConnectionEventArgs(connection.,connection.RemoteEndpoint));
                             connection.Dispose();
                             _connectedSockets.Remove(connection);
                         }
@@ -109,8 +108,7 @@ namespace Flekosoft.Common.Network.Tcp
                 }
                 catch (Exception ex)
                 {
-                    var exc = new Exception("ConnectRequestsThreadProc Error", ex);
-                    OnErrorEvent(exc);
+                    OnErrorEvent(ex);
                 }
             }
         }
@@ -196,10 +194,6 @@ namespace Flekosoft.Common.Network.Tcp
         }
 
         #endregion
-
-
-
-
 
         #region events
         public event EventHandler StartedEvent;

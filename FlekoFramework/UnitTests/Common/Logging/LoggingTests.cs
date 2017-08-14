@@ -5,7 +5,7 @@ using System.Threading;
 using Flekosoft.Common.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Flekosoft.UnitTests.Common
+namespace Flekosoft.UnitTests.Common.Logging
 {
     class Writer : LoggerOutput
     {

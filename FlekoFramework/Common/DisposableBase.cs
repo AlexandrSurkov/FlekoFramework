@@ -14,7 +14,7 @@ namespace Flekosoft.Common
         }
         public void Dispose()
         {
-            Dispose(true);
+            Dispose(!IsDisposed);
             GC.SuppressFinalize(this);
         }
 

@@ -9,10 +9,7 @@ namespace Flekosoft.Common
         protected void OnErrorEvent(Exception exception)
         {
             // ReSharper disable once UseNullPropagation
-            if (ErrorEvent != null)
-            {
-                ErrorEvent(this, new ErrorEventArgs(exception));
-            }
+            ErrorEvent?.Invoke(this, new ErrorEventArgs(exception));
         }
 
         protected override void Dispose(bool disposing)

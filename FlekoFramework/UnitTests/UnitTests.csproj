@@ -56,7 +56,8 @@
     <Reference Include="System.Windows.Forms" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Common\LoggingTests.cs" />
+    <Compile Include="Common\Logging\LoggingTests.cs" />
+    <Compile Include="Common\PropertyChangedErrorNotifyDisposableBaseTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

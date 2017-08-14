@@ -45,7 +45,8 @@
     <Compile Include="Http\HttpClient.cs" />
     <Compile Include="Ping.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Tcp\Internals\ExchnageDriver.cs" />
+    <Compile Include="Tcp\Internals\AsyncNetworkExchange.cs" />
+    <Compile Include="Tcp\Internals\INetworkInterface.cs" />
     <Compile Include="Tcp\Internals\ListenSocket.cs" />
     <Compile Include="Tcp\Internals\ExchangeSocket.cs" />
     <Compile Include="Tcp\TcpServerLocalEndpoint.cs" />

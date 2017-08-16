@@ -26,7 +26,8 @@ namespace Flekosoft.Common.Network.Tcp.Internals
 
         private int _readBufferSize;
 
-        private readonly object _networkInterfaceSyncObject = new object();
+        private readonly object _networkInterfaceReadSyncObject = new object();
+        private readonly object _networkInterfaceWriteSyncObject = new object();
         private INetworkExchangeInterface _networkInterface;
 
         private readonly object _writeSyncObject = new object();
@@ -99,7 +100,7 @@ namespace Flekosoft.Common.Network.Tcp.Internals
             {
                 try
                 {
-                    lock (_networkInterfaceSyncObject)
+                    lock (_networkInterfaceReadSyncObject)
                     {
                         if (IsStarted && _networkInterface?.IsConnected == true)
                         {
@@ -250,9 +251,12 @@ namespace Flekosoft.Common.Network.Tcp.Internals
         /// <param name="networkInterface">interface to send and receive data</param>
         public void Start(INetworkExchangeInterface networkInterface)
         {
-            lock (_networkInterfaceSyncObject)
+            lock (_networkInterfaceReadSyncObject)
             {
-                _networkInterface = networkInterface;
+                lock (_networkInterfaceWriteSyncObject)
+                {
+                    _networkInterface = networkInterface;
+                }
             }
             IsStarted = true;
         }
@@ -263,9 +267,12 @@ namespace Flekosoft.Common.Network.Tcp.Internals
         public void Stop()
         {
             IsStarted = false;
-            lock (_networkInterfaceSyncObject)
+            lock (_networkInterfaceReadSyncObject)
             {
-                _networkInterface = null;
+                lock (_networkInterfaceWriteSyncObject)
+                {
+                    _networkInterface = null;
+                }
             }
         }
 
@@ -277,7 +284,7 @@ namespace Flekosoft.Common.Network.Tcp.Internals
                 {
                     lock (_writeSyncObject)
                     {
-                        lock (_networkInterfaceSyncObject)
+                        lock (_networkInterfaceWriteSyncObject)
                         {
                             var index = 0;
                             var written = 0;

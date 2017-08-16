@@ -106,13 +106,6 @@ namespace Flekosoft.Common.Network.Tcp.Internals
                         {
                             lock (_readBufferSyncObject)
                             {
-                                //Clear buffer. 
-                                //TODO: May be we will not need to do it. Will see after use experiance
-                                //for (int i = 0; i < _readBuffer.Length; i++)
-                                //{
-                                //    _readBuffer[i] = 0x00;
-                                //}
-
                                 int count = _networkInterface.Read(_readBuffer);
                                 if (count > 0)
                                 {
@@ -278,43 +271,58 @@ namespace Flekosoft.Common.Network.Tcp.Internals
 
         protected bool Write(byte[] data)
         {
-            if (_networkInterface?.IsConnected == true)
+            try
             {
-                if (data != null)
+                if (_networkInterface?.IsConnected == true)
                 {
-                    lock (_writeSyncObject)
+                    if (data != null)
                     {
-                        lock (_networkInterfaceWriteSyncObject)
+                        lock (_writeSyncObject)
                         {
-                            var index = 0;
-                            var written = 0;
-                            var len = data.Length;
-                            while (written < data.Length)
+                            lock (_networkInterfaceWriteSyncObject)
                             {
-                                written = (int)_networkInterface?.Write(data, index, len);
-                                index += written;
-                                len -= written;
-                                ////if (written != data.Length)
-                                ////{
-                                ////    throw new NetworkWriteException($"{Name}.SendDataSync: Send error. bytes to send " +
-                                ////                                    data.Length + " but sent " +
-                                ////                                    written + " bytes ");
-                                ////}
+                                var index = 0;
+                                var written = 0;
+                                var len = data.Length;
+                                while (written < data.Length)
+                                {
+                                    written = (int) _networkInterface?.Write(data, index, len);
+                                    index += written;
+                                    len -= written;
+                                    ////if (written != data.Length)
+                                    ////{
+                                    ////    throw new NetworkWriteException($"{Name}.SendDataSync: Send error. bytes to send " +
+                                    ////                                    data.Length + " but sent " +
+                                    ////                                    written + " bytes ");
+                                    ////}
+                                }
+                                if (DataTrace)
+                                    OnSendDataTraceEvent(data, _networkInterface.LocalEndpoint,
+                                        _networkInterface.RemoteEndpoint);
                             }
-                            if (DataTrace) OnSendDataTraceEvent(data, _networkInterface.LocalEndpoint, _networkInterface.RemoteEndpoint);
                         }
+                        //_sendDataQueue.Enqueue(data);
+                        //lock (_hasDataToSendLockWhObject)
+                        //{
+                        //    if (_sendDataQueue.IsEmpty) _hasDataToSendWh?.Reset();
+                        //    else _hasDataToSendWh?.Set();
+                        //}
+                        return true;
                     }
-                    //_sendDataQueue.Enqueue(data);
-                    //lock (_hasDataToSendLockWhObject)
-                    //{
-                    //    if (_sendDataQueue.IsEmpty) _hasDataToSendWh?.Reset();
-                    //    else _hasDataToSendWh?.Set();
-                    //}
-                    return true;
+                    return false;
                 }
                 return false;
             }
-            return false;
+            catch (Exception exception)
+            {
+                OnErrorEvent(exception);
+                //lock (_hasDataToSendLockWhObject)
+                //{
+                //    if (_sendDataQueue.IsEmpty) _hasDataToSendWh?.Reset();
+                //    else _hasDataToSendWh?.Set();
+                //}
+                return false;
+            }
         }
 
         #endregion

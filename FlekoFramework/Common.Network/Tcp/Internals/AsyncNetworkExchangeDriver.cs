@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Linq;
+using System.Net;
 using System.Threading;
 
 namespace Flekosoft.Common.Network.Tcp.Internals
@@ -24,13 +26,15 @@ namespace Flekosoft.Common.Network.Tcp.Internals
 
         private int _readBufferSize;
 
+        private readonly object _networkInterfaceSyncObject = new object();
         private INetworkExchangeInterface _networkInterface;
 
-        private object _writeWyncObject = new object();
+        private readonly object _writeSyncObject = new object();
 
         protected AsyncNetworkExchangeDriver()
         {
             ReadBufferSize = 1024;
+            DataTrace = false;
 
             //_sendDataThread = new Thread(WriteDataThreadFunc);
             //_sendDataThread.Start();
@@ -80,6 +84,11 @@ namespace Flekosoft.Common.Network.Tcp.Internals
             }
         }
 
+        /// <summary>
+        /// Send trace events on data receive/send
+        /// </summary>
+        public bool DataTrace { get; set; }
+
         #endregion
 
         #region Threads
@@ -90,38 +99,42 @@ namespace Flekosoft.Common.Network.Tcp.Internals
             {
                 try
                 {
-                    if (IsStarted && _networkInterface != null && _networkInterface.IsConnected)
+                    lock (_networkInterfaceSyncObject)
                     {
-                        lock (_readBufferSyncObject)
+                        if (IsStarted && _networkInterface?.IsConnected == true)
                         {
-                            //Clear buffer. 
-                            //TODO: May be we will not need to do it. Will see after use experiance
-                            //for (int i = 0; i < _readBuffer.Length; i++)
-                            //{
-                            //    _readBuffer[i] = 0x00;
-                            //}
-
-                            int count = _networkInterface.Read(_readBuffer);
-                            if (count > 0)
+                            lock (_readBufferSyncObject)
                             {
-                                for (int i = 0; i < count; i++)
-                                {
-                                    ProcessByteInternal(_readBuffer[i]);
-
-                                    //_processDataQueue.Enqueue(_readBuffer[i]);
-                                    //var data = new byte[count];
-                                    //Array.Copy(_readBuffer, data, count);
-                                    //OnReceivedDataEvent(new NetworkDataEventArgs(data, _networkInterface?.RemoteEndpoint));
-                                }
-                                //lock (_hasDataToProcessWhLockObject)
+                                //Clear buffer. 
+                                //TODO: May be we will not need to do it. Will see after use experiance
+                                //for (int i = 0; i < _readBuffer.Length; i++)
                                 //{
-                                //    if (_processDataQueue.IsEmpty) _hasDataToProcessWh?.Reset();
-                                //    else _hasDataToProcessWh?.Set();
+                                //    _readBuffer[i] = 0x00;
                                 //}
+
+                                int count = _networkInterface.Read(_readBuffer);
+                                if (count > 0)
+                                {
+                                    if (DataTrace) OnReceiveDataTraceEvent(_readBuffer.ToList().GetRange(0, count).ToArray(), _networkInterface.LocalEndpoint, _networkInterface.RemoteEndpoint);
+                                    for (int i = 0; i < count; i++)
+                                    {
+                                        ProcessByteInternal(_readBuffer[i]);
+
+                                        //_processDataQueue.Enqueue(_readBuffer[i]);
+                                        //var data = new byte[count];
+                                        //Array.Copy(_readBuffer, data, count);
+                                        //OnReceivedDataEvent(new NetworkDataEventArgs(data, _networkInterface?.RemoteEndpoint));
+                                    }
+                                    //lock (_hasDataToProcessWhLockObject)
+                                    //{
+                                    //    if (_processDataQueue.IsEmpty) _hasDataToProcessWh?.Reset();
+                                    //    else _hasDataToProcessWh?.Set();
+                                    //}
+                                }
                             }
                         }
+                        else Thread.Sleep(1);
                     }
-                    else Thread.Sleep(1);
                 }
                 catch (ThreadAbortException)
                 {
@@ -237,7 +250,10 @@ namespace Flekosoft.Common.Network.Tcp.Internals
         /// <param name="networkInterface">interface to send and receive data</param>
         public void Start(INetworkExchangeInterface networkInterface)
         {
-            _networkInterface = networkInterface;
+            lock (_networkInterfaceSyncObject)
+            {
+                _networkInterface = networkInterface;
+            }
             IsStarted = true;
         }
 
@@ -247,23 +263,38 @@ namespace Flekosoft.Common.Network.Tcp.Internals
         public void Stop()
         {
             IsStarted = false;
-            _networkInterface = null;
+            lock (_networkInterfaceSyncObject)
+            {
+                _networkInterface = null;
+            }
         }
 
         protected bool Write(byte[] data)
         {
-            if (_networkInterface.IsConnected)
+            if (_networkInterface?.IsConnected == true)
             {
                 if (data != null)
                 {
-                    lock (_writeWyncObject)
+                    lock (_writeSyncObject)
                     {
-                        var written = _networkInterface?.Write(data);
-                        if (written != data.Length)
+                        lock (_networkInterfaceSyncObject)
                         {
-                            throw new NetworkWriteException($"{Name}.SendDataSync: Send error. bytes to send " +
-                                                            data.Length + " but sent " +
-                                                            written + " bytes ");
+                            var index = 0;
+                            var written = 0;
+                            var len = data.Length;
+                            while (written < data.Length)
+                            {
+                                written = (int)_networkInterface?.Write(data, index, len);
+                                index += written;
+                                len -= written;
+                                ////if (written != data.Length)
+                                ////{
+                                ////    throw new NetworkWriteException($"{Name}.SendDataSync: Send error. bytes to send " +
+                                ////                                    data.Length + " but sent " +
+                                ////                                    written + " bytes ");
+                                ////}
+                            }
+                            if (DataTrace) OnSendDataTraceEvent(data, _networkInterface.LocalEndpoint, _networkInterface.RemoteEndpoint);
                         }
                     }
                     //_sendDataQueue.Enqueue(data);
@@ -297,17 +328,17 @@ namespace Flekosoft.Common.Network.Tcp.Internals
             StoppedEvent?.Invoke(this, EventArgs.Empty);
         }
 
-        //public event EventHandler<NetworkDataEventArgs> ReceivedDataEvent;
-        //private void OnReceivedDataEvent(NetworkDataEventArgs e)
-        //{
-        //    ReceivedDataEvent?.Invoke(this, e);
-        //}
+        public event EventHandler<NetworkDataEventArgs> ReceiveDataTraceEvent;
+        private void OnReceiveDataTraceEvent(byte[] data, IPEndPoint localEndPoint, IPEndPoint remoteEndPoint)
+        {
+            ReceiveDataTraceEvent?.Invoke(this, new NetworkDataEventArgs(data, localEndPoint, remoteEndPoint));
+        }
 
-        //public event EventHandler<NetworkDataEventArgs> DataSentEvent;
-        //private void OnDataSentEvent(NetworkDataEventArgs e)
-        //{
-        //    DataSentEvent?.Invoke(this, e);
-        //}
+        public event EventHandler<NetworkDataEventArgs> SendDataTraceEvent;
+        private void OnSendDataTraceEvent(byte[] data, IPEndPoint localEndPoint, IPEndPoint remoteEndPoint)
+        {
+            SendDataTraceEvent?.Invoke(this, new NetworkDataEventArgs(data, localEndPoint, remoteEndPoint));
+        }
 
         #endregion
 
@@ -362,8 +393,8 @@ namespace Flekosoft.Common.Network.Tcp.Internals
 
                 StartedEvent = null;
                 StoppedEvent = null;
-                //DataSentEvent = null;
-                //ReceivedDataEvent = null;
+                ReceiveDataTraceEvent = null;
+                SendDataTraceEvent = null;
             }
             base.Dispose(disposing);
         }

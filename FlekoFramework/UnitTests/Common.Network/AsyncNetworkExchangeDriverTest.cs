@@ -44,13 +44,15 @@ namespace Flekosoft.UnitTests.Common.Network
             return i;
         }
 
-        public int Write(byte[] data)
+        public int Write(byte[] buffer, int offset, int size)
         {
-            for (int i = 0; i < data.Length; i++)
+            var count = 0;
+            for (int i = offset; i < (size + offset); i++)
             {
-                _senderToReceiverQueue.Enqueue(data[i]);
+                _senderToReceiverQueue.Enqueue(buffer[i]);
+                count++;
             }
-            return data.Length;
+            return count;
         }
 
         public bool IsConnected { get; set; }
@@ -79,13 +81,15 @@ namespace Flekosoft.UnitTests.Common.Network
             return i;
         }
 
-        public int Write(byte[] data)
+        public int Write(byte[] buffer, int offset, int size)
         {
-            for (int i = 0; i < data.Length; i++)
+            var count = 0;
+            for (int i = offset; i < (size + offset); i++)
             {
-                _receiverToSenderQueue.Enqueue(data[i]);
+                _receiverToSenderQueue.Enqueue(buffer[i]);
+                count++;
             }
-            return data.Length;
+            return count;
         }
 
         public bool IsConnected { get; set; }
@@ -168,14 +172,14 @@ namespace Flekosoft.UnitTests.Common.Network
             {
                 var startTime = DateTime.Now;
                 var now = DateTime.Now;
-                long value = 1;
+                int value = 1;
                 sender.ReceivedBytes.Clear();
                 receiver.ReceivedBytes.Clear();
 
                 while ((now - startTime).TotalSeconds < 1)
                 {
                     Assert.IsTrue(sender.WriteData(BitConverter.GetBytes(value)));
-                    while (receiver.ReceivedBytes.Count < value * sizeof(long)) { }
+                    while (receiver.ReceivedBytes.Count < value * sizeof(int)) { }
                     value++;
                     now = DateTime.Now;
                 }
@@ -188,7 +192,7 @@ namespace Flekosoft.UnitTests.Common.Network
                 //}
             }
 
-            
+
 
 
             sender.Dispose();

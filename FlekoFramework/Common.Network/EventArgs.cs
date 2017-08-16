@@ -26,14 +26,16 @@ namespace Flekosoft.Common.Network
 
     public class NetworkDataEventArgs : EventArgs
     {
-        public NetworkDataEventArgs(byte[] data, IPEndPoint endPoint)
+        public NetworkDataEventArgs(byte[] data, IPEndPoint localEndPoint, IPEndPoint remoteEndPoint)
         {
             Data = data;
-            EndPoint = endPoint;
+            LocalEndPoint = localEndPoint;
+            RemoteEndPoint = remoteEndPoint;
         }
 
         public byte[] Data { get; }
-        public IPEndPoint EndPoint { get; }
+        public IPEndPoint LocalEndPoint { get; }
+        public IPEndPoint RemoteEndPoint { get; }
     }
 
     public class EndPointArgs : EventArgs

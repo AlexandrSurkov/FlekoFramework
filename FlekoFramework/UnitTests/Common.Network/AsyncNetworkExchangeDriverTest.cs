@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Net;
 using System.Threading;
+using Flekosoft.Common.Network;
 using Flekosoft.Common.Network.Tcp.Internals;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -113,16 +114,35 @@ namespace Flekosoft.UnitTests.Common.Network
             var sender = new Driver();
             var receiver = new Driver();
 
+            sender.StartedEvent += Sender_StartedEvent;
+            sender.StoppedEvent += Sender_StoppedEvent;
+
             Assert.IsFalse(sender.IsStarted);
             Assert.IsFalse(receiver.IsStarted);
 
+            Assert.IsFalse(StoppedEventCalled);
+            Assert.IsFalse(StartedEventCalled);
+
             sender.Start(senderInterface);
+            Assert.IsFalse(StoppedEventCalled);
+            Assert.IsTrue(StartedEventCalled);
+
             receiver.Start(receiverInterface);
 
             Assert.IsTrue(sender.IsStarted);
             Assert.IsTrue(receiver.IsStarted);
 
+            StoppedEventCalled = false;
+            StartedEventCalled = false;
+            Assert.IsFalse(StoppedEventCalled);
+            Assert.IsFalse(StartedEventCalled);
+
             sender.Stop();
+
+            Assert.IsTrue(StoppedEventCalled);
+            Assert.IsFalse(StartedEventCalled);
+
+
             Assert.IsFalse(sender.IsStarted);
             Assert.IsTrue(receiver.IsStarted);
             receiver.Stop();
@@ -168,13 +188,16 @@ namespace Flekosoft.UnitTests.Common.Network
                 Assert.AreEqual(senderData[i], receiver.ReceivedBytes[i]);
             }
 
-            for (int j = 0; j < 20; j++)
+            var perfomanceList = new List<int>();
+            //Perfomance Test
+            for (int j = 0; j < 10; j++)
             {
                 var startTime = DateTime.Now;
                 var now = DateTime.Now;
                 int value = 1;
                 sender.ReceivedBytes.Clear();
                 receiver.ReceivedBytes.Clear();
+                var index = 1;
 
                 while ((now - startTime).TotalSeconds < 1)
                 {
@@ -184,19 +207,145 @@ namespace Flekosoft.UnitTests.Common.Network
                     now = DateTime.Now;
                 }
                 System.Diagnostics.Trace.WriteLine($"Packets per second {value}");
-                //var index = 1;
-                //for (int i = 0; i < value; i += sizeof(long))
-                //{
-                //    Assert.AreEqual(index, BitConverter.ToInt32(receiver.ReceivedBytes.ToArray(), i));
-                //    index++;
-                //}
+                for (int i = 0; i < value; i += sizeof(int))
+                {
+                    var val = BitConverter.GetBytes(index);
+                    Assert.AreEqual(val[0], receiver.ReceivedBytes[i + 0]);
+                    Assert.AreEqual(val[1], receiver.ReceivedBytes[i + 1]);
+                    Assert.AreEqual(val[2], receiver.ReceivedBytes[i + 2]);
+                    Assert.AreEqual(val[3], receiver.ReceivedBytes[i + 3]);
+                    index++;
+                }
+                perfomanceList.Add(value);
             }
 
+            var perfmance = perfomanceList[0];
+            for (int i = 1; i < perfomanceList.Count; i++)
+            {
+                perfmance = (perfmance + perfomanceList[i]) / 2;
+            }
+            Assert.IsTrue(perfmance > 500);
 
+            sender.ReceivedBytes.Clear();
+            receiver.ReceivedBytes.Clear();
+
+            Assert.AreEqual(0, sender.ReceivedBytes.Count);
+            Assert.AreEqual(0, receiver.ReceivedBytes.Count);
+
+            sender.Stop();
+            Assert.IsFalse(sender.IsStarted);
+            Assert.IsTrue(receiver.IsStarted);
+            receiver.Stop();
+            Assert.IsFalse(receiver.IsStarted);
+            Assert.IsFalse(sender.IsStarted);
+
+            Assert.IsFalse(sender.WriteData(senderData));
+            Thread.Sleep(10);
+            Assert.AreEqual(0, receiver.ReceivedBytes.Count);
+
+            Assert.IsFalse(receiver.WriteData(receiverData));
+            Thread.Sleep(10);
+            Assert.AreEqual(0, sender.ReceivedBytes.Count);
+
+            sender.Start(senderInterface);
+            receiver.Start(receiverInterface);
+
+            Assert.IsTrue(sender.IsStarted);
+            Assert.IsTrue(receiver.IsStarted);
+
+            //Test exceptions while chnage ReadBuffer
+            receiver.ReadBufferSize = 256;
+            Assert.AreEqual(256, receiver.ReadBufferSize);
+            sender.ReadBufferSize = 256;
+            Assert.AreEqual(256, sender.ReadBufferSize);
+
+            //Test Stup while sending
+            for (int i = 0; i < 1000; i += sizeof(int))
+            {
+                var val = BitConverter.GetBytes(i);
+                Assert.IsTrue(sender.WriteData(val));
+
+                if (i == 900) receiver.Stop();
+            }
+
+            receiver.Start(receiverInterface);
+            //DataTrace test
+            Assert.IsFalse(sender.DataTrace);
+            sender.DataTrace = true;
+            Assert.IsTrue(sender.DataTrace);
+
+            Assert.IsNull(SenderDataEventArgs);
+            Assert.IsNull(ReceiverDataEventArgs);
+
+            Assert.IsTrue(sender.WriteData(senderData));
+
+            Assert.IsNull(SenderDataEventArgs);
+            Assert.IsNull(ReceiverDataEventArgs);
+
+            sender.SendDataTraceEvent += Sender_SendDataTraceEvent;
+
+            Assert.IsTrue(sender.WriteData(senderData));
+            Assert.IsNotNull(SenderDataEventArgs);
+            Assert.AreEqual(senderData[0], SenderDataEventArgs.Data[0]);
+            Assert.AreEqual(senderData[1], SenderDataEventArgs.Data[1]);
+            Assert.AreEqual(senderData[2], SenderDataEventArgs.Data[2]);
+            Assert.IsNull(ReceiverDataEventArgs);
+
+            Assert.IsFalse(receiver.DataTrace);
+            receiver.DataTrace = true;
+            Assert.IsTrue(receiver.DataTrace);
+
+            SenderDataEventArgs = null;
+            Assert.IsTrue(sender.WriteData(senderData));
+            Assert.IsNotNull(SenderDataEventArgs);
+            Assert.AreEqual(senderData[0], SenderDataEventArgs.Data[0]);
+            Assert.AreEqual(senderData[1], SenderDataEventArgs.Data[1]);
+            Assert.AreEqual(senderData[2], SenderDataEventArgs.Data[2]);
+            Assert.IsNull(ReceiverDataEventArgs);
+
+            receiver.ReceiveDataTraceEvent += Receiver_ReceiveDataTraceEvent;
+
+            SenderDataEventArgs = null;
+            Assert.IsTrue(sender.WriteData(senderData));
+            Assert.IsNotNull(SenderDataEventArgs);
+            Assert.AreEqual(senderData[0], SenderDataEventArgs.Data[0]);
+            Assert.AreEqual(senderData[1], SenderDataEventArgs.Data[1]);
+            Assert.AreEqual(senderData[2], SenderDataEventArgs.Data[2]);
+            Thread.Sleep(100);
+            Assert.IsNotNull(ReceiverDataEventArgs);
+            Assert.AreEqual(senderData[0], ReceiverDataEventArgs.Data[0]);
+            Assert.AreEqual(senderData[1], ReceiverDataEventArgs.Data[1]);
+            Assert.AreEqual(senderData[2], ReceiverDataEventArgs.Data[2]);
 
 
             sender.Dispose();
             receiver.Dispose();
+        }
+
+        public NetworkDataEventArgs SenderDataEventArgs { get; set; } = null;
+        public NetworkDataEventArgs ReceiverDataEventArgs { get; set; } = null;
+
+        private void Receiver_ReceiveDataTraceEvent(object sender, NetworkDataEventArgs e)
+        {
+            ReceiverDataEventArgs = e;
+        }
+
+        private void Sender_SendDataTraceEvent(object sender, NetworkDataEventArgs e)
+        {
+            SenderDataEventArgs = e;
+        }
+
+        public bool StartedEventCalled { get; set; }
+        public bool StoppedEventCalled { get; set; }
+
+        private void Sender_StoppedEvent(object sender, EventArgs e)
+        {
+            StoppedEventCalled = true;
+        }
+
+        private void Sender_StartedEvent(object sender, EventArgs e)
+        {
+            StartedEventCalled = true;
         }
     }
 }

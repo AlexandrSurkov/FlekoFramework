@@ -20,6 +20,7 @@ namespace Flekosoft.Common.Network.Tcp.Internals
 
         public Socket Socket
         {
+            // ReSharper disable once ConvertPropertyToExpressionBody
             get { return _socket; }
         }
 
@@ -39,7 +40,7 @@ namespace Flekosoft.Common.Network.Tcp.Internals
             {
                 if (disposing)
                 {
-                    if (_acceptedE != null) _acceptedE.Close();
+                    _acceptedE?.Close();
 
                     if (_socket != null)
                     {

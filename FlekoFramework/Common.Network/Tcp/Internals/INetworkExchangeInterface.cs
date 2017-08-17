@@ -1,8 +1,9 @@
-﻿using System.Net;
+﻿using System;
+using System.Net;
 
 namespace Flekosoft.Common.Network.Tcp.Internals
 {
-    public interface INetworkExchangeInterface
+    public interface INetworkExchangeInterface: IDisposable
     {
         int Read(byte[] data);
         int Write(byte[] buffer, int offset, int size);

@@ -32,10 +32,15 @@ namespace Flekosoft.Common.Network.Tcp.Internals
 
         private readonly object _writeSyncObject = new object();
 
+        /// <summary>
+        /// 
+        /// </summary>
         protected AsyncNetworkExchangeDriver()
         {
             ReadBufferSize = 1024;
             DataTrace = false;
+
+            //_networkInterface = networkInterface;
 
             //_sendDataThread = new Thread(WriteDataThreadFunc);
             //_sendDataThread.Start();
@@ -64,6 +69,8 @@ namespace Flekosoft.Common.Network.Tcp.Internals
                 }
             }
         }
+
+        public INetworkExchangeInterface ExchangeInterface { get { return _networkInterface; } }
 
         /// <summary>
         /// Socket read buffer size
@@ -286,7 +293,7 @@ namespace Flekosoft.Common.Network.Tcp.Internals
                                 var len = data.Length;
                                 while (written < data.Length)
                                 {
-                                    written = (int) _networkInterface?.Write(data, index, len);
+                                    written = (int)_networkInterface?.Write(data, index, len);
                                     index += written;
                                     len -= written;
                                     ////if (written != data.Length)
@@ -410,6 +417,9 @@ namespace Flekosoft.Common.Network.Tcp.Internals
                 StoppedEvent = null;
                 ReceiveDataTraceEvent = null;
                 SendDataTraceEvent = null;
+
+                // ReSharper disable once InconsistentlySynchronizedField
+                _networkInterface.Dispose();
             }
             base.Dispose(disposing);
         }

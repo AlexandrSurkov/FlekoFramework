@@ -9,14 +9,17 @@ namespace Flekosoft.Common.Network.Tcp.Internals
         private Socket _socket;
         private readonly ManualResetEvent _acceptedE;
 
-        public ListenSocket(Socket socket)
+        public ListenSocket(Socket socket, TcpServerLocalEndpoint tcpServerLocalEndpoint)
         {
             _socket = socket;
+            TcpServerLocalEndpoint = tcpServerLocalEndpoint;
             _acceptedE = new ManualResetEvent(false);
             AcceptBeginned = false;
         }
 
         public bool AcceptBeginned { get; set; }
+
+        public TcpServerLocalEndpoint TcpServerLocalEndpoint { get; }
 
         public Socket Socket
         {

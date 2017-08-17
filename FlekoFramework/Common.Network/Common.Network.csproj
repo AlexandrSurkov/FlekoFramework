@@ -48,6 +48,7 @@
     <Compile Include="Tcp\Internals\AsyncNetworkExchangeDriver.cs" />
     <Compile Include="Tcp\Internals\INetworkExchangeInterface.cs" />
     <Compile Include="Tcp\Internals\ListenSocket.cs" />
+    <Compile Include="Tcp\Internals\SocketAsyncNetworkExchangeDriver.cs" />
     <Compile Include="Tcp\Internals\SocketNetworkExchangeInterface.cs" />
     <Compile Include="Tcp\TcpServerLocalEndpoint.cs" />
     <Compile Include="Tcp\TcpClient.cs" />

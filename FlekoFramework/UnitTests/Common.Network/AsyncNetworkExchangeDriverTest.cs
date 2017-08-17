@@ -6,6 +6,7 @@ using System.Threading;
 using Flekosoft.Common.Network;
 using Flekosoft.Common.Network.Tcp.Internals;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Flekosoft.Common;
 
 namespace Flekosoft.UnitTests.Common.Network
 {
@@ -24,7 +25,7 @@ namespace Flekosoft.UnitTests.Common.Network
         }
     }
 
-    class SenderInterface : INetworkExchangeInterface
+    class SenderInterface : DisposableBase, INetworkExchangeInterface
     {
         private readonly ConcurrentQueue<byte> _senderToReceiverQueue;
         private readonly ConcurrentQueue<byte> _receiverToSenderQueue;
@@ -61,7 +62,7 @@ namespace Flekosoft.UnitTests.Common.Network
         public IPEndPoint RemoteEndpoint { get; } = new IPEndPoint(4321, 4321);
     }
 
-    class ReceiverInterface : INetworkExchangeInterface
+    class ReceiverInterface : DisposableBase, INetworkExchangeInterface
     {
         private readonly ConcurrentQueue<byte> _senderToReceiverQueue;
         private readonly ConcurrentQueue<byte> _receiverToSenderQueue;

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using Flekosoft.Common.Network.Tcp.Internals;
@@ -15,7 +16,8 @@ namespace Flekosoft.Common.Network.Tcp
         private readonly Thread _waitConnectionThread;
         private readonly object _listenSocketsSyncObject = new object();
         private readonly object _connectedSocketsListSyncObject = new object();
-        private readonly ObservableCollection<AsyncNetworkExchangeDriver> _connectedSockets = new ObservableCollection<AsyncNetworkExchangeDriver>();
+        private readonly ObservableCollection<SocketAsyncNetworkExchangeDriver> _connectedSockets = new ObservableCollection<SocketAsyncNetworkExchangeDriver>();
+        private bool _dataTrace;
 
 
         public TcpServer()
@@ -49,6 +51,30 @@ namespace Flekosoft.Common.Network.Tcp
         /// </summary>
         public ReadOnlyCollection<TcpServerLocalEndpoint> Endpoints { get; protected set; }
 
+        /// <summary>
+        /// Send trace events on data receive/send
+        /// </summary>
+        public bool DataTrace
+        {
+            get { return _dataTrace; }
+            set
+            {
+                _dataTrace = value;
+                if (_dataTrace == value) return;
+                _dataTrace = value;
+                lock (_connectedSocketsListSyncObject)
+                {
+                    // ReSharper disable LoopCanBeConvertedToQuery
+                    foreach (var connection in _connectedSockets)
+                    // ReSharper restore LoopCanBeConvertedToQuery
+                    {
+                        connection.DataTrace = _dataTrace;
+                    }
+                }
+                OnPropertyChanged(nameof(IsStarted));
+            }
+        }
+
         #endregion
 
         #region Threads
@@ -81,19 +107,19 @@ namespace Flekosoft.Common.Network.Tcp
                             }
                         }
 
-                        var removeList = new List<AsyncNetworkExchangeDriver>();
+                        var removeList = new List<SocketAsyncNetworkExchangeDriver>();
                         lock (_connectedSocketsListSyncObject)
                         {
                             // ReSharper disable LoopCanBeConvertedToQuery
                             foreach (var connection in _connectedSockets)
                             // ReSharper restore LoopCanBeConvertedToQuery
                             {
-                                if (!connection.IsConnected) removeList.Add(connection);
+                                if (!connection.ExchangeInterface.IsConnected) removeList.Add(connection);
                             }
 
                             foreach (var connection in removeList)
                             {
-                                OnDisconnectedEvent(new ConnectionEventArgs(connection., connection.RemoteEndpoint));
+                                OnDisconnectedEvent(new ConnectionEventArgs(connection.ExchangeInterface.LocalEndpoint, connection.ExchangeInterface.RemoteEndpoint));
                                 connection.Dispose();
                                 _connectedSockets.Remove(connection);
                             }
@@ -112,7 +138,7 @@ namespace Flekosoft.Common.Network.Tcp
 
                         lock (_connectedSocketsListSyncObject)
                         {
-                            foreach (AsyncNetworkExchangeDriver cs in _connectedSockets)
+                            foreach (SocketAsyncNetworkExchangeDriver cs in _connectedSockets)
                             {
                                 cs?.Dispose();
                             }
@@ -140,7 +166,7 @@ namespace Flekosoft.Common.Network.Tcp
         /// Start server
         /// </summary>
         /// <param name="endpoints">List of local ip endpoints цhich will used to wait connetion</param>
-        /// <returns>True - если сервер успешно запущен. Иначе false</returns>
+        /// <returns>True - server succesfully started else false</returns>
         public bool Start(ICollection<TcpServerLocalEndpoint> endpoints)
         {
             if (IsStarted) return false;
@@ -162,7 +188,7 @@ namespace Flekosoft.Common.Network.Tcp
                     // start listening
                     listenSocket.Listen(16);
                     OnStartListeningEvent(new EndPointArgs(address.EndPoint));
-                    _listenSockets.Add(new ListenSocket(listenSocket));
+                    _listenSockets.Add(new ListenSocket(listenSocket, address));
                 }
             }
 
@@ -176,9 +202,34 @@ namespace Flekosoft.Common.Network.Tcp
             IsStarted = false;
         }
 
+        public bool Write(byte[] data, IPEndPoint localEndPoint, IPEndPoint remoteEndPoint)
+        {
+            var driver = FindDriver(localEndPoint, remoteEndPoint);
+            if (driver == null) return false;
+            return driver.SendData(data);
+        }
+
+        private SocketAsyncNetworkExchangeDriver FindDriver(IPEndPoint localEndPoint, IPEndPoint remoteEndPoint)
+        {
+            lock (_connectedSocketsListSyncObject)
+            {
+                foreach (SocketAsyncNetworkExchangeDriver cs in _connectedSockets)
+                {
+                    if (cs.ExchangeInterface.LocalEndpoint.Equals(localEndPoint) &&
+                        cs.ExchangeInterface.RemoteEndpoint.Equals(remoteEndPoint))
+                    {
+                        return cs;
+                    }
+                }
+            }
+            return null;
+        }
+
+        #endregion
+
+        #region event handlers
         private void AcceptCallback(IAsyncResult ar)
         {
-
             try
             {
                 var listenSocket = (ListenSocket)ar.AsyncState;
@@ -186,7 +237,7 @@ namespace Flekosoft.Common.Network.Tcp
                 if (listenSocket?.Socket != null)
                 {
                     Socket socket = listenSocket.Socket.EndAccept(ar);
-                    if (_connectedSockets.Count >= _maxClients)
+                    if (_connectedSockets.Count >= listenSocket.TcpServerLocalEndpoint.MaxClients)
                     {
                         socket.Close();
                     }
@@ -196,15 +247,15 @@ namespace Flekosoft.Common.Network.Tcp
                         {
                             try
                             {
-                                _connectedSocket = new NetworkExchangeDriver(_cultureInfo);
-                                _connectedSocket.DisconnectedEvent += _connectedSocket_DisconnectedEvent1;
-                                _connectedSocket.ConnectedEvent += _connectedSocket_ConnectedEvent1;
-                                _connectedSockets.Add(_connectedSocket);
-                                _connectedSocket.ErrorEvent += _connectedSocket_ErrorEvent;
-                                _connectedSocket.ReceivedDataEvent += _connectedSocket_AsyncDataEvent;
-                                _connectedSocket.SendedDataEvent += _connectedSocket_SendedDataEvent;
-                                _connectedSocket.StartWork(new TcpExchangeInterface(socket));
+                                var driver = new SocketAsyncNetworkExchangeDriver();
+                                driver.ErrorEvent += Driver_ErrorEvent;
+                                driver.NewByteEvent += Driver_NewByteEvent;
+                                driver.ReceiveDataTraceEvent += Driver_ReceiveDataTraceEvent;
+                                driver.SendDataTraceEvent += Driver_SendDataTraceEvent;
+                                _connectedSockets.Add(driver);
+                                driver.Start(new SocketNetworkExchangeInterface(socket));
 
+                                OnConnectedEvent(new ConnectionEventArgs(driver.ExchangeInterface.LocalEndpoint, driver.ExchangeInterface.RemoteEndpoint));
                             }
                             catch (Exception ex)
                             {
@@ -221,6 +272,25 @@ namespace Flekosoft.Common.Network.Tcp
             }
         }
 
+        private void Driver_SendDataTraceEvent(object sender, NetworkDataEventArgs e)
+        {
+            OnSendDataTraceEvent(e.Data, e.LocalEndPoint, e.RemoteEndPoint);
+        }
+
+        private void Driver_ReceiveDataTraceEvent(object sender, NetworkDataEventArgs e)
+        {
+            OnReceiveDataTraceEvent(e.Data, e.LocalEndPoint, e.RemoteEndPoint);
+        }
+
+        private void Driver_NewByteEvent(object sender, NetworkDataEventArgs e)
+        {
+            OnNewByteEvent(e.Data, e.LocalEndPoint, e.RemoteEndPoint);
+        }
+
+        private void Driver_ErrorEvent(object sender, System.IO.ErrorEventArgs e)
+        {
+            OnErrorEvent(e.GetException());
+        }
         #endregion
 
         #region events
@@ -255,17 +325,23 @@ namespace Flekosoft.Common.Network.Tcp
             ConnectedEvent?.Invoke(this, e);
         }
 
-        //public event EventHandler<NetworkDataEventArgs> ReceivedDataEvent;
-        //private void OnReceivedDataEvent(NetworkDataEventArgs e)
-        //{
-        //    ReceivedDataEvent?.Invoke(this, e);
-        //}
+        public event EventHandler<NetworkDataEventArgs> NewByteEvent;
+        private void OnNewByteEvent(byte[] data, IPEndPoint localEndPoint, IPEndPoint remoteEndPoint)
+        {
+            NewByteEvent?.Invoke(this, new NetworkDataEventArgs(data, localEndPoint, remoteEndPoint));
+        }
 
-        //public event EventHandler<NetworkDataEventArgs> SendedDataEvent;
-        //private void OnSendedDataEvent(NetworkDataEventArgs e)
-        //{
-        //    SendedDataEvent?.Invoke(this, e);
-        //}
+        public event EventHandler<NetworkDataEventArgs> ReceiveDataTraceEvent;
+        private void OnReceiveDataTraceEvent(byte[] data, IPEndPoint localEndPoint, IPEndPoint remoteEndPoint)
+        {
+            ReceiveDataTraceEvent?.Invoke(this, new NetworkDataEventArgs(data, localEndPoint, remoteEndPoint));
+        }
+
+        public event EventHandler<NetworkDataEventArgs> SendDataTraceEvent;
+        private void OnSendDataTraceEvent(byte[] data, IPEndPoint localEndPoint, IPEndPoint remoteEndPoint)
+        {
+            SendDataTraceEvent?.Invoke(this, new NetworkDataEventArgs(data, localEndPoint, remoteEndPoint));
+        }
         #endregion
 
         #region Disposable
@@ -293,7 +369,7 @@ namespace Flekosoft.Common.Network.Tcp
 
                 lock (_connectedSocketsListSyncObject)
                 {
-                    foreach (AsyncNetworkExchangeDriver cs in _connectedSockets)
+                    foreach (SocketAsyncNetworkExchangeDriver cs in _connectedSockets)
                     {
                         cs?.Dispose();
                     }
@@ -305,8 +381,9 @@ namespace Flekosoft.Common.Network.Tcp
                 StartedEvent = null;
                 DisconnectedEvent = null;
                 ConnectedEvent = null;
-                //ReceivedDataEvent = null;
-                //SendedDataEvent = null;
+                NewByteEvent = null;
+                ReceiveDataTraceEvent = null;
+                SendDataTraceEvent = null;
             }
             base.Dispose(disposing);
         }

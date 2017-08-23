@@ -48,7 +48,7 @@ namespace Flekosoft.Common.Logging.Windows
                 if (_maximumLines != value)
                 {
                     _maximumLines = value;
-                    OnPropertyChanged("MaximumLines");
+                    OnPropertyChanged(nameof(MaximumLines));
                     UpdateListBox(true);
                 }
             }

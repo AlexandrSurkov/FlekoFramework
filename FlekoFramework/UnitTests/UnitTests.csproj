@@ -57,6 +57,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Common.Network\AsyncNetworkExchangeDriverTest.cs" />
+    <Compile Include="Common.Network\TcpServerTests.cs" />
     <Compile Include="Common\Logging\LoggingTests.cs" />
     <Compile Include="Common\PropertyChangedErrorNotifyDisposableBaseTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

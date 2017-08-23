@@ -28,7 +28,7 @@ namespace Flekosoft.Common.Video
                 if (_videoResolution != value)
                 {
                     _videoResolution = value;
-                    OnPropertyChanged("VideoResolution");
+                    OnPropertyChanged(nameof(VideoResolution));
                     Logger.Instance.AppendLog(new LogRecord(DateTime.Now, new List<string> { $"VideoSource {this}: video resolution changed to {_videoResolution}" }, LogRecordLevel.Info));
                 }
             }
@@ -41,7 +41,7 @@ namespace Flekosoft.Common.Video
                 if (_framesPerSecond != value)
                 {
                     _framesPerSecond = value;
-                    OnPropertyChanged("FramesPerSecond");
+                    OnPropertyChanged(nameof(FramesPerSecond));
                     Logger.Instance.AppendLog(new LogRecord(DateTime.Now, new List<string> { $"VideoSource {this}: fps changed to {_framesPerSecond}" }, LogRecordLevel.Info));
                 }
             }
@@ -55,7 +55,7 @@ namespace Flekosoft.Common.Video
                 if (_isStarted != value)
                 {
                     _isStarted = value;
-                    OnPropertyChanged("IsStarted");
+                    OnPropertyChanged(nameof(IsStarted));
                     // ReSharper disable once ConvertIfStatementToConditionalTernaryExpression
                     if (_isStarted) Logger.Instance.AppendLog(new LogRecord(DateTime.Now, new List<string> { $"VideoSource {this}: Started" }, LogRecordLevel.Info));
                     else Logger.Instance.AppendLog(new LogRecord(DateTime.Now, new List<string> { $"VideoSource {this}: Stopped" }, LogRecordLevel.Info));
@@ -71,7 +71,7 @@ namespace Flekosoft.Common.Video
                 if (_supportedFps != value)
                 {
                     _supportedFps = value;
-                    OnPropertyChanged("SupportedFps");
+                    OnPropertyChanged(nameof(SupportedFps));
                     Logger.Instance.AppendLog(new LogRecord(DateTime.Now, new List<string> { $"VideoSource {this}: Supported fps changed" }, LogRecordLevel.Info));
 
 #if DEBUG
@@ -95,7 +95,7 @@ namespace Flekosoft.Common.Video
                 if (_supportedResolution != value)
                 {
                     _supportedResolution = value;
-                    OnPropertyChanged("SupportedResolution");
+                    OnPropertyChanged(nameof(SupportedResolution));
                     Logger.Instance.AppendLog(new LogRecord(DateTime.Now, new List<string> { $"VideoSource {this}: Supported resolution changed" }, LogRecordLevel.Info));
 
 #if DEBUG

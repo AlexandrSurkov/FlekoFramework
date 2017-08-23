@@ -59,7 +59,6 @@ namespace Flekosoft.Common.Network.Tcp
             get { return _dataTrace; }
             set
             {
-                _dataTrace = value;
                 if (_dataTrace == value) return;
                 _dataTrace = value;
                 lock (_connectedSocketsListSyncObject)
@@ -71,7 +70,7 @@ namespace Flekosoft.Common.Network.Tcp
                         connection.DataTrace = _dataTrace;
                     }
                 }
-                OnPropertyChanged(nameof(IsStarted));
+                OnPropertyChanged(nameof(DataTrace));
             }
         }
 
@@ -127,23 +126,7 @@ namespace Flekosoft.Common.Network.Tcp
                     }
                     else
                     {
-                        lock (_listenSocketsSyncObject)
-                        {
-                            foreach (ListenSocket ls in _listenSockets)
-                            {
-                                ls?.Dispose();
-                            }
-                            _listenSockets.Clear();
-                        }
-
-                        lock (_connectedSocketsListSyncObject)
-                        {
-                            foreach (SocketAsyncNetworkExchangeDriver cs in _connectedSockets)
-                            {
-                                cs?.Dispose();
-                            }
-                            _connectedSockets.Clear();
-                        }
+                        ClearSocketLists();
                         Thread.Sleep(1);
                     }
                 }
@@ -207,6 +190,27 @@ namespace Flekosoft.Common.Network.Tcp
             var driver = FindDriver(localEndPoint, remoteEndPoint);
             if (driver == null) return false;
             return driver.SendData(data);
+        }
+
+        void ClearSocketLists()
+        {
+            lock (_listenSocketsSyncObject)
+            {
+                foreach (ListenSocket ls in _listenSockets)
+                {
+                    ls?.Dispose();
+                }
+                _listenSockets.Clear();
+            }
+
+            lock (_connectedSocketsListSyncObject)
+            {
+                foreach (SocketAsyncNetworkExchangeDriver cs in _connectedSockets)
+                {
+                    cs?.Dispose();
+                }
+                _connectedSockets.Clear();
+            }
         }
 
         private SocketAsyncNetworkExchangeDriver FindDriver(IPEndPoint localEndPoint, IPEndPoint remoteEndPoint)
@@ -357,24 +361,8 @@ namespace Flekosoft.Common.Network.Tcp
                         _waitConnectionThread.Abort();
                     }
                 }
-
-                lock (_listenSocketsSyncObject)
-                {
-                    foreach (ListenSocket ls in _listenSockets)
-                    {
-                        ls?.Dispose();
-                    }
-                    _listenSockets.Clear();
-                }
-
-                lock (_connectedSocketsListSyncObject)
-                {
-                    foreach (SocketAsyncNetworkExchangeDriver cs in _connectedSockets)
-                    {
-                        cs?.Dispose();
-                    }
-                    _connectedSockets.Clear();
-                }
+                Stop();
+                ClearSocketLists();
 
                 StoppedEvent = null;
                 StartListeningEvent = null;

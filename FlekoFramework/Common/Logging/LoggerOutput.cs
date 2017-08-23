@@ -81,7 +81,7 @@ namespace Flekosoft.Common.Logging
                 if (_logLevel != value)
                 {
                     _logLevel = value;
-                    OnPropertyChanged("LogLevel");
+                    OnPropertyChanged(nameof(LogRecordLevel));
                 }
             }
         }
@@ -94,7 +94,7 @@ namespace Flekosoft.Common.Logging
                 if (_dateTimeFormat != value)
                 {
                     _dateTimeFormat = value;
-                    OnPropertyChanged("DateTimeFormat");
+                    OnPropertyChanged(nameof(DateTimeFormat));
                 }
             }
         }

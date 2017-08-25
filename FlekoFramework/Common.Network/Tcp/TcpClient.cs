@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
@@ -7,9 +6,8 @@ using Flekosoft.Common.Network.Tcp.Internals;
 
 namespace Flekosoft.Common.Network.Tcp
 {
-    public abstract class TcpClient : PropertyChangedErrorNotifyDisposableBase
+    public abstract class TcpClient : AsyncNetworkExchangeDriver
     {
-        private bool _isStarted;
         private bool _isConnected;
 
         private TcpClientNetworkExchangeInterface _exchangeInterface;
@@ -20,18 +18,9 @@ namespace Flekosoft.Common.Network.Tcp
         private int _pingFailCount;
 
         private readonly Thread _connectThread;
-        //private readonly Thread _readFromStreamThread;
-        //private readonly Thread _processDataThread;
-
-        private readonly ConcurrentQueue<byte> _bytesQueue = new ConcurrentQueue<byte>();
-        readonly EventWaitHandle _hasDataWh = new EventWaitHandle(false, EventResetMode.ManualReset);
-
-        private byte[] _readBuffer;
-        private readonly object _readBufferSyncObject = new object();
 
         private int _pollFailLimit;
         private int _pollInterval;
-        private int _readBufferSize;
         private int _connectInterval;
 
         protected TcpClient()
@@ -43,10 +32,6 @@ namespace Flekosoft.Common.Network.Tcp
 
             _connectThread = new Thread(ConnectThreadFunc);
             _connectThread.Start();
-            _readFromStreamThread = new Thread(ReadFromStreamThreadFunc);
-            _readFromStreamThread.Start();
-            _processDataThread = new Thread(ProcessDataThreadFunc);
-            _processDataThread.Start();
         }
 
         #region Properties
@@ -74,23 +59,7 @@ namespace Flekosoft.Common.Network.Tcp
                 }
             }
         }
-        /// <summary>
-        /// Is client started
-        /// </summary>
-        public bool IsStarted
-        {
-            get { return _isStarted; }
-            private set
-            {
-                if (_isStarted != value)
-                {
-                    _isStarted = value;
-                    OnPropertyChanged(nameof(IsStarted));
-                    if (_isStarted) OnStartedEvent();
-                    else OnStoppedEvent();
-                }
-            }
-        }
+
         /// <summary>
         /// Count of failed polls to disconnect from server
         /// </summary>
@@ -136,25 +105,25 @@ namespace Flekosoft.Common.Network.Tcp
                 }
             }
         }
-        /// <summary>
-        /// Socket read buffer size
-        /// </summary>
-        public int ReadBufferSize
-        {
-            get { return _readBufferSize; }
-            set
-            {
-                if (_readBufferSize != value)
-                {
-                    _readBufferSize = value;
-                    lock (_readBufferSyncObject)
-                    {
-                        _readBuffer = new byte[_readBufferSize];
-                    }
-                    OnPropertyChanged(nameof(ReadBufferSize));
-                }
-            }
-        }
+        ///// <summary>
+        ///// Socket read buffer size
+        ///// </summary>
+        //public int ReadBufferSize
+        //{
+        //    get { return _readBufferSize; }
+        //    set
+        //    {
+        //        if (_readBufferSize != value)
+        //        {
+        //            _readBufferSize = value;
+        //            lock (_readBufferSyncObject)
+        //            {
+        //                _readBuffer = new byte[_readBufferSize];
+        //            }
+        //            OnPropertyChanged(nameof(ReadBufferSize));
+        //        }
+        //    }
+        //}
 
         #endregion
 
@@ -200,7 +169,7 @@ namespace Flekosoft.Common.Network.Tcp
                     {
                         Thread.Sleep(PollInterval);
                         //Poll
-                        if (!Ping.Send(IpAddress))
+                        if (!Poll())
                         {
                             _pingFailCount++;
                             if (_pingFailCount >= PollFailLimit)
@@ -219,110 +188,6 @@ namespace Flekosoft.Common.Network.Tcp
                 }
             }
         }
-
-        //private void ReadFromStreamThreadFunc()
-        //{
-        //    while (true)
-        //    {
-        //        try
-        //        {
-        //            if (IsConnected & _netStream != null)
-        //            {
-        //                if (_netStream.CanRead && _netStream.DataAvailable)
-        //                {
-        //                    lock (_readBufferSyncObject)
-        //                    {
-        //                        //Clear buffer. 
-        //                        //TODO: May be we will not need to do it. Will see after use experiance
-        //                        //for (int i = 0; i < _readBuffer.Length; i++)
-        //                        //{
-        //                        //    _readBuffer[i] = 0x00;
-        //                        //}
-
-        //                        int count = _netStream.Read(_readBuffer, 0, _readBuffer.Length);
-        //                        if (count > 0)
-        //                        {
-        //                            for (int i = 0; i < count; i++)
-        //                            {
-        //                                _bytesQueue.Enqueue(_readBuffer[i]);
-        //                            }
-        //                            if (_bytesQueue.IsEmpty) _hasDataWh?.Reset();
-        //                            else _hasDataWh?.Set();
-        //                        }
-        //                        continue;
-        //                    }
-        //                }
-        //            }
-        //            Thread.Sleep(1);
-        //        }
-        //        catch (ThreadAbortException)
-        //        {
-        //            break;
-        //        }
-        //        catch (Exception exception)
-        //        {
-        //            var ex = exception.InnerException as SocketException;
-        //            if (ex != null)
-        //            {
-        //                switch (ex.SocketErrorCode)
-        //                {
-        //                    case SocketError.SocketError:
-        //                    case SocketError.Fault:
-        //                    case SocketError.NotSocket:
-        //                    case SocketError.SocketNotSupported:
-        //                    case SocketError.AddressNotAvailable:
-        //                    case SocketError.NetworkDown:
-        //                    case SocketError.NetworkUnreachable:
-        //                    case SocketError.NetworkReset:
-        //                    case SocketError.ConnectionAborted:
-        //                    case SocketError.ConnectionReset:
-        //                    case SocketError.NotConnected:
-        //                    case SocketError.Shutdown:
-        //                    case SocketError.TimedOut:
-        //                    case SocketError.ConnectionRefused:
-        //                    case SocketError.HostDown:
-        //                    case SocketError.HostUnreachable:
-        //                    case SocketError.SystemNotReady:
-        //                    case SocketError.Disconnecting:
-        //                    case SocketError.HostNotFound:
-        //                    case SocketError.OperationAborted:
-        //                        DisconnectFromServer();
-        //                        continue;
-        //                }
-        //            }
-        //            OnErrorEvent(exception);
-        //        }
-        //    }
-        //}
-
-        //private void ProcessDataThreadFunc()
-        //{
-        //    while (true)
-        //    {
-        //        try
-        //        {
-        //            if (_hasDataWh != null && _hasDataWh.WaitOne(Timeout.Infinite))
-        //            {
-        //                byte dataByte;
-        //                if (_bytesQueue.TryDequeue(out dataByte))
-        //                {
-        //                    ProcessByteInternal(dataByte);
-        //                }
-        //                if (_bytesQueue.IsEmpty) _hasDataWh?.Reset();
-        //                else _hasDataWh?.Set();
-        //            }
-        //        }
-        //        catch (ThreadAbortException)
-        //        {
-        //            break;
-        //        }
-        //        catch (Exception ex)
-        //        {
-        //            OnErrorEvent(ex);
-        //        }
-        //    }
-        //}
-
         #endregion
 
         #region Methods
@@ -331,16 +196,16 @@ namespace Flekosoft.Common.Network.Tcp
         {
             try
             {
+                _exchangeInterface?.Dispose();
+
                 var client = new System.Net.Sockets.TcpClient(IpAddress, Port);
-                //_exchangeInterface = new TcpClientNetworkExchangeInterface(client);
-                //_client = new System.Net.Sockets.TcpClient(IpAddress, Port);
-                //_netStream = _client.GetStream();
-                //_netStream.WriteTimeout = Timeout.Infinite;
-                //_netStream.ReadTimeout = Timeout.Infinite;
+                _exchangeInterface = new TcpClientNetworkExchangeInterface(client);
 
                 IsConnected = true;
                 _pingFailCount = 0;
-                OnConnectedEvent(_client.Client.LocalEndPoint, _client.Client.RemoteEndPoint);
+                OnConnectedEvent(_exchangeInterface.LocalEndpoint, _exchangeInterface.RemoteEndpoint);
+
+                StartExchange(_exchangeInterface);
                 return true;
             }
             catch (SocketException se)
@@ -356,15 +221,11 @@ namespace Flekosoft.Common.Network.Tcp
         }
         private void DisconnectFromServer()
         {
-            if (_client != null)
-            {
-                if (IsConnected)
-                {
-                    _client?.Close();
-                }
-                _client = null;
-                _netStream = null;
-            }
+            StopExchange();
+
+            _exchangeInterface?.Dispose();
+            _exchangeInterface = null;
+
             if (IsConnected)
             {
                 IsConnected = false;
@@ -394,23 +255,9 @@ namespace Flekosoft.Common.Network.Tcp
             Port = 0;
         }
 
-        protected bool Write(byte[] data)
-        {
-            if (IsConnected & _netStream != null)
-            {
-                if (_netStream.CanWrite)
-                {
-                    _netStream.Write(data, 0, data.Length);
-                    return true;
-                }
-            }
-            return false;
-        }
-
+        protected abstract bool Poll();
 
         #endregion
-
-        protected abstract void ProcessByteInternal(byte dataByte);
 
         #region events
         /// <summary>
@@ -440,17 +287,6 @@ namespace Flekosoft.Common.Network.Tcp
             ConnectionFailEvent?.Invoke(this, new ConnectionFailEventArgs(result));
         }
 
-        public event EventHandler StartedEvent;
-        private void OnStartedEvent()
-        {
-            StartedEvent?.Invoke(this, EventArgs.Empty);
-        }
-
-        public event EventHandler StoppedEvent;
-        private void OnStoppedEvent()
-        {
-            StoppedEvent?.Invoke(this, EventArgs.Empty);
-        }
         #endregion
 
         #region Dispodable
@@ -466,21 +302,21 @@ namespace Flekosoft.Common.Network.Tcp
                     }
                 }
 
-                if (_readFromStreamThread != null)
-                {
-                    if (_readFromStreamThread.IsAlive)
-                    {
-                        _readFromStreamThread.Abort();
-                    }
-                }
+                //if (_readFromStreamThread != null)
+                //{
+                //    if (_readFromStreamThread.IsAlive)
+                //    {
+                //        _readFromStreamThread.Abort();
+                //    }
+                //}
 
-                if (_processDataThread != null)
-                {
-                    if (_processDataThread.IsAlive)
-                    {
-                        _processDataThread.Abort();
-                    }
-                }
+                //if (_processDataThread != null)
+                //{
+                //    if (_processDataThread.IsAlive)
+                //    {
+                //        _processDataThread.Abort();
+                //    }
+                //}
 
                 DisconnectFromServer();
 
@@ -488,8 +324,6 @@ namespace Flekosoft.Common.Network.Tcp
                 ConnectionFailEvent = null;
                 DisconnectedEvent = null;
                 ReconnectingEvent = null;
-                StartedEvent = null;
-                StoppedEvent = null;
             }
             base.Dispose(disposing);
         }

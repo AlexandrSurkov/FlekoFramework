@@ -257,7 +257,7 @@ namespace Flekosoft.Common.Network.Tcp
                                 driver.ReceiveDataTraceEvent += Driver_ReceiveDataTraceEvent;
                                 driver.SendDataTraceEvent += Driver_SendDataTraceEvent;
                                 _connectedSockets.Add(driver);
-                                driver.Start(new SocketNetworkExchangeInterface(socket));
+                                driver.StartExchange(new SocketNetworkExchangeInterface(socket));
 
                                 OnConnectedEvent(new ConnectionEventArgs(driver.ExchangeInterface.LocalEndpoint, driver.ExchangeInterface.RemoteEndpoint));
                             }

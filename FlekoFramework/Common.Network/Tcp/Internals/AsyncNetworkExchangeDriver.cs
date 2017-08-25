@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Linq;
 using System.Net;
+using System.Runtime.CompilerServices;
 using System.Threading;
 
+[assembly: InternalsVisibleTo("Flekosoft.UnitTests")]
 namespace Flekosoft.Common.Network.Tcp.Internals
 {
     public abstract class AsyncNetworkExchangeDriver : PropertyChangedErrorNotifyDisposableBase

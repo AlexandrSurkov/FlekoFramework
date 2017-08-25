@@ -58,7 +58,7 @@ namespace Flekosoft.Common.Network.Tcp.Internals
         public bool IsStarted
         {
             get { return _isStarted; }
-            private set
+            protected set
             {
                 if (_isStarted != value)
                 {
@@ -249,7 +249,7 @@ namespace Flekosoft.Common.Network.Tcp.Internals
         /// Start
         /// </summary>
         /// <param name="networkInterface">interface to send and receive data</param>
-        public void Start(INetworkExchangeInterface networkInterface)
+        internal void StartExchange(INetworkExchangeInterface networkInterface)
         {
             lock (_networkInterfaceReadSyncObject)
             {
@@ -264,7 +264,7 @@ namespace Flekosoft.Common.Network.Tcp.Internals
         /// <summary>
         /// Disconnect and stop cilent
         /// </summary>
-        public void Stop()
+        internal void StopExchange()
         {
             IsStarted = false;
             lock (_networkInterfaceReadSyncObject)
@@ -332,9 +332,11 @@ namespace Flekosoft.Common.Network.Tcp.Internals
             }
         }
 
+        protected abstract void ProcessByteInternal(byte data);
+
         #endregion
 
-        protected abstract void ProcessByteInternal(byte data);
+
 
         #region events
 

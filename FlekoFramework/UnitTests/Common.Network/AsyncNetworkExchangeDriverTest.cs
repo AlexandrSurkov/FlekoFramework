@@ -23,6 +23,16 @@ namespace Flekosoft.UnitTests.Common.Network
         {
             return Write(data);
         }
+
+        public void Start(INetworkExchangeInterface networkInterface)
+        {
+            StartExchange(networkInterface);
+        }
+
+        public void Stop()
+        {
+            StopExchange();
+        }
     }
 
     class SenderInterface : DisposableBase, INetworkExchangeInterface
@@ -36,7 +46,7 @@ namespace Flekosoft.UnitTests.Common.Network
             _receiverToSenderQueue = receiverToSenderQueue;
         }
 
-        public int Read(byte[] data)
+        public int Read(byte[] data, int timeout)
         {
             int i;
             for (i = 0; i < data.Length; i++)
@@ -46,7 +56,7 @@ namespace Flekosoft.UnitTests.Common.Network
             return i;
         }
 
-        public int Write(byte[] buffer, int offset, int size)
+        public int Write(byte[] buffer, int offset, int size, int timeout)
         {
             var count = 0;
             for (int i = offset; i < (size + offset); i++)
@@ -60,6 +70,13 @@ namespace Flekosoft.UnitTests.Common.Network
         public bool IsConnected { get; set; }
         public IPEndPoint LocalEndpoint { get; } = new IPEndPoint(1234, 1234);
         public IPEndPoint RemoteEndpoint { get; } = new IPEndPoint(4321, 4321);
+
+        public event EventHandler DisconnectedEvent;
+
+        public void SendDisconnctedEvent()
+        {
+            DisconnectedEvent?.Invoke(this,EventArgs.Empty);
+        }
     }
 
     class ReceiverInterface : DisposableBase, INetworkExchangeInterface
@@ -73,7 +90,7 @@ namespace Flekosoft.UnitTests.Common.Network
             _receiverToSenderQueue = receiverToSenderQueue;
         }
 
-        public int Read(byte[] data)
+        public int Read(byte[] data, int timeout)
         {
             int i;
             for (i = 0; i < data.Length; i++)
@@ -83,7 +100,7 @@ namespace Flekosoft.UnitTests.Common.Network
             return i;
         }
 
-        public int Write(byte[] buffer, int offset, int size)
+        public int Write(byte[] buffer, int offset, int size, int timeout)
         {
             var count = 0;
             for (int i = offset; i < (size + offset); i++)
@@ -97,6 +114,13 @@ namespace Flekosoft.UnitTests.Common.Network
         public bool IsConnected { get; set; }
         public IPEndPoint LocalEndpoint { get; } = new IPEndPoint(1234, 1234);
         public IPEndPoint RemoteEndpoint { get; } = new IPEndPoint(4321, 4321);
+
+        public event EventHandler DisconnectedEvent;
+
+        public void SendDisconnctedEvent()
+        {
+            DisconnectedEvent?.Invoke(this, EventArgs.Empty);
+        }
     }
 
 

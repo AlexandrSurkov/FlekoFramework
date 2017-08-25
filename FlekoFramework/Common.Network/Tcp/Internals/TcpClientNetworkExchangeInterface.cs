@@ -4,21 +4,23 @@ using System.Net.Sockets;
 
 namespace Flekosoft.Common.Network.Tcp.Internals
 {
-    internal class SocketNetworkExchangeInterface : PropertyChangedErrorNotifyDisposableBase, INetworkExchangeInterface
+    class TcpClientNetworkExchangeInterface : PropertyChangedErrorNotifyDisposableBase, INetworkExchangeInterface
     {
+
         private readonly object _readSyncObject = new object();
         private readonly object _writeSyncObject = new object();
         private bool _isConnected;
+        readonly NetworkStream _netStream;
 
-        public SocketNetworkExchangeInterface(Socket socket)
+        public TcpClientNetworkExchangeInterface(System.Net.Sockets.TcpClient tcpClient)
         {
-            Socket = socket;
+            TcpClient = tcpClient;
+            _netStream = TcpClient.GetStream();
 
-            Socket.SendBufferSize = 262144;
-            Socket.ReceiveBufferSize = 262144;
-            LocalEndpoint = (IPEndPoint)Socket.LocalEndPoint;
-            RemoteEndpoint = (IPEndPoint)Socket.RemoteEndPoint;
-            IsConnected = true;
+            LocalEndpoint = (IPEndPoint)TcpClient.Client.LocalEndPoint;
+            RemoteEndpoint = (IPEndPoint)TcpClient.Client.RemoteEndPoint;
+
+            IsConnected = true; 
         }
 
         public int Read(byte[] data, int timeout)
@@ -27,25 +29,20 @@ namespace Flekosoft.Common.Network.Tcp.Internals
             {
                 lock (_readSyncObject) //Can't read at the same time from different threads
                 {
-                    if (Socket == null)
+                    if (!TcpClient.Client.Connected) throw new NotConnectedException();
+                    if (_netStream == null) throw new NotConnectedException();
+                    if (_netStream.CanRead && _netStream.DataAvailable)
                     {
-                        throw new NotConnectedException();
-                    }
-                    if (!Socket.Connected)
-                    {
-                        throw new NotConnectedException();
-                    }
+                        var part1 = TcpClient.Client.Poll(1000, SelectMode.SelectRead);
+                        var part2 = (TcpClient.Client.Available == 0);
+                        if ((part1 & part2) || !TcpClient.Client.Connected)
+                        {
+                            throw new NotConnectedException();
+                        }
 
-                    var part1 = Socket.Poll(1000, SelectMode.SelectRead);
-                    var part2 = (Socket.Available == 0);
-                    if ((part1 & part2) || !Socket.Connected)
-                    {
-                        throw new NotConnectedException();
+                        TcpClient.ReceiveTimeout = timeout;
+                        return _netStream.Read(data, 0, data.Length);
                     }
-
-                    Socket.ReceiveTimeout = timeout;
-
-                    return Socket.Receive(data);
                 }
             }
             catch (NotConnectedException)
@@ -65,14 +62,13 @@ namespace Flekosoft.Common.Network.Tcp.Internals
             {
                 lock (_writeSyncObject) //Can't write at the same time from different threads
                 {
-                    if (Socket == null) throw new NotConnectedException();
-                    if (!Socket.Connected) throw new NotConnectedException();
+                   if (!TcpClient.Client.Connected) throw new NotConnectedException();
+                    if (_netStream == null) throw new NotConnectedException();
 
-                    Socket.SendTimeout = timeout;
+                    TcpClient.SendTimeout = timeout;
 
                     SocketError err;
-                    var sendedBytes = Socket.Send(buffer, offset, size, SocketFlags.None, out err);
-
+                    var sendedBytes = TcpClient.Client.Send(buffer, offset, size, SocketFlags.None, out err);
                     if (err != SocketError.Success)
                     {
                         Exception ex;
@@ -107,10 +103,9 @@ namespace Flekosoft.Common.Network.Tcp.Internals
                 }
             }
         }
-
         public IPEndPoint LocalEndpoint { get; }
         public IPEndPoint RemoteEndpoint { get; }
-        public Socket Socket { get; }
+        public System.Net.Sockets.TcpClient TcpClient { get; }
 
         public event EventHandler DisconnectedEvent;
         protected void OnDisconnectedEvent()
@@ -122,9 +117,13 @@ namespace Flekosoft.Common.Network.Tcp.Internals
         {
             if (disposing)
             {
-                Socket.Shutdown(SocketShutdown.Both);
-                Socket.Close();
-                Socket.Dispose();
+                if (TcpClient != null)
+                {
+                    if (TcpClient.Client.Connected)
+                    {
+                        TcpClient?.Close();
+                    }
+                }
 
                 DisconnectedEvent = null;
             }

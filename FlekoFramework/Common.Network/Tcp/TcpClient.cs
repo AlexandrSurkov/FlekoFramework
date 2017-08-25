@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
+using Flekosoft.Common.Network.Tcp.Internals;
 
 namespace Flekosoft.Common.Network.Tcp
 {
@@ -11,14 +12,16 @@ namespace Flekosoft.Common.Network.Tcp
         private bool _isStarted;
         private bool _isConnected;
 
-        private System.Net.Sockets.TcpClient _client;
-        NetworkStream _netStream;
+        private TcpClientNetworkExchangeInterface _exchangeInterface;
+
+        //private System.Net.Sockets.TcpClient _client;
+        //NetworkStream _netStream;
 
         private int _pingFailCount;
 
         private readonly Thread _connectThread;
-        private readonly Thread _readFromStreamThread;
-        private readonly Thread _processDataThread;
+        //private readonly Thread _readFromStreamThread;
+        //private readonly Thread _processDataThread;
 
         private readonly ConcurrentQueue<byte> _bytesQueue = new ConcurrentQueue<byte>();
         readonly EventWaitHandle _hasDataWh = new EventWaitHandle(false, EventResetMode.ManualReset);
@@ -217,108 +220,108 @@ namespace Flekosoft.Common.Network.Tcp
             }
         }
 
-        private void ReadFromStreamThreadFunc()
-        {
-            while (true)
-            {
-                try
-                {
-                    if (IsConnected & _netStream != null)
-                    {
-                        if (_netStream.CanRead && _netStream.DataAvailable)
-                        {
-                            lock (_readBufferSyncObject)
-                            {
-                                //Clear buffer. 
-                                //TODO: May be we will not need to do it. Will see after use experiance
-                                //for (int i = 0; i < _readBuffer.Length; i++)
-                                //{
-                                //    _readBuffer[i] = 0x00;
-                                //}
+        //private void ReadFromStreamThreadFunc()
+        //{
+        //    while (true)
+        //    {
+        //        try
+        //        {
+        //            if (IsConnected & _netStream != null)
+        //            {
+        //                if (_netStream.CanRead && _netStream.DataAvailable)
+        //                {
+        //                    lock (_readBufferSyncObject)
+        //                    {
+        //                        //Clear buffer. 
+        //                        //TODO: May be we will not need to do it. Will see after use experiance
+        //                        //for (int i = 0; i < _readBuffer.Length; i++)
+        //                        //{
+        //                        //    _readBuffer[i] = 0x00;
+        //                        //}
 
-                                int count = _netStream.Read(_readBuffer, 0, _readBuffer.Length);
-                                if (count > 0)
-                                {
-                                    for (int i = 0; i < count; i++)
-                                    {
-                                        _bytesQueue.Enqueue(_readBuffer[i]);
-                                    }
-                                    if (_bytesQueue.IsEmpty) _hasDataWh?.Reset();
-                                    else _hasDataWh?.Set();
-                                }
-                                continue;
-                            }
-                        }
-                    }
-                    Thread.Sleep(1);
-                }
-                catch (ThreadAbortException)
-                {
-                    break;
-                }
-                catch (Exception exception)
-                {
-                    var ex = exception.InnerException as SocketException;
-                    if (ex != null)
-                    {
-                        switch (ex.SocketErrorCode)
-                        {
-                            case SocketError.SocketError:
-                            case SocketError.Fault:
-                            case SocketError.NotSocket:
-                            case SocketError.SocketNotSupported:
-                            case SocketError.AddressNotAvailable:
-                            case SocketError.NetworkDown:
-                            case SocketError.NetworkUnreachable:
-                            case SocketError.NetworkReset:
-                            case SocketError.ConnectionAborted:
-                            case SocketError.ConnectionReset:
-                            case SocketError.NotConnected:
-                            case SocketError.Shutdown:
-                            case SocketError.TimedOut:
-                            case SocketError.ConnectionRefused:
-                            case SocketError.HostDown:
-                            case SocketError.HostUnreachable:
-                            case SocketError.SystemNotReady:
-                            case SocketError.Disconnecting:
-                            case SocketError.HostNotFound:
-                            case SocketError.OperationAborted:
-                                DisconnectFromServer();
-                                continue;
-                        }
-                    }
-                    OnErrorEvent(exception);
-                }
-            }
-        }
+        //                        int count = _netStream.Read(_readBuffer, 0, _readBuffer.Length);
+        //                        if (count > 0)
+        //                        {
+        //                            for (int i = 0; i < count; i++)
+        //                            {
+        //                                _bytesQueue.Enqueue(_readBuffer[i]);
+        //                            }
+        //                            if (_bytesQueue.IsEmpty) _hasDataWh?.Reset();
+        //                            else _hasDataWh?.Set();
+        //                        }
+        //                        continue;
+        //                    }
+        //                }
+        //            }
+        //            Thread.Sleep(1);
+        //        }
+        //        catch (ThreadAbortException)
+        //        {
+        //            break;
+        //        }
+        //        catch (Exception exception)
+        //        {
+        //            var ex = exception.InnerException as SocketException;
+        //            if (ex != null)
+        //            {
+        //                switch (ex.SocketErrorCode)
+        //                {
+        //                    case SocketError.SocketError:
+        //                    case SocketError.Fault:
+        //                    case SocketError.NotSocket:
+        //                    case SocketError.SocketNotSupported:
+        //                    case SocketError.AddressNotAvailable:
+        //                    case SocketError.NetworkDown:
+        //                    case SocketError.NetworkUnreachable:
+        //                    case SocketError.NetworkReset:
+        //                    case SocketError.ConnectionAborted:
+        //                    case SocketError.ConnectionReset:
+        //                    case SocketError.NotConnected:
+        //                    case SocketError.Shutdown:
+        //                    case SocketError.TimedOut:
+        //                    case SocketError.ConnectionRefused:
+        //                    case SocketError.HostDown:
+        //                    case SocketError.HostUnreachable:
+        //                    case SocketError.SystemNotReady:
+        //                    case SocketError.Disconnecting:
+        //                    case SocketError.HostNotFound:
+        //                    case SocketError.OperationAborted:
+        //                        DisconnectFromServer();
+        //                        continue;
+        //                }
+        //            }
+        //            OnErrorEvent(exception);
+        //        }
+        //    }
+        //}
 
-        private void ProcessDataThreadFunc()
-        {
-            while (true)
-            {
-                try
-                {
-                    if (_hasDataWh != null && _hasDataWh.WaitOne(Timeout.Infinite))
-                    {
-                        byte dataByte;
-                        if (_bytesQueue.TryDequeue(out dataByte))
-                        {
-                            ProcessByteInternal(dataByte);
-                        }
-                        if (_bytesQueue.IsEmpty) _hasDataWh?.Reset();
-                        else _hasDataWh?.Set();
-                    }
-                }
-                catch (ThreadAbortException)
-                {
-                    break;
-                }
-                catch (Exception ex)
-                {
-                    OnErrorEvent(ex);
-                }
-            }
-        }
+        //private void ProcessDataThreadFunc()
+        //{
+        //    while (true)
+        //    {
+        //        try
+        //        {
+        //            if (_hasDataWh != null && _hasDataWh.WaitOne(Timeout.Infinite))
+        //            {
+        //                byte dataByte;
+        //                if (_bytesQueue.TryDequeue(out dataByte))
+        //                {
+        //                    ProcessByteInternal(dataByte);
+        //                }
+        //                if (_bytesQueue.IsEmpty) _hasDataWh?.Reset();
+        //                else _hasDataWh?.Set();
+        //            }
+        //        }
+        //        catch (ThreadAbortException)
+        //        {
+        //            break;
+        //        }
+        //        catch (Exception ex)
+        //        {
+        //            OnErrorEvent(ex);
+        //        }
+        //    }
+        //}
 
         #endregion
 
@@ -328,10 +331,12 @@ namespace Flekosoft.Common.Network.Tcp
         {
             try
             {
-                _client = new System.Net.Sockets.TcpClient(IpAddress, Port);
-                _netStream = _client.GetStream();
-                _netStream.WriteTimeout = Timeout.Infinite;
-                _netStream.ReadTimeout = Timeout.Infinite;
+                var client = new System.Net.Sockets.TcpClient(IpAddress, Port);
+                //_exchangeInterface = new TcpClientNetworkExchangeInterface(client);
+                //_client = new System.Net.Sockets.TcpClient(IpAddress, Port);
+                //_netStream = _client.GetStream();
+                //_netStream.WriteTimeout = Timeout.Infinite;
+                //_netStream.ReadTimeout = Timeout.Infinite;
 
                 IsConnected = true;
                 _pingFailCount = 0;

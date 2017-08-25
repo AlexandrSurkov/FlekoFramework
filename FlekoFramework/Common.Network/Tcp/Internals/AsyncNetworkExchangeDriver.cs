@@ -113,7 +113,7 @@ namespace Flekosoft.Common.Network.Tcp.Internals
                         {
                             lock (_readBufferSyncObject)
                             {
-                                int count = _networkInterface.Read(_readBuffer);
+                                int count = _networkInterface.Read(_readBuffer, Timeout.Infinite);
                                 if (count > 0)
                                 {
                                     if (DataTrace) OnReceiveDataTraceEvent(_readBuffer.ToList().GetRange(0, count).ToArray(), _networkInterface.LocalEndpoint, _networkInterface.RemoteEndpoint);
@@ -293,7 +293,7 @@ namespace Flekosoft.Common.Network.Tcp.Internals
                                 var len = data.Length;
                                 while (written < data.Length)
                                 {
-                                    written = (int)_networkInterface?.Write(data, index, len);
+                                    written = (int)_networkInterface?.Write(data, index, len, Timeout.Infinite);
                                     index += written;
                                     len -= written;
                                     ////if (written != data.Length)

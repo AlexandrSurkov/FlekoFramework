@@ -9,8 +9,8 @@ namespace Flekosoft.Common.Network.Tcp.Internals
         int Write(byte[] buffer, int offset, int size, int timeout);
         bool IsConnected { get; }
 
-        IPEndPoint LocalEndpoint { get; }
-        IPEndPoint RemoteEndpoint { get; }
+        IPEndPoint LocalEndPoint { get; }
+        IPEndPoint RemoteEndPoint { get; }
 
         event EventHandler DisconnectedEvent;
     }

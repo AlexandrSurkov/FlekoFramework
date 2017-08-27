@@ -10,9 +10,9 @@ namespace Flekosoft.Common.Network.Tcp.Internals
             return Write(data);
         }
 
-        protected override void ProcessByteInternal(byte data)
+        protected override void ProcessByteInternal(NetworkDataEventArgs e)
         {
-            OnNewByteEvent(new[] { data }, ExchangeInterface.LocalEndpoint, ExchangeInterface.LocalEndpoint);
+            OnNewByteEvent(e.Data, e.LocalEndPoint, e.RemoteEndPoint);
         }
 
         public event EventHandler<NetworkDataEventArgs> NewByteEvent;

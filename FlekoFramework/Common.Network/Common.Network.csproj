@@ -51,9 +51,11 @@
     <Compile Include="Tcp\Internals\SocketAsyncNetworkExchangeDriver.cs" />
     <Compile Include="Tcp\Internals\SocketNetworkExchangeInterface.cs" />
     <Compile Include="Tcp\Internals\TcpClientNetworkExchangeInterface.cs" />
-    <Compile Include="Tcp\TcpServerLocalEndpoint.cs" />
     <Compile Include="Tcp\TcpClient.cs" />
     <Compile Include="Tcp\TcpServer.cs" />
+    <Compile Include="Tcp\TcpServerLocalEndpoint.cs" />
+    <Compile Include="Tcp\TcpClientBase.cs" />
+    <Compile Include="Tcp\TcpServerBase.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Common\Common.csproj">

@@ -118,10 +118,11 @@ namespace Flekosoft.Common.Network.Tcp.Internals
                                 int count = _networkInterface.Read(_readBuffer, Timeout.Infinite);
                                 if (count > 0)
                                 {
-                                    if (DataTrace) OnReceiveDataTraceEvent(_readBuffer.ToList().GetRange(0, count).ToArray(), _networkInterface.LocalEndpoint, _networkInterface.RemoteEndpoint);
+                                    if (DataTrace) OnReceiveDataTraceEvent(_readBuffer.ToList().GetRange(0, count).ToArray(), _networkInterface.LocalEndPoint, _networkInterface.RemoteEndPoint);
                                     for (int i = 0; i < count; i++)
                                     {
-                                        ProcessByteInternal(_readBuffer[i]);
+                                        ProcessByteInternal(new NetworkDataEventArgs(new[] { _readBuffer[i] }, ExchangeInterface.LocalEndPoint, ExchangeInterface.RemoteEndPoint));
+
 
                                         //_processDataQueue.Enqueue(_readBuffer[i]);
                                         //var data = new byte[count];
@@ -273,6 +274,7 @@ namespace Flekosoft.Common.Network.Tcp.Internals
             {
                 lock (_networkInterfaceWriteSyncObject)
                 {
+                    _networkInterface?.Dispose();
                     _networkInterface = null;
                 }
             }
@@ -306,8 +308,8 @@ namespace Flekosoft.Common.Network.Tcp.Internals
                                     ////}
                                 }
                                 if (DataTrace)
-                                    OnSendDataTraceEvent(data, _networkInterface.LocalEndpoint,
-                                        _networkInterface.RemoteEndpoint);
+                                    OnSendDataTraceEvent(data, _networkInterface.LocalEndPoint,
+                                        _networkInterface.RemoteEndPoint);
                             }
                         }
                         //_sendDataQueue.Enqueue(data);
@@ -334,7 +336,7 @@ namespace Flekosoft.Common.Network.Tcp.Internals
             }
         }
 
-        protected abstract void ProcessByteInternal(byte data);
+        protected abstract void ProcessByteInternal(NetworkDataEventArgs e);
 
         #endregion
 
@@ -423,7 +425,7 @@ namespace Flekosoft.Common.Network.Tcp.Internals
                 SendDataTraceEvent = null;
 
                 // ReSharper disable once InconsistentlySynchronizedField
-                _networkInterface.Dispose();
+                _networkInterface?.Dispose();
             }
             base.Dispose(disposing);
         }

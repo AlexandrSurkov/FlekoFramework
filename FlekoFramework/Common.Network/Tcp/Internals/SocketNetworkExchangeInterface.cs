@@ -16,8 +16,8 @@ namespace Flekosoft.Common.Network.Tcp.Internals
 
             Socket.SendBufferSize = 262144;
             Socket.ReceiveBufferSize = 262144;
-            LocalEndpoint = (IPEndPoint)Socket.LocalEndPoint;
-            RemoteEndpoint = (IPEndPoint)Socket.RemoteEndPoint;
+            LocalEndPoint = (IPEndPoint)Socket.LocalEndPoint;
+            RemoteEndPoint = (IPEndPoint)Socket.RemoteEndPoint;
             IsConnected = true;
         }
 
@@ -108,8 +108,8 @@ namespace Flekosoft.Common.Network.Tcp.Internals
             }
         }
 
-        public IPEndPoint LocalEndpoint { get; }
-        public IPEndPoint RemoteEndpoint { get; }
+        public IPEndPoint LocalEndPoint { get; }
+        public IPEndPoint RemoteEndPoint { get; }
         public Socket Socket { get; }
 
         public event EventHandler DisconnectedEvent;

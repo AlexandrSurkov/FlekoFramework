@@ -17,10 +17,10 @@ namespace Flekosoft.Common.Network.Tcp.Internals
             TcpClient = tcpClient;
             _netStream = TcpClient.GetStream();
 
-            LocalEndpoint = (IPEndPoint)TcpClient.Client.LocalEndPoint;
-            RemoteEndpoint = (IPEndPoint)TcpClient.Client.RemoteEndPoint;
+            LocalEndPoint = (IPEndPoint)TcpClient.Client.LocalEndPoint;
+            RemoteEndPoint = (IPEndPoint)TcpClient.Client.RemoteEndPoint;
 
-            IsConnected = true; 
+            IsConnected = true;
         }
 
         public int Read(byte[] data, int timeout)
@@ -31,15 +31,16 @@ namespace Flekosoft.Common.Network.Tcp.Internals
                 {
                     if (!TcpClient.Client.Connected) throw new NotConnectedException();
                     if (_netStream == null) throw new NotConnectedException();
+
+                    var part1 = TcpClient.Client.Poll(1000, SelectMode.SelectRead);
+                    var part2 = (TcpClient.Client.Available == 0);
+                    if ((part1 & part2) || !TcpClient.Client.Connected)
+                    {
+                        throw new NotConnectedException();
+                    }
+
                     if (_netStream.CanRead && _netStream.DataAvailable)
                     {
-                        var part1 = TcpClient.Client.Poll(1000, SelectMode.SelectRead);
-                        var part2 = (TcpClient.Client.Available == 0);
-                        if ((part1 & part2) || !TcpClient.Client.Connected)
-                        {
-                            throw new NotConnectedException();
-                        }
-
                         TcpClient.ReceiveTimeout = timeout;
                         return _netStream.Read(data, 0, data.Length);
                     }
@@ -62,7 +63,7 @@ namespace Flekosoft.Common.Network.Tcp.Internals
             {
                 lock (_writeSyncObject) //Can't write at the same time from different threads
                 {
-                   if (!TcpClient.Client.Connected) throw new NotConnectedException();
+                    if (!TcpClient.Client.Connected) throw new NotConnectedException();
                     if (_netStream == null) throw new NotConnectedException();
 
                     TcpClient.SendTimeout = timeout;
@@ -103,8 +104,8 @@ namespace Flekosoft.Common.Network.Tcp.Internals
                 }
             }
         }
-        public IPEndPoint LocalEndpoint { get; }
-        public IPEndPoint RemoteEndpoint { get; }
+        public IPEndPoint LocalEndPoint { get; }
+        public IPEndPoint RemoteEndPoint { get; }
         public System.Net.Sockets.TcpClient TcpClient { get; }
 
         public event EventHandler DisconnectedEvent;

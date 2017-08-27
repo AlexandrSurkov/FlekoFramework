@@ -14,11 +14,6 @@ namespace Flekosoft.UnitTests.Common.Network
     {
         public List<byte> ReceivedBytes { get; } = new List<byte>();
 
-        protected override void ProcessByteInternal(byte dataByte)
-        {
-            ReceivedBytes.Add(dataByte);
-        }
-
         public bool WriteData(byte[] data)
         {
             return Write(data);
@@ -32,6 +27,11 @@ namespace Flekosoft.UnitTests.Common.Network
         public void Stop()
         {
             StopExchange();
+        }
+
+        protected override void ProcessByteInternal(NetworkDataEventArgs e)
+        {
+            ReceivedBytes.AddRange(e.Data);
         }
     }
 
@@ -68,8 +68,8 @@ namespace Flekosoft.UnitTests.Common.Network
         }
 
         public bool IsConnected { get; set; }
-        public IPEndPoint LocalEndpoint { get; } = new IPEndPoint(1234, 1234);
-        public IPEndPoint RemoteEndpoint { get; } = new IPEndPoint(4321, 4321);
+        public IPEndPoint LocalEndPoint { get; } = new IPEndPoint(1234, 1234);
+        public IPEndPoint RemoteEndPoint { get; } = new IPEndPoint(4321, 4321);
 
         public event EventHandler DisconnectedEvent;
 
@@ -112,8 +112,8 @@ namespace Flekosoft.UnitTests.Common.Network
         }
 
         public bool IsConnected { get; set; }
-        public IPEndPoint LocalEndpoint { get; } = new IPEndPoint(1234, 1234);
-        public IPEndPoint RemoteEndpoint { get; } = new IPEndPoint(4321, 4321);
+        public IPEndPoint LocalEndPoint { get; } = new IPEndPoint(1234, 1234);
+        public IPEndPoint RemoteEndPoint { get; } = new IPEndPoint(4321, 4321);
 
         public event EventHandler DisconnectedEvent;
 
@@ -345,6 +345,16 @@ namespace Flekosoft.UnitTests.Common.Network
 
             sender.Dispose();
             receiver.Dispose();
+
+            Assert.IsTrue(senderInterface.IsDisposed);
+            Assert.IsTrue(receiverInterface.IsDisposed);
+
+        }
+
+        [TestMethod]
+        public void DataTraceTest()
+        {
+            Assert.Fail();
         }
 
         public NetworkDataEventArgs SenderDataEventArgs { get; set; } = null;

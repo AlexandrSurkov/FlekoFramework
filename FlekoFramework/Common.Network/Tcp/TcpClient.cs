@@ -16,6 +16,11 @@ namespace Flekosoft.Common.Network.Tcp
 
         }
 
+        public bool SendData(byte[] data)
+        {
+            return Write(data);
+        }
+
         public event EventHandler<NetworkDataEventArgs> DataReceivedEvent;
         private void OnDataReceivedEvent(byte[] data, IPEndPoint localEndPoint, IPEndPoint remoteEndPoint)
         {

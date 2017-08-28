@@ -15,8 +15,6 @@ namespace Flekosoft.Common.Network.Tcp
 
         private readonly Thread _waitConnectionThread;
         private readonly object _listenSocketsSyncObject = new object();
-        private readonly object _connectedSocketsListSyncObject = new object();
-        private readonly Dictionary<TcpServerLocalEndpoint, List<SocketAsyncNetworkExchangeDriver>> _connectedSockets = new Dictionary<TcpServerLocalEndpoint, List<SocketAsyncNetworkExchangeDriver>>();
         private bool _dataTrace;
 
 
@@ -61,13 +59,13 @@ namespace Flekosoft.Common.Network.Tcp
             {
                 if (_dataTrace == value) return;
                 _dataTrace = value;
-                lock (_connectedSocketsListSyncObject)
+                lock (_listenSocketsSyncObject)
                 {
                     // ReSharper disable LoopCanBeConvertedToQuery
-                    foreach (var connection in _connectedSockets)
+                    foreach (var listenSocket in _listenSockets)
                     // ReSharper restore LoopCanBeConvertedToQuery
                     {
-                        foreach (var driver in connection.Value)
+                        foreach (var driver in listenSocket.ConnectedSockets)
                         {
                             driver.DataTrace = _dataTrace;
                         }
@@ -92,44 +90,41 @@ namespace Flekosoft.Common.Network.Tcp
                     {
                         if (IsStarted)
                         {
+                            var removeList = new List<SocketAsyncNetworkExchangeDriver>();
+
                             foreach (ListenSocket ls in _listenSockets)
                             {
                                 try
                                 {
                                     Thread.Sleep(1);
 
-                                    if (ls.AcceptBeginned) continue;
-                                    ls.Socket.BeginAccept(AcceptCallback, ls);
-                                    ls.AcceptBeginned = true;
-                                    if (!_connectedSockets.ContainsKey(ls.TcpServerLocalEndpoint))
-                                        _connectedSockets.Add(ls.TcpServerLocalEndpoint, new List<SocketAsyncNetworkExchangeDriver>());
+                                    foreach (SocketAsyncNetworkExchangeDriver driver in ls.ConnectedSockets)
+                                    {
+                                        if (!driver.ExchangeInterface.IsConnected) removeList.Add(driver);
+                                    }
+                                    foreach (var driver in removeList)
+                                    {
+                                        driver.Dispose();
+                                        ls.ConnectedSockets.Remove(driver);
+                                        OnDisconnectedEvent(
+                                            new ConnectionEventArgs(driver.ExchangeInterface.LocalEndPoint,
+                                                driver.ExchangeInterface.RemoteEndPoint));
+                                    }
+
+                                    if (ls.AcceptBeginned)
+                                    {
+                                        continue;
+                                    }
+
+                                    //if (ls.ConnectedSockets.Count < ls.TcpServerLocalEndpoint.MaxClients)
+                                    //{
+                                        ls.Socket.BeginAccept(AcceptCallback, ls);
+                                        ls.AcceptBeginned = true;
+                                    //}
                                 }
                                 catch (ThreadAbortException)
                                 {
                                     return;
-                                }
-                            }
-
-                            var removeList = new Dictionary<TcpServerLocalEndpoint, SocketAsyncNetworkExchangeDriver>();
-                            lock (_connectedSocketsListSyncObject)
-                            {
-                                // ReSharper disable LoopCanBeConvertedToQuery
-                                foreach (var connection in _connectedSockets)
-                                // ReSharper restore LoopCanBeConvertedToQuery
-                                {
-                                    foreach (var driver in connection.Value)
-                                    {
-                                        if (!driver.ExchangeInterface.IsConnected) removeList.Add(connection.Key, driver);
-                                    }
-                                }
-
-                                foreach (var connection in removeList)
-                                {
-                                    connection.Value.Dispose();
-                                    _connectedSockets[connection.Key].Remove(connection.Value);
-                                    OnDisconnectedEvent(
-                                        new ConnectionEventArgs(connection.Value.ExchangeInterface.LocalEndPoint,
-                                            connection.Value.ExchangeInterface.RemoteEndPoint));
                                 }
                             }
                         }
@@ -216,30 +211,15 @@ namespace Flekosoft.Common.Network.Tcp
                 }
                 _listenSockets.Clear();
             }
-
-            lock (_connectedSocketsListSyncObject)
-            {
-                foreach (var connection in _connectedSockets)
-                // ReSharper restore LoopCanBeConvertedToQuery
-                {
-                    foreach (var driver in connection.Value)
-                    {
-                        driver?.Dispose();
-                    }
-                    connection.Value.Clear();
-                }
-                _connectedSockets.Clear();
-            }
         }
 
         private SocketAsyncNetworkExchangeDriver FindDriver(IPEndPoint localEndPoint, IPEndPoint remoteEndPoint)
         {
-            lock (_connectedSocketsListSyncObject)
+            lock (_listenSocketsSyncObject)
             {
-                foreach (var connection in _connectedSockets)
-                // ReSharper restore LoopCanBeConvertedToQuery
+                foreach (ListenSocket listenSocket in _listenSockets)
                 {
-                    foreach (var driver in connection.Value)
+                    foreach (SocketAsyncNetworkExchangeDriver driver in listenSocket.ConnectedSockets)
                     {
                         if (driver.ExchangeInterface.LocalEndPoint.Equals(localEndPoint) &&
                         driver.ExchangeInterface.RemoteEndPoint.Equals(remoteEndPoint))
@@ -261,18 +241,18 @@ namespace Flekosoft.Common.Network.Tcp
         {
             try
             {
-                var listenSocket = (ListenSocket) ar.AsyncState;
-
-                if (listenSocket?.Socket != null)
+                lock (_listenSocketsSyncObject)
                 {
-                    Socket socket = listenSocket.Socket.EndAccept(ar);
-                    if (_connectedSockets[listenSocket.TcpServerLocalEndpoint].Count >= listenSocket.TcpServerLocalEndpoint.MaxClients)
+                    var listenSocket = (ListenSocket)ar.AsyncState;
+
+                    if (listenSocket?.Socket != null)
                     {
-                        socket.Close();
-                    }
-                    else
-                    {
-                        lock (_connectedSocketsListSyncObject)
+                        Socket socket = listenSocket.Socket.EndAccept(ar);
+                        if (listenSocket.ConnectedSockets.Count >= listenSocket.TcpServerLocalEndpoint.MaxClients)
+                        {
+                            socket.Close();
+                        }
+                        else
                         {
                             try
                             {
@@ -281,7 +261,8 @@ namespace Flekosoft.Common.Network.Tcp
                                 driver.NewByteEvent += Driver_NewByteEvent;
                                 driver.ReceiveDataTraceEvent += Driver_ReceiveDataTraceEvent;
                                 driver.SendDataTraceEvent += Driver_SendDataTraceEvent;
-                                _connectedSockets[listenSocket.TcpServerLocalEndpoint].Add(driver);
+                                driver.DataTrace = DataTrace;
+                                listenSocket.ConnectedSockets.Add(driver);
                                 driver.StartExchange(new SocketNetworkExchangeInterface(socket));
 
                                 OnConnectedEvent(new ConnectionEventArgs(driver.ExchangeInterface.LocalEndPoint,
@@ -292,9 +273,9 @@ namespace Flekosoft.Common.Network.Tcp
                                 OnErrorEvent(ex);
                             }
                         }
-                    }
 
-                    listenSocket.AcceptBeginned = false;
+                        listenSocket.AcceptBeginned = false;
+                    }
                 }
             }
             catch (ObjectDisposedException)

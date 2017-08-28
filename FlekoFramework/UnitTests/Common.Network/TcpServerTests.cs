@@ -380,7 +380,7 @@ namespace Flekosoft.UnitTests.Common.Network
             server.DataReceivedEvent += Server_DataReceivedEvent;
 
             var epList = new List<TcpServerLocalEndpoint>();
-            var ipEp1 = (new TcpServerLocalEndpoint(new IPEndPoint(IPAddress.Parse("127.0.0.1"), 1234), 1));
+            var ipEp1 = (new TcpServerLocalEndpoint(new IPEndPoint(IPAddress.Parse("127.0.0.1"), 2345), 1));
 
             epList.Add(ipEp1);
             server.Start(epList);
@@ -463,14 +463,16 @@ namespace Flekosoft.UnitTests.Common.Network
                     Assert.AreEqual(client.ExchangeInterface.LocalEndPoint, ServerDataReceivedEvent[j].RemoteEndPoint);
                     Assert.AreEqual(client.ExchangeInterface.RemoteEndPoint, ServerDataReceivedEvent[j].LocalEndPoint);
 
-                    Assert.AreEqual(data[j], ClientSendDataTraceEvent[j].Data[0]);
-                    Assert.AreEqual(client.ExchangeInterface.LocalEndPoint, ClientSendDataTraceEvent[j].RemoteEndPoint);
-                    Assert.AreEqual(client.ExchangeInterface.RemoteEndPoint, ClientSendDataTraceEvent[j].LocalEndPoint);
-
-                    Assert.AreEqual(data[j], ServerReceiveDataTraceEvent[j].Data[0]);
-                    Assert.AreEqual(client.ExchangeInterface.LocalEndPoint, ServerReceiveDataTraceEvent[j].RemoteEndPoint);
-                    Assert.AreEqual(client.ExchangeInterface.RemoteEndPoint, ServerReceiveDataTraceEvent[j].LocalEndPoint);
+                    Assert.AreEqual(data[j], ClientSendDataTraceEvent[0].Data[j]);
+                    Assert.AreEqual(data[j], ServerReceiveDataTraceEvent[0].Data[j]);
                 }
+
+                
+                Assert.AreEqual(ipEp1.EndPoint, ClientSendDataTraceEvent[0].RemoteEndPoint);
+
+                
+                Assert.AreEqual(client.ExchangeInterface.LocalEndPoint, ServerReceiveDataTraceEvent[0].RemoteEndPoint);
+                Assert.AreEqual(client.ExchangeInterface.RemoteEndPoint, ServerReceiveDataTraceEvent[0].LocalEndPoint);
             }
 
             for (int i = 1; i < 10; i++)
@@ -492,12 +494,14 @@ namespace Flekosoft.UnitTests.Common.Network
                     Assert.AreEqual(data[j], ClientDataReceivedEvent[j].Data[0]);
                     Assert.AreEqual(ipEp1.EndPoint, ClientDataReceivedEvent[j].RemoteEndPoint);
 
-                    Assert.AreEqual(data[j], ServerSendDataTraceEvent[j].Data[0]);
-                    Assert.AreEqual(ipEp1.EndPoint, ServerSendDataTraceEvent[j].RemoteEndPoint);
-
-                    Assert.AreEqual(data[j], ClientReceiveDataTraceEvent[j].Data[0]);
-                    Assert.AreEqual(ipEp1.EndPoint, ClientReceiveDataTraceEvent[j].RemoteEndPoint);
+                    Assert.AreEqual(data[j], ServerSendDataTraceEvent[0].Data[j]);
+                    Assert.AreEqual(data[j], ClientReceiveDataTraceEvent[0].Data[j]);
                 }
+
+                Assert.AreEqual(client.ExchangeInterface.LocalEndPoint, ServerReceiveDataTraceEvent[0].RemoteEndPoint);
+                Assert.AreEqual(client.ExchangeInterface.RemoteEndPoint, ServerReceiveDataTraceEvent[0].LocalEndPoint);
+               
+                Assert.AreEqual(ipEp1.EndPoint, ClientReceiveDataTraceEvent[0].RemoteEndPoint);
             }
 
             server.Dispose();

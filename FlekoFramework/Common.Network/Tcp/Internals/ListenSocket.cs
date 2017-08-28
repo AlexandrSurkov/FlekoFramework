@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.ObjectModel;
 using System.Net.Sockets;
 using System.Threading;
 
@@ -20,6 +21,8 @@ namespace Flekosoft.Common.Network.Tcp.Internals
         public bool AcceptBeginned { get; set; }
 
         public TcpServerLocalEndpoint TcpServerLocalEndpoint { get; }
+
+        public ObservableCollection<SocketAsyncNetworkExchangeDriver> ConnectedSockets { get; } = new ObservableCollection<SocketAsyncNetworkExchangeDriver>();
 
         public Socket Socket
         {
@@ -61,6 +64,13 @@ namespace Flekosoft.Common.Network.Tcp.Internals
                         }
                         _socket.Close();
                         _socket = null;
+
+                        foreach (var connection in ConnectedSockets)
+                        // ReSharper restore LoopCanBeConvertedToQuery
+                        {
+                            connection?.Dispose();
+                        }
+                        ConnectedSockets.Clear();
                     }
                 }
                 _disposed = true;

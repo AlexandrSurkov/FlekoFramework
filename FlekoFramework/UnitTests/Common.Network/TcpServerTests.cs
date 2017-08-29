@@ -275,6 +275,11 @@ namespace Flekosoft.UnitTests.Common.Network
 
             Assert.IsTrue(server.IsDisposed);
             Assert.IsFalse(server.IsStarted);
+
+
+            client1.Dispose();
+            client2.Dispose();
+            client3.Dispose();
         }
 
         [TestMethod]

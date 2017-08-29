@@ -33,6 +33,7 @@ namespace Flekosoft.Common.Network.Tcp.Internals
         private INetworkExchangeInterface _networkInterface;
 
         private readonly object _writeSyncObject = new object();
+        private bool _dataTrace;
 
         /// <summary>
         /// 
@@ -97,7 +98,18 @@ namespace Flekosoft.Common.Network.Tcp.Internals
         /// <summary>
         /// Send trace events on data receive/send
         /// </summary>
-        public bool DataTrace { get; set; }
+        public bool DataTrace
+        {
+            get { return _dataTrace; }
+            set
+            {
+                if (_dataTrace != value)
+                {
+                    _dataTrace = value;
+                    OnPropertyChanged(nameof(DataTrace));
+                }
+            }
+        }
 
         #endregion
 

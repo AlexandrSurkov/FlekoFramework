@@ -130,7 +130,7 @@ namespace Flekosoft.UnitTests.Common.Network
         readonly ConcurrentQueue<byte> _senderToReceiverQueue = new ConcurrentQueue<byte>();
         readonly ConcurrentQueue<byte> _receiverToSenderQueue = new ConcurrentQueue<byte>();
         [TestMethod]
-        public void Test()
+        public void AllPartsAndPerfomanceTest()
         {
             var senderInterface = new SenderInterface(_senderToReceiverQueue, _receiverToSenderQueue)
             { IsConnected = false };
@@ -284,7 +284,7 @@ namespace Flekosoft.UnitTests.Common.Network
             sender.ReadBufferSize = 256;
             Assert.AreEqual(256, sender.ReadBufferSize);
 
-            //Test Stup while sending
+            //Test Stop while sending
             for (int i = 0; i < 1000; i += sizeof(int))
             {
                 var val = BitConverter.GetBytes(i);
@@ -351,10 +351,9 @@ namespace Flekosoft.UnitTests.Common.Network
 
         }
 
-        [TestMethod]
-        public void DataTraceTest()
+        private void Sender_SendDataTraceEvent1(object sender, NetworkDataEventArgs e)
         {
-            Assert.Fail();
+            throw new NotImplementedException();
         }
 
         public NetworkDataEventArgs SenderDataEventArgs { get; set; } = null;

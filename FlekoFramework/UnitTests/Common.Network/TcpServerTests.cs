@@ -13,7 +13,7 @@ namespace Flekosoft.UnitTests.Common.Network
     public class TcpServerTests
     {
         [TestMethod]
-        public void CreateStartStopDispose()
+        public void CreateStartStopDisposeTest()
         {
             var server = new TcpServer();
             server.ErrorEvent += Server_ErrorEvent;
@@ -569,7 +569,7 @@ namespace Flekosoft.UnitTests.Common.Network
             Assert.IsNull(ConnectionFailEventArgs);
             Assert.IsFalse(ClientDisconnectedEventColled);
             client.Start(tslep.EndPoint);
-            Thread.Sleep(200);
+            Thread.Sleep(400);
             Assert.IsNull(ConnectedEventArgs);
             Assert.IsTrue(ConnectionFailEventArgs != null || ClientDisconnectedEventColled);
 

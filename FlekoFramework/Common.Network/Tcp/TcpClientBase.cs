@@ -149,23 +149,14 @@ namespace Flekosoft.Common.Network.Tcp
 
                     if (!IsConnected)
                     {
-                        try
+                        if (!IsDisposed)
                         {
-                            if (!IsDisposed)
+                            OnReconnectingEvent();
+                            if (ConnectToServer())
                             {
-                                OnReconnectingEvent();
-                                if (ConnectToServer())
-                                {
-                                    _pingFailCount = 0;
-                                }
-                                else Thread.Sleep(ConnectInterval);
+                                _pingFailCount = 0;
                             }
-                        }
-                        // ReSharper disable UnusedVariable
-                        catch (Exception ex)
-                        // ReSharper restore UnusedVariable
-                        {
-                            OnErrorEvent(ex);
+                            else Thread.Sleep(ConnectInterval);
                         }
                     }
                     else
@@ -238,7 +229,11 @@ namespace Flekosoft.Common.Network.Tcp
 
         private void _exchangeInterface_DisconnectedEvent(object sender, EventArgs e)
         {
-            DisconnectFromServer();
+            if (IsConnected)
+            {
+                IsConnected = false;
+                OnDisconnectedEvent();
+            }
         }
 
         private void DisconnectFromServer()

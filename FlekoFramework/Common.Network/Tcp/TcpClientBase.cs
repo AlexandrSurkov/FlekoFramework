@@ -176,7 +176,13 @@ namespace Flekosoft.Common.Network.Tcp
                         {
                             _pingFailCount++;
                             if (_pingFailCount >= PollFailLimit)
-                                DisconnectFromServer();
+                            {
+                                if (IsConnected)
+                                {
+                                    IsConnected = false;
+                                    OnDisconnectedEvent();
+                                }
+                            }
                         }
                         else _pingFailCount = 0;
                     }
@@ -216,6 +222,10 @@ namespace Flekosoft.Common.Network.Tcp
             {
                 client?.Close();
                 OnConnectionFailEvent(se.SocketErrorCode.ToString());
+                return false;
+            }
+            catch (ThreadAbortException)
+            {
                 return false;
             }
             catch (Exception ex)

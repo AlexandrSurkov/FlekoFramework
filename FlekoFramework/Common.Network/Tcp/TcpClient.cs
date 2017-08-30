@@ -7,7 +7,9 @@ namespace Flekosoft.Common.Network.Tcp
     {
         protected override bool Poll()
         {
-            return Ping.Send(DestinationIpEndPoint.Address.ToString());
+            if (DestinationIpEndPoint != null)
+                return Ping.Send(DestinationIpEndPoint.Address.ToString());
+            return false;
         }
 
         protected override void ProcessByteInternal(NetworkDataEventArgs e)

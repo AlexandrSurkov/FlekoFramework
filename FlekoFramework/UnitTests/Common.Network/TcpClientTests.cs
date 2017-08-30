@@ -9,6 +9,20 @@ using System.Threading;
 
 namespace Flekosoft.UnitTests.Common.Network
 {
+
+    class TcpClientTestClass : TcpClient
+    {
+        public DateTime PollCalledDateTime { get; set; }
+        public int PollColledCount { get; set; }
+        public bool PollResult { get; set; } = true;
+        protected override bool Poll()
+        {
+            PollCalledDateTime = DateTime.Now;
+            PollColledCount++;
+            return PollResult;
+        }
+    }
+
     [TestClass]
     public class TcpClientTests
     {
@@ -156,26 +170,26 @@ namespace Flekosoft.UnitTests.Common.Network
 
             ClientReconnectingEventColled = false;
             Assert.IsFalse(ClientReconnectingEventColled);
-            Thread.Sleep(client.ConnectInterval + 100);
+            Thread.Sleep((int)(1.5 * client.ConnectInterval));
             Assert.IsTrue(ClientReconnectingEventColled);
 
             ClientConnectedEventArgs = null;
             Assert.IsNull(ClientConnectedEventArgs);
             server.Start(epList);
-            Thread.Sleep(client.ConnectInterval + 100);
+            Thread.Sleep((int)(1.5 * client.ConnectInterval));
             Assert.IsNotNull(ClientConnectedEventArgs);
             Assert.AreEqual(server.Endpoints[0].EndPoint, ClientConnectedEventArgs.RemoteEndPoint);
 
             ClientReconnectingEventColled = false;
             Assert.IsFalse(ClientDisconnectedEventCalled);
             client.Stop();
-            Thread.Sleep(client.PollInterval + 100);
+            Thread.Sleep((int)(1.5 * client.PollInterval));
             Assert.IsTrue(ClientDisconnectedEventCalled);
 
             ClientConnectedEventArgs = null;
             Assert.IsNull(ClientConnectedEventArgs);
             client.Start(new IPEndPoint(IPAddress.Parse("127.0.0.1"), 9876));
-            Thread.Sleep(client.ConnectInterval + 100);
+            Thread.Sleep((int)(1.5 * client.ConnectInterval));
             Assert.IsNotNull(ClientConnectedEventArgs);
             Assert.AreEqual(server.Endpoints[0].EndPoint, ClientConnectedEventArgs.RemoteEndPoint);
 
@@ -250,6 +264,7 @@ namespace Flekosoft.UnitTests.Common.Network
             var ipEp1 = (new TcpServerLocalEndpoint(new IPEndPoint(IPAddress.Parse("127.0.0.1"), 2345), 1));
 
             epList.Add(ipEp1);
+            server.DataReceivedEvent += Server_DataReceivedEvent;
             server.Start(epList);
 
             var client = new TcpClient();
@@ -353,6 +368,157 @@ namespace Flekosoft.UnitTests.Common.Network
             server.Dispose();
         }
 
+        [TestMethod]
+        public void ConnectIntervalTest()
+        {
+            var client = new TcpClient();
+            client.ErrorEvent += Client_ErrorEvent;
+            client.PropertyChanged += Client_PropertyChanged;
+            client.ReconnectingEvent += Client_ReconnectingEvent;
+            client.ConnectionFailEvent += Client_ConnectionFailEvent;
+            client.Start(new IPEndPoint(IPAddress.Parse("127.0.0.1"), 1234));
+
+
+            ConnectIntervalCheck(client, 100);
+            ConnectIntervalCheck(client, 500);
+            ConnectIntervalCheck(client, 1000);
+            ConnectIntervalCheck(client, 2000);
+
+
+            client.Dispose();
+        }
+
+        [TestMethod]
+        public void PollTest()
+        {
+            var server = new TcpServer();
+            var epList = new List<TcpServerLocalEndpoint>();
+            var ipEp1 = (new TcpServerLocalEndpoint(new IPEndPoint(IPAddress.Parse("127.0.0.1"), 2345), 1));
+            epList.Add(ipEp1);
+            server.DataReceivedEvent += Server_DataReceivedEvent;
+            server.Start(epList);
+
+            var client = new TcpClientTestClass();
+            client.ErrorEvent += Client_ErrorEvent;
+            client.DisconnectedEvent += Client_DisconnectedEvent;
+            client.ConnectedEvent += Client_ConnectedEvent;
+            client.Start(ipEp1.EndPoint);
+
+            CheckPollInterval(client, 100);
+            CheckPollInterval(client, 500);
+            CheckPollInterval(client, 1000);
+            CheckPollInterval(client, 2000);
+
+            CheckPollFailCount(client, 1);
+            CheckPollFailCount(client, 3);
+            CheckPollFailCount(client, 5);
+            CheckPollFailCount(client, 10);
+
+            client.Dispose();
+            server.Dispose();
+        }
+
+        void CheckPollFailCount(TcpClientTestClass client, int count)
+        {
+            client.PollResult = true;
+            client.PollInterval = 100;
+            client.PollFailLimit = count;
+
+            client.PollColledCount = 0;
+            var waitStart = DateTime.Now;
+            while (client.PollColledCount == 0)
+            {
+                var delta = DateTime.Now - waitStart;
+                if(delta.TotalSeconds>5) Assert.Fail("Wait Timeout");
+            }
+
+            client.PollColledCount = 0;
+            Assert.AreEqual(0, client.PollColledCount);
+            client.PollResult = false;
+            ClientDisconnectedEventCalled = false;
+
+            waitStart = DateTime.Now;
+            while (!ClientDisconnectedEventCalled)
+            {
+                var delta = DateTime.Now - waitStart;
+                if (delta.TotalSeconds > 5) Assert.Fail("Wait Timeout");
+            }
+
+            Assert.AreEqual(count, client.PollFailLimit);
+            Assert.AreEqual(count, client.PollColledCount);
+        }
+
+        void CheckPollInterval(TcpClientTestClass client, int interval)
+        {
+            client.PollResult = true;
+            client.PollInterval = interval;
+            client.PollColledCount = 0;
+
+            var waitStart = DateTime.Now;
+            while (client.PollColledCount == 0)
+            {
+                var dta = DateTime.Now - waitStart;
+                if (dta.TotalSeconds > 5) Assert.Fail("Wait Timeout");
+            }
+            var now = DateTime.Now;
+
+            client.PollColledCount = 0;
+            client.PollCalledDateTime = DateTime.MinValue;
+            Assert.AreEqual(interval, client.PollInterval);
+            Assert.AreEqual(DateTime.MinValue, client.PollCalledDateTime);
+            Assert.AreEqual(0, client.PollColledCount);
+
+            Thread.Sleep((int)(1.5 * client.PollInterval));
+
+            Assert.AreEqual(1, client.PollColledCount);
+            Assert.AreNotEqual(DateTime.MinValue, client.PollCalledDateTime);
+            var delta = client.PollCalledDateTime - now;
+            var minDelta = interval - interval * 0.1;
+            var maxDelta = interval + interval * 0.1;
+            Assert.IsTrue(minDelta <= delta.TotalMilliseconds);
+            Assert.IsTrue(maxDelta >= delta.TotalMilliseconds);
+        }
+
+        void ConnectIntervalCheck(TcpClient client, int interval)
+        {
+
+            client.ConnectInterval = interval;
+            ClientConnectionFailEvent = null;
+            Assert.IsNull(ClientConnectionFailEvent);
+
+            var waitStart = DateTime.Now;
+            while (ClientConnectionFailEvent == null)
+            {
+                var dta = DateTime.Now - waitStart;
+                if (dta.TotalSeconds > 5) Assert.Fail("Wait Timeout");
+            }
+            var now = DateTime.Now;
+
+            ClientReconnectingEventColled = false;
+            ClientReconnectingEventColledDateTime = DateTime.MinValue;
+            ClientConnectionFailEvent = null;
+            Assert.IsFalse(ClientReconnectingEventColled);
+            Assert.AreEqual(DateTime.MinValue, ClientReconnectingEventColledDateTime);
+            Assert.AreEqual(interval, client.ConnectInterval);
+            Assert.IsNull(ClientConnectionFailEvent);
+
+            Thread.Sleep((int)(1.5 * client.ConnectInterval));
+
+            Assert.IsTrue(ClientReconnectingEventColled);
+            Assert.AreNotEqual(DateTime.MinValue, ClientReconnectingEventColledDateTime);
+            var delta = ClientReconnectingEventColledDateTime - now;
+            var minDelta = interval - interval * 0.05;
+            var maxDelta = interval + interval * 0.05;
+            Assert.IsTrue(minDelta <= delta.TotalMilliseconds);
+            Assert.IsTrue(maxDelta >= delta.TotalMilliseconds);
+        }
+
+        public ConnectionFailEventArgs ClientConnectionFailEvent { get; set; }
+        private void Client_ConnectionFailEvent(object sender, ConnectionFailEventArgs e)
+        {
+            ClientConnectionFailEvent = e;
+        }
+
         public List<NetworkDataEventArgs> ClientSendDataTraceEvent { get; } = new List<NetworkDataEventArgs>();
         private void Client_SendDataTraceEvent(object sender, NetworkDataEventArgs e)
         {
@@ -378,9 +544,11 @@ namespace Flekosoft.UnitTests.Common.Network
         }
 
         public bool ClientReconnectingEventColled { get; set; }
+        public DateTime ClientReconnectingEventColledDateTime { get; set; }
         private void Client_ReconnectingEvent(object sender, EventArgs e)
         {
             ClientReconnectingEventColled = true;
+            ClientReconnectingEventColledDateTime = DateTime.Now;
         }
         public bool ClientDisconnectedEventCalled { get; set; }
         private void Client_DisconnectedEvent(object sender, EventArgs e)

@@ -96,8 +96,6 @@ namespace Flekosoft.Common.Network.Tcp
                             {
                                 try
                                 {
-                                    Thread.Sleep(1);
-
                                     foreach (SocketAsyncNetworkExchangeDriver driver in ls.ConnectedSockets)
                                     {
                                         if (!driver.ExchangeInterface.IsConnected) removeList.Add(driver);
@@ -118,8 +116,9 @@ namespace Flekosoft.Common.Network.Tcp
 
                                     //if (ls.ConnectedSockets.Count < ls.TcpServerLocalEndpoint.MaxClients)
                                     //{
-                                        ls.Socket.BeginAccept(AcceptCallback, ls);
-                                        ls.AcceptBeginned = true;
+                                    ls.AcceptBeginned = true; //STRONG in this order! First is Accept begin = true. Second is  Begin Accept !!!
+                                    ls.Socket.BeginAccept(AcceptCallback, ls);
+                                    
                                     //}
                                 }
                                 catch (ThreadAbortException)
@@ -132,8 +131,8 @@ namespace Flekosoft.Common.Network.Tcp
                         {
                             ClearSocketLists();
                         }
-                        Thread.Sleep(1);
                     }
+                    Thread.Sleep(1);
                 }
                 catch (ThreadAbortException)
                 {
@@ -199,6 +198,8 @@ namespace Flekosoft.Common.Network.Tcp
             var driver = FindDriver(localEndPoint, remoteEndPoint);
             if (driver == null) return false;
             return driver.SendData(data);
+
+            //return _listenSockets[0].ConnectedSockets[0].SendData(data);
         }
 
         void ClearSocketLists()
@@ -232,6 +233,11 @@ namespace Flekosoft.Common.Network.Tcp
             return null;
         }
 
+        string GetKeyStringForDriver(SocketAsyncNetworkExchangeDriver driver)
+        {
+            return $"{driver.ExchangeInterface.LocalEndPoint}_{driver.ExchangeInterface.RemoteEndPoint}";
+        }
+
         protected abstract void ProcessDataInternal(NetworkDataEventArgs e);
 
         #endregion
@@ -262,8 +268,8 @@ namespace Flekosoft.Common.Network.Tcp
                                 driver.ReceiveDataTraceEvent += Driver_ReceiveDataTraceEvent;
                                 driver.SendDataTraceEvent += Driver_SendDataTraceEvent;
                                 driver.DataTrace = DataTrace;
-                                listenSocket.ConnectedSockets.Add(driver);
                                 driver.StartExchange(new SocketNetworkExchangeInterface(socket));
+                                listenSocket.ConnectedSockets.Add(driver);
 
                                 OnConnectedEvent(new ConnectionEventArgs(driver.ExchangeInterface.LocalEndPoint,
                                     driver.ExchangeInterface.RemoteEndPoint));

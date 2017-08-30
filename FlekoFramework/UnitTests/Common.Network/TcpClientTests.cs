@@ -261,7 +261,7 @@ namespace Flekosoft.UnitTests.Common.Network
             var server = new TcpServer();
 
             var epList = new List<TcpServerLocalEndpoint>();
-            var ipEp1 = (new TcpServerLocalEndpoint(new IPEndPoint(IPAddress.Parse("127.0.0.1"), 2345), 1));
+            var ipEp1 = (new TcpServerLocalEndpoint(new IPEndPoint(IPAddress.Parse("127.0.0.1"), 2901), 1));
 
             epList.Add(ipEp1);
             server.DataReceivedEvent += Server_DataReceivedEvent;
@@ -393,32 +393,34 @@ namespace Flekosoft.UnitTests.Common.Network
         {
             var server = new TcpServer();
             var epList = new List<TcpServerLocalEndpoint>();
-            var ipEp1 = (new TcpServerLocalEndpoint(new IPEndPoint(IPAddress.Parse("127.0.0.1"), 2345), 1));
+            var ipEp1 = (new TcpServerLocalEndpoint(new IPEndPoint(IPAddress.Parse("127.0.0.1"), 0192), 1));
             epList.Add(ipEp1);
             server.DataReceivedEvent += Server_DataReceivedEvent;
             server.Start(epList);
-
+            
             var client = new TcpClientTestClass();
             client.ErrorEvent += Client_ErrorEvent;
             client.DisconnectedEvent += Client_DisconnectedEvent;
             client.ConnectedEvent += Client_ConnectedEvent;
             client.Start(ipEp1.EndPoint);
 
-            CheckPollInterval(client, 100);
-            CheckPollInterval(client, 500);
-            CheckPollInterval(client, 1000);
-            CheckPollInterval(client, 2000);
+            Thread.Sleep(200);
 
-            CheckPollFailCount(client, 1);
-            CheckPollFailCount(client, 3);
-            CheckPollFailCount(client, 5);
-            CheckPollFailCount(client, 10);
+            CheckPollInterval(client, server, 100);
+            CheckPollInterval(client, server, 500);
+            CheckPollInterval(client, server, 1000);
+            CheckPollInterval(client, server, 2000);
+
+            CheckPollFailCount(client, server, 1);
+            CheckPollFailCount(client, server, 3);
+            CheckPollFailCount(client, server, 5);
+            CheckPollFailCount(client, server, 10);
 
             client.Dispose();
             server.Dispose();
         }
 
-        void CheckPollFailCount(TcpClientTestClass client, int count)
+        void CheckPollFailCount(TcpClientTestClass client, TcpServer server, int count)
         {
             client.PollResult = true;
             client.PollInterval = 100;
@@ -429,7 +431,7 @@ namespace Flekosoft.UnitTests.Common.Network
             while (client.PollColledCount == 0)
             {
                 var delta = DateTime.Now - waitStart;
-                if(delta.TotalSeconds>5) Assert.Fail("Wait Timeout");
+                if (delta.TotalSeconds > 5) Assert.Fail("Wait Timeout");
             }
 
             client.PollColledCount = 0;
@@ -448,7 +450,7 @@ namespace Flekosoft.UnitTests.Common.Network
             Assert.AreEqual(count, client.PollColledCount);
         }
 
-        void CheckPollInterval(TcpClientTestClass client, int interval)
+        void CheckPollInterval(TcpClientTestClass client, TcpServer server, int interval)
         {
             client.PollResult = true;
             client.PollInterval = interval;

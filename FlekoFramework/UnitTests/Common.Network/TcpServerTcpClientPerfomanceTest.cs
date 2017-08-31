@@ -25,12 +25,12 @@ namespace Flekosoft.UnitTests.Common.Network
             epList.Add(ipEp1);
             server.Start(epList);
 
-            TestPerfomance(server);
+            TestPerfomance(server, 15000);
 
             server.Dispose();
         }
 
-        void TestPerfomance(TcpServer server)
+        void TestPerfomance(TcpServer server, int perfomance)
         {
             var client = new TcpClient();
             client.ErrorEvent += Client_ErrorEvent;
@@ -148,7 +148,7 @@ namespace Flekosoft.UnitTests.Common.Network
             {
                 System.Diagnostics.Trace.WriteLine($"Server -> Client {client.ExchangeInterface.LocalEndPoint} Averange Packets per second {perfmance}");
             }
-            Assert.IsTrue(perfmance > 500);
+            Assert.IsTrue(perfmance > perfomance);
 
             client.Dispose();
         }
@@ -183,7 +183,7 @@ namespace Flekosoft.UnitTests.Common.Network
         {
             try
             {
-                TestPerfomance((TcpServer)state);
+                TestPerfomance((TcpServer)state, 2500);
             }
             catch (Exception e)
             {

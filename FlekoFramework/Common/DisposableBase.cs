@@ -1,8 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace Flekosoft.Common
 {
-    public abstract class DisposableBase : IDisposable
+    public abstract class DisposableBase : LoggingBase, IDisposable
     {
         #region IDisposable Members
         private bool _disposed;
@@ -12,6 +13,7 @@ namespace Flekosoft.Common
             // ReSharper disable once ConvertPropertyToExpressionBody
             get { return _disposed; }
         }
+
         public void Dispose()
         {
             Dispose(!IsDisposed);

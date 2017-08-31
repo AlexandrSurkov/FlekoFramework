@@ -60,7 +60,10 @@
     <Compile Include="Common.Network\TcpServerTests.cs" />
     <Compile Include="Common.Network\TcpServerTcpClientPerfomanceTest.cs" />
     <Compile Include="Common.Network\TcpClientTests.cs" />
+    <Compile Include="Common\FiniteStateMachine\StateMashineTests.cs" />
     <Compile Include="Common\Logging\LoggingTests.cs" />
+    <Compile Include="Common\Messaging\MessagingTests.cs" />
+    <Compile Include="Common\Observable\ObservableTests.cs" />
     <Compile Include="Common\PropertyChangedErrorNotifyDisposableBaseTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

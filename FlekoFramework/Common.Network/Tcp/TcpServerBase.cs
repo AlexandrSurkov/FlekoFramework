@@ -233,9 +233,24 @@ namespace Flekosoft.Common.Network.Tcp
             return null;
         }
 
-        string GetKeyStringForDriver(SocketAsyncNetworkExchangeDriver driver)
+        /// <summary>
+        /// Get all connections
+        /// </summary>
+        /// <returns>Collection of Local and Remote IpEndPoints pairs</returns>
+        public ReadOnlyCollection<Connection> GetConnections()
         {
-            return $"{driver.ExchangeInterface.LocalEndPoint}_{driver.ExchangeInterface.RemoteEndPoint}";
+            var result = new List<Connection>();
+            lock (_listenSocketsSyncObject)
+            {
+                foreach (ListenSocket listenSocket in _listenSockets)
+                {
+                    foreach (SocketAsyncNetworkExchangeDriver driver in listenSocket.ConnectedSockets)
+                    {
+                        result.Add(new Connection(driver.ExchangeInterface.LocalEndPoint, driver.ExchangeInterface.RemoteEndPoint));
+                    }
+                }
+            }
+            return result.AsReadOnly();
         }
 
         protected abstract void ProcessDataInternal(NetworkDataEventArgs e);
@@ -388,6 +403,5 @@ namespace Flekosoft.Common.Network.Tcp
 
         #endregion
     }
-
 
 }

@@ -257,6 +257,49 @@ namespace Flekosoft.UnitTests.Common.Network
             Assert.IsTrue(client2.IsConnected);
             Assert.IsTrue(client3.IsConnected);
 
+
+            var conn = server.GetConnections();
+            var contains = false;
+            foreach (Connection connection in conn)
+            {
+                if (Equals(connection.RemoteEndPoint, client1.ExchangeInterface.LocalEndPoint) &&
+                    Equals(connection.LocalEndPoint, client1.ExchangeInterface.RemoteEndPoint))
+                {
+                    contains = true;
+                    break;
+
+                }
+            }
+            Assert.IsTrue(contains);
+
+            contains = false;
+            foreach (Connection connection in conn)
+            {
+                if (Equals(connection.RemoteEndPoint, client2.ExchangeInterface.LocalEndPoint) &&
+                    Equals(connection.LocalEndPoint, client2.ExchangeInterface.RemoteEndPoint))
+                {
+                    contains = true;
+                    break;
+
+                }
+            }
+            Assert.IsTrue(contains);
+
+            contains = false;
+            foreach (Connection connection in conn)
+            {
+                if (Equals(connection.RemoteEndPoint, client3.ExchangeInterface.LocalEndPoint) &&
+                    Equals(connection.LocalEndPoint, client3.ExchangeInterface.RemoteEndPoint))
+                {
+                    contains = true;
+                    break;
+
+                }
+            }
+            Assert.IsTrue(contains);
+
+
+
             Client1DisconnectedEventColled = false;
             Client2DisconnectedEventColled = false;
             Client3DisconnectedEventColled = false;

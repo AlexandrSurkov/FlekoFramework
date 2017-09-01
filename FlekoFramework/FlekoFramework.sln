@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26430.13
+VisualStudioVersion = 15.0.26730.3
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common", "Common\Common.csproj", "{C1C745EC-463E-49DC-A457-EE232A4D59E2}"
 EndProject
@@ -12,6 +12,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTests", "UnitTests\UnitTests.csproj", "{D335440E-34D2-4BC4-ACB6-0DED39BB859E}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common.Video", "Common.Video\Common.Video.csproj", "{4DE7BC71-64DC-46CD-A326-580D1EC78BF6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common.Math", "Common.Math\Common.Math.csproj", "{D105322A-19A9-4677-A6C6-3B0638EF1AA6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -39,12 +41,19 @@ Global
 		{4DE7BC71-64DC-46CD-A326-580D1EC78BF6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4DE7BC71-64DC-46CD-A326-580D1EC78BF6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4DE7BC71-64DC-46CD-A326-580D1EC78BF6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D105322A-19A9-4677-A6C6-3B0638EF1AA6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D105322A-19A9-4677-A6C6-3B0638EF1AA6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D105322A-19A9-4677-A6C6-3B0638EF1AA6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D105322A-19A9-4677-A6C6-3B0638EF1AA6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {0B5BC4C4-6BE3-421E-A1A8-DE39F7B832E3}
+	EndGlobalSection
 	GlobalSection(TeamFoundationVersionControl) = preSolution
-		SccNumberOfProjects = 6
+		SccNumberOfProjects = 7
 		SccEnterpriseProvider = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
 		SccTeamFoundationServer = https://flekosoft.visualstudio.com/
 		SccLocalPath0 = .
@@ -63,5 +72,8 @@ Global
 		SccProjectUniqueName5 = Common.Video\\Common.Video.csproj
 		SccProjectName5 = Common.Video
 		SccLocalPath5 = Common.Video
+		SccProjectUniqueName6 = Common.Math\\Common.Math.csproj
+		SccProjectName6 = Common.Math
+		SccLocalPath6 = Common.Math
 	EndGlobalSection
 EndGlobal

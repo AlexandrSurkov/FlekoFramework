@@ -56,6 +56,15 @@
     <Reference Include="System.Windows.Forms" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Common.Math\EllipseTests.cs" />
+    <Compile Include="Common.Math\GeometryTest.cs" />
+    <Compile Include="Common.Math\LineSegment2DTest.cs" />
+    <Compile Include="Common.Math\LineSegment3DTests.cs" />
+    <Compile Include="Common.Math\PlaneTest.cs" />
+    <Compile Include="Common.Math\RectTests.cs" />
+    <Compile Include="Common.Math\UtilsTest.cs" />
+    <Compile Include="Common.Math\Vector2DTests.cs" />
+    <Compile Include="Common.Math\Vector3DTests.cs" />
     <Compile Include="Common.Network\AsyncNetworkExchangeDriverTest.cs" />
     <Compile Include="Common.Network\TcpServerTests.cs" />
     <Compile Include="Common.Network\TcpServerTcpClientPerfomanceTest.cs" />
@@ -74,6 +83,10 @@
     <ProjectReference Include="..\Common.Logging.Windows\Common.Logging.Windows.csproj">
       <Project>{3c2060d8-6036-491b-8e6f-f75f05f1e450}</Project>
       <Name>Common.Logging.Windows</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Common.Math\Common.Math.csproj">
+      <Project>{D105322A-19A9-4677-A6C6-3B0638EF1AA6}</Project>
+      <Name>Common.Math</Name>
     </ProjectReference>
     <ProjectReference Include="..\Common.Network\Common.Network.csproj">
       <Project>{41D3FED6-A0E5-481B-A84F-8E6E409466ED}</Project>

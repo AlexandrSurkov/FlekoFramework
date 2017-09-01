@@ -46,7 +46,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Box.cs" />
+    <Compile Include="CRC8.cs" />
     <Compile Include="Ellipse.cs" />
+    <Compile Include="TableEncryption.cs" />
     <Compile Include="Geometry.cs" />
     <Compile Include="LineSegment2D.cs" />
     <Compile Include="LineSegment3D.cs" />

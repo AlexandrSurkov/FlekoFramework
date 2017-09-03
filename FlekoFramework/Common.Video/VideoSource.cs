@@ -13,6 +13,7 @@ namespace Flekosoft.Common.Video
         private ReadOnlyCollection<int> _supportedFps;
         private ReadOnlyCollection<Resolution> _supportedResolution;
 
+        // ReSharper disable once EmptyConstructor
         protected VideoSource()
         {
 #if DEBUG
@@ -25,6 +26,8 @@ namespace Flekosoft.Common.Video
             get { return _videoResolution; }
             set
             {
+                if(value == null) throw new ArgumentNullException();
+                if (!SupportedResolution.Contains(value)) throw new ArgumentOutOfRangeException();
                 if (_videoResolution != value)
                 {
                     _videoResolution = value;
@@ -38,6 +41,7 @@ namespace Flekosoft.Common.Video
             get { return _framesPerSecond; }
             set
             {
+                if (!SupportedFps.Contains(value)) throw new ArgumentOutOfRangeException();
                 if (_framesPerSecond != value)
                 {
                     _framesPerSecond = value;
@@ -111,13 +115,13 @@ namespace Flekosoft.Common.Video
             }
         }
 
-        public event EventHandler<NewFrameEventArgs> NewFrame;
-        protected void OnNewFrame(Frame frame)
+        public event EventHandler<FrameEventArgs> NewFrame;
+        protected void OnNewFrame(VideoFrame frame)
         {
 #if DEBUG
             Logger.Instance.AppendLog(new LogRecord(DateTime.Now, new List<string> { $"VideoSource {this}: New frame {frame}" }, LogRecordLevel.Debug));
 #endif
-            NewFrame?.Invoke(this, new NewFrameEventArgs(frame));
+            NewFrame?.Invoke(this, new FrameEventArgs(frame));
         }
 
         public void Start()

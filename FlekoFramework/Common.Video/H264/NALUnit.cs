@@ -3,7 +3,7 @@
 namespace Flekosoft.Common.Video.H264
 {
     // ReSharper disable once InconsistentNaming
-    public class NALUnit : Frame
+    public class NALUnit : VideoFrame
     {
 
         public NALUnit(DateTime timeStamp, byte[] rawData, Resolution resolution, FrameFormat frameFormat) : base(timeStamp, rawData, resolution, frameFormat)

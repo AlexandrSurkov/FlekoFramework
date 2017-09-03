@@ -14,13 +14,13 @@ namespace Flekosoft.Common.Video
         H264NALUnit,
     }
 
-    public class NewFrameEventArgs : EventArgs
+    public class FrameEventArgs : EventArgs
     {
-        public NewFrameEventArgs(Frame frame)
+        public FrameEventArgs(VideoFrame frame)
         {
             Frame = frame;
         }
 
-        public Frame Frame { get; }
+        public VideoFrame Frame { get; }
     }
 }

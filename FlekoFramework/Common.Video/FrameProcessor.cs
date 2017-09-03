@@ -8,7 +8,7 @@ namespace Flekosoft.Common.Video
 {
     public abstract class FrameProcessor : PropertyChangedErrorNotifyDisposableBase, IFrameProcessor
     {
-        private readonly ConcurrentQueue<Frame> _frameQueue = new ConcurrentQueue<Frame>();
+        private readonly ConcurrentQueue<VideoFrame> _frameQueue = new ConcurrentQueue<VideoFrame>();
         readonly EventWaitHandle _newFrameWh = new EventWaitHandle(false, EventResetMode.ManualReset);
         private readonly Thread _processThread;
 
@@ -21,7 +21,7 @@ namespace Flekosoft.Common.Video
 #endif
         }
 
-        public void ProcessFrame(Frame frame)
+        public void ProcessFrame(VideoFrame frame)
         {
 #if DEBUG
             Logger.Instance.AppendLog(new LogRecord(DateTime.Now, new List<string> { $"FrameProcessor {this}: Frame enqueued: {frame}" }, LogRecordLevel.Debug));
@@ -33,7 +33,7 @@ namespace Flekosoft.Common.Video
             _newFrameWh.Set();
         }
 
-        protected abstract void ProcessFrameInternal(Frame frame);
+        protected abstract void ProcessFrameInternal(VideoFrame frame);
 
         private void ProcessFrameThreadFunc()
         {
@@ -43,7 +43,7 @@ namespace Flekosoft.Common.Video
                 {
                     if (_newFrameWh.WaitOne(Timeout.Infinite))
                     {
-                        Frame frame;
+                        VideoFrame frame;
                         if (_frameQueue.TryDequeue(out frame))
                         {
 #if DEBUG
@@ -80,8 +80,9 @@ namespace Flekosoft.Common.Video
                 _newFrameWh?.Dispose();
             }
             base.Dispose(disposing);
-
+#if DEBUG
             Logger.Instance.AppendLog(new LogRecord(DateTime.Now, new List<string> { $"FrameProcessor {this}: Disposed" }, LogRecordLevel.Debug));
+#endif
         }
     }
 }

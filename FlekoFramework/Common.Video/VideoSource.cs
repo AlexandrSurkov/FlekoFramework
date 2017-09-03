@@ -9,6 +9,7 @@ namespace Flekosoft.Common.Video
     {
         private Resolution _videoResolution;
         private int _framesPerSecond;
+        private string _name;
         private bool _isStarted;
         private ReadOnlyCollection<int> _supportedFps;
         private ReadOnlyCollection<Resolution> _supportedResolution;
@@ -47,6 +48,22 @@ namespace Flekosoft.Common.Video
                     _framesPerSecond = value;
                     OnPropertyChanged(nameof(FramesPerSecond));
                     Logger.Instance.AppendLog(new LogRecord(DateTime.Now, new List<string> { $"VideoSource {this}: fps changed to {_framesPerSecond}" }, LogRecordLevel.Info));
+                }
+            }
+        }
+
+        public new string Name
+        {
+            get { return _name; }
+            set
+            {
+                if (_name != value)
+                {
+                    _name = value;
+                    OnPropertyChanged(nameof(Name));
+#if DEBUG
+                    Logger.Instance.AppendLog(new LogRecord(DateTime.Now, new List<string> { $"VideoSource {this}: Name was changed to {_name}" }, LogRecordLevel.Debug));
+#endif
                 }
             }
         }

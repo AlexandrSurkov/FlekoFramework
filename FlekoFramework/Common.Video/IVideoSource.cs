@@ -9,6 +9,8 @@ namespace Flekosoft.Common.Video
 
         bool IsStarted { get; }
 
+        string Name { get; set; }
+
         ReadOnlyCollection<int> SupportedFps { get; }
         ReadOnlyCollection<Resolution> SupportedResolution { get; }
 

@@ -69,6 +69,11 @@ namespace Flekosoft.UnitTests.Common.Video
             vst.FramesPerSecond = vst.SupportedFps[1];
             Assert.AreEqual(vst.SupportedFps[1], vst.FramesPerSecond);
 
+            var name = "name123";
+            Assert.AreNotEqual(name,vst.Name);
+            vst.Name = name;
+            Assert.AreEqual(name, vst.Name);
+
             vst.NewFrame += Vst_NewFrame;
             FrameEventArgs = null;
             Assert.IsNull(FrameEventArgs);

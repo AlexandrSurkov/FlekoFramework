@@ -2,9 +2,9 @@
 
 namespace Flekosoft.Common.Video
 {
-    public class Frame : IDisposable
+    public class VideoFrame : DisposableBase
     {
-        public Frame(DateTime timeStamp, byte[] rawData, Resolution resolution, FrameFormat frameFormat)
+        public VideoFrame(DateTime timeStamp, byte[] rawData, Resolution resolution, FrameFormat frameFormat)
         {
             RawData = rawData;
             FrameFormat = frameFormat;
@@ -23,27 +23,5 @@ namespace Flekosoft.Common.Video
             // ReSharper disable once UseFormatSpecifierInInterpolation
             return $"Frame TimeStamp: {TimeStamp.ToString("yy/MM/dd hh:mm:ss.fffffff")}  Resolution: {Resolution} Format: {FrameFormat}";
         }
-
-        #region IDisposable Members
-        private bool _disposed;
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
-        protected virtual void Dispose(bool disposing)
-        {
-            if (!_disposed)
-            {
-                if (disposing)
-                {
-                    //Clear resources
-                }
-                _disposed = true;
-            }
-        }
-        #endregion
-
     }
 }

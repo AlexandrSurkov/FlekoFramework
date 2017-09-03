@@ -69,6 +69,9 @@
     <Compile Include="Common.Network\TcpServerTests.cs" />
     <Compile Include="Common.Network\TcpServerTcpClientPerfomanceTest.cs" />
     <Compile Include="Common.Network\TcpClientTests.cs" />
+    <Compile Include="Common.Video\ResolutionTests.cs" />
+    <Compile Include="Common.Video\FrameProcessorTests.cs" />
+    <Compile Include="Common.Video\VideoSourceTests.cs" />
     <Compile Include="Common\FiniteStateMachine\StateMashineTests.cs" />
     <Compile Include="Common\Logging\LoggingTests.cs" />
     <Compile Include="Common\Messaging\MessagingTests.cs" />
@@ -91,6 +94,10 @@
     <ProjectReference Include="..\Common.Network\Common.Network.csproj">
       <Project>{41D3FED6-A0E5-481B-A84F-8E6E409466ED}</Project>
       <Name>Common.Network</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Common.Video\Common.Video.csproj">
+      <Project>{4DE7BC71-64DC-46CD-A326-580D1EC78BF6}</Project>
+      <Name>Common.Video</Name>
     </ProjectReference>
     <ProjectReference Include="..\Common\Common.csproj">
       <Project>{c1c745ec-463e-49dc-a457-ee232a4d59e2}</Project>

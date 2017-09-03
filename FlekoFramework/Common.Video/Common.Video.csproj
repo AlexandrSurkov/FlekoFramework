@@ -39,7 +39,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Definitions.cs" />
-    <Compile Include="Frame.cs" />
+    <Compile Include="VideoFrame.cs" />
     <Compile Include="FrameProcessor.cs" />
     <Compile Include="H264\Definitions.cs" />
     <Compile Include="H264\NALUnit.cs" />

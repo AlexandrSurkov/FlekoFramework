@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using System.Net;
+using System.Web;
 
 namespace Flekosoft.Common.Network.Http
 {

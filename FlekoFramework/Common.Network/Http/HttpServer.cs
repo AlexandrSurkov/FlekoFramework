@@ -1,11 +1,80 @@
 ﻿using System;
-using System.Net;
+using System.Collections.Generic;
 using System.Text;
-using System.Threading;
-using Flekosoft.Common.Logging;
+using Flekosoft.Common.Network.Tcp;
 
 namespace Flekosoft.Common.Network.Http
 {
+    public class HttpServer : TcpServerBase
+    {
+        private string _networkReceivedString = string.Empty;
+        private readonly List<string> _httpRequest = new List<string>();
+        private int _contentIndex = 0;
+        int _contentLen = -1;
+
+        public event EventHandler<HttpRequestArgs> RequestEvent;
+
+        protected override void ProcessDataInternal(NetworkDataEventArgs e)
+        {
+            _networkReceivedString += Encoding.ASCII.GetString(e.Data);
+            if (_contentLen != -1)
+            {
+                _contentIndex++;
+            }
+
+            if (_networkReceivedString.Contains("\r\n"))
+            {
+                _httpRequest.Add(_networkReceivedString);
+                _networkReceivedString = string.Empty;
+            }
+            else if (_contentIndex == _contentLen)
+            {
+                _httpRequest.Add(_networkReceivedString);
+                _networkReceivedString = string.Empty;
+
+                HttpRequestArgs args = new HttpRequestArgs(_httpRequest.ToArray(), HttpRequestMethod.Unknown);
+                if (_httpRequest[0].Contains("GET"))
+                    args = new HttpRequestArgs(_httpRequest.ToArray(), HttpRequestMethod.Get);
+                if (_httpRequest[0].Contains("POST"))
+                    args = new HttpRequestArgs(_httpRequest.ToArray(), HttpRequestMethod.Post);
+                if (_httpRequest[0].Contains("PUT"))
+                    args = new HttpRequestArgs(_httpRequest.ToArray(), HttpRequestMethod.Put);
+                if (_httpRequest[0].Contains("DELETE"))
+                    args = new HttpRequestArgs(_httpRequest.ToArray(), HttpRequestMethod.Delete);
+
+                RequestEvent?.Invoke(this, args);
+
+                _httpRequest.Clear();
+                _contentLen = -1;
+            }
+
+
+            if (_contentLen == -1 && _httpRequest.Count > 0 && _httpRequest[_httpRequest.Count - 1] == "\r\n")
+            {
+
+                var request = _httpRequest[0].Split(' ');
+                var str = request[1];
+                foreach (var reqStr in _httpRequest)
+                {
+                    if (reqStr.Contains("Content-Length"))
+                    {
+                        _contentLen = int.Parse(reqStr.Split(' ')[1]);
+                    }
+                }
+            }
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                RequestEvent = null;
+            }
+            base.Dispose(disposing);
+        }
+    }
+}
+
     //public class HttpServer : PropertyChangedErrorNotifyDisposableBase
     //{
     //    private HttpListener _listener;
@@ -173,4 +242,3 @@ namespace Flekosoft.Common.Network.Http
     //    }
     //    #endregion
     //}
-}

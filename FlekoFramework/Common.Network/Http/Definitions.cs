@@ -4,6 +4,7 @@ namespace Flekosoft.Common.Network.Http
 {
     public enum HttpRequestMethod
     {
+        Unknown,
         Get,
         Post,
         Put,
@@ -11,14 +12,14 @@ namespace Flekosoft.Common.Network.Http
     }
     public class HttpRequestArgs : EventArgs
     {
-        public HttpRequestArgs(string rawUrl, HttpRequestMethod method)
+        public HttpRequestArgs(string[] request, HttpRequestMethod method)
         {
-            RawUrl = rawUrl;
+            Request = request;
             Method = method;
             Respond = string.Empty;
         }
 
-        public string RawUrl { get; }
+        public string[] Request { get; }
         public HttpRequestMethod Method { get; }
         public string Respond { get; set; }
     }

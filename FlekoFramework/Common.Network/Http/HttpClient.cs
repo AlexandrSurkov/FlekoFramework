@@ -30,7 +30,7 @@ namespace Flekosoft.Common.Network.Http
             //try
             //{
             WebResponse resp = req.GetResponse();
-            if (resp.ContentLength > 0)
+            //if (resp.ContentLength > 0)
             {
                 Stream stream = resp.GetResponseStream();
                 if (stream != null)

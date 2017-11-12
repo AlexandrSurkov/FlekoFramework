@@ -152,7 +152,7 @@ namespace Flekosoft.Common.Network.Tcp
         /// <summary>
         /// Start server
         /// </summary>
-        /// <param name="endpoints">List of local ip endpoints цhich will used to wait connetion</param>
+        /// <param name="endpoints">List of local ip endpoints which will used to wait connetion</param>
         /// <returns>True - server succesfully started else false</returns>
         public void Start(ICollection<TcpServerLocalEndpoint> endpoints)
         {

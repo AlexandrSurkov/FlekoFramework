@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using System.Net;
+using System.Text;
 using System.Web;
 
 namespace Flekosoft.Common.Network.Http
@@ -29,13 +30,16 @@ namespace Flekosoft.Common.Network.Http
             //try
             //{
             WebResponse resp = req.GetResponse();
-            Stream stream = resp.GetResponseStream();
-            if (stream != null)
+            if (resp.ContentLength > 0)
             {
-                StreamReader sr = new StreamReader(stream);
-                string Out = sr.ReadToEnd();
-                sr.Close();
-                return Out;
+                Stream stream = resp.GetResponseStream();
+                if (stream != null)
+                {
+                    StreamReader sr = new StreamReader(stream);
+                    string Out = sr.ReadToEnd();
+                    sr.Close();
+                    return Out;
+                }
             }
             return string.Empty;
             //}
@@ -55,10 +59,10 @@ namespace Flekosoft.Common.Network.Http
             //}
         }
 
-        public static string SendJson(HttpRequestMethod type, string url, string json, int timeoutMs)
+        public static string SendJson(HttpRequestMethod type, string url, string json, Encoding jsonEncoding, int timeoutMs)
         {
             HttpWebRequest req = (HttpWebRequest)WebRequest.Create(url);
-            req.ContentType = "application/json";
+            req.ContentType = $"application/json; charset={jsonEncoding.BodyName}";
             req.Timeout = timeoutMs;
             switch (type)
             {
@@ -76,7 +80,7 @@ namespace Flekosoft.Common.Network.Http
                     break;
             }
 
-            using (var streamWriter = new StreamWriter(req.GetRequestStream()))
+            using (var streamWriter = new StreamWriter(req.GetRequestStream(), jsonEncoding))
             {
                 streamWriter.Write(json);
                 streamWriter.Flush();
@@ -86,13 +90,16 @@ namespace Flekosoft.Common.Network.Http
             //try
             //{
             WebResponse resp = req.GetResponse();
-            Stream stream = resp.GetResponseStream();
-            if (stream != null)
+            if (resp.ContentLength > 0)
             {
-                StreamReader sr = new StreamReader(stream);
-                string Out = sr.ReadToEnd();
-                sr.Close();
-                return Out;
+                Stream stream = resp.GetResponseStream();
+                if (stream != null)
+                {
+                    StreamReader sr = new StreamReader(stream);
+                    string Out = sr.ReadToEnd();
+                    sr.Close();
+                    return Out;
+                }
             }
             return string.Empty;
             //}

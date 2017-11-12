@@ -69,6 +69,7 @@
     <Compile Include="Common.Network\TcpServerTests.cs" />
     <Compile Include="Common.Network\TcpServerTcpClientPerfomanceTest.cs" />
     <Compile Include="Common.Network\TcpClientTests.cs" />
+    <Compile Include="Common.Network\HttpServerTest.cs" />
     <Compile Include="Common.Video\ResolutionTests.cs" />
     <Compile Include="Common.Video\FrameProcessorTests.cs" />
     <Compile Include="Common.Video\VideoSourceTests.cs" />

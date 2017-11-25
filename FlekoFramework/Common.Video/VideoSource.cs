@@ -24,7 +24,7 @@ namespace Flekosoft.Common.Video
 
         public Resolution VideoResolution
         {
-            get { return _videoResolution; }
+            get => _videoResolution;
             set
             {
                 if(value == null) throw new ArgumentNullException();
@@ -39,7 +39,7 @@ namespace Flekosoft.Common.Video
         }
         public int FramesPerSecond
         {
-            get { return _framesPerSecond; }
+            get => _framesPerSecond;
             set
             {
                 if (!SupportedFps.Contains(value)) throw new ArgumentOutOfRangeException();
@@ -70,7 +70,7 @@ namespace Flekosoft.Common.Video
 
         public bool IsStarted
         {
-            get { return _isStarted; }
+            get => _isStarted;
             private set
             {
                 if (_isStarted != value)

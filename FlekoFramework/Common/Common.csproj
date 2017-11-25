@@ -59,6 +59,9 @@
     <Compile Include="Observable\ObservervableNotification.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PropertyChangedErrorNotifyDisposableBase.cs" />
+    <Compile Include="Serialization\ISerializabe.cs" />
+    <Compile Include="Serialization\ISerializer.cs" />
+    <Compile Include="Serialization\Serializer.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

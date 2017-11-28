@@ -1,9 +1,9 @@
-﻿using System.Collections.Generic;
+﻿//using System.Collections.Generic;
 
-namespace Flekosoft.Common.Serialization
-{
-    public interface ISerializabe
-    {
-        List<ISerializer> Serializers { get; }
-    }
-}
+//namespace Flekosoft.Common.Serialization
+//{
+//    public interface ISerializabe
+//    {
+//        List<ISerializer> Serializers { get; }
+//    }
+//}

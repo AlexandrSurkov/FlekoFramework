@@ -6,7 +6,7 @@ using Flekosoft.Common.Logging;
 
 namespace Flekosoft.Common.Collection
 {
-    public abstract class CollectionBase: DisposableBase, IEnumerable,INotifyCollectionChanged
+    public abstract class CollectionBase: PropertyChangedErrorNotifyDisposableBase, IEnumerable,INotifyCollectionChanged
     {
         protected readonly object LockObject = new object();
 
@@ -19,6 +19,11 @@ namespace Flekosoft.Common.Collection
         protected abstract IEnumerator InternalGetEnumerator();
         protected abstract void InternalClear();
         protected abstract int InternalGetCount();
+
+        public override string ToString()
+        {
+            return CollectionName;
+        }
 
         public int Count
         {

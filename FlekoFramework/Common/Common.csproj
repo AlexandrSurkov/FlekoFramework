@@ -39,8 +39,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Collection\CollectionBase.cs" />
+    <Compile Include="Collection\DictionaryCollection.cs" />
+    <Compile Include="Collection\DictionaryCollectionBase.cs" />
     <Compile Include="Collection\ListCollection.cs" />
     <Compile Include="Collection\ListCollectionBase.cs" />
+    <Compile Include="Collection\SortedDictionaryCollection.cs" />
     <Compile Include="DisposableBase.cs" />
     <Compile Include="ErrorNotifyDisposableBase.cs" />
     <Compile Include="FiniteStateMachine\State.cs" />

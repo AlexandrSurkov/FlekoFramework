@@ -143,10 +143,5 @@ namespace Flekosoft.Common.Collection
                 return InternalAsReadOnly();
             }
         }
-
-        public override string ToString()
-        {
-            return CollectionName;
-        }
     }
 }

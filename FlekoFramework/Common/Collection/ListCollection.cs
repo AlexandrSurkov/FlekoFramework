@@ -2,12 +2,13 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 
 namespace Flekosoft.Common.Collection
 {
     public class ListCollection<T> : ListCollectionBase<T>
     {
-        protected List<T> InternalList { get; } = new List<T>();
+        protected List<T> InternalCollection { get; } = new List<T>();
 
         public ListCollection(string collectionName) : base(collectionName)
         {
@@ -20,8 +21,14 @@ namespace Flekosoft.Common.Collection
         /// <returns></returns>
         protected override bool InternalAdd(T item)
         {
-            InternalList.Add(item);
+            InternalCollection.Add(item);
+            if (item is INotifyPropertyChanged ipc) ipc.PropertyChanged += Item_PropertyChanged;
             return true;
+        }
+
+        private void Item_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            OnPropertyChanged($"Collection[{InternalIndexOf((T)sender)}]." + e.PropertyName);
         }
 
         /// <summary>
@@ -31,7 +38,7 @@ namespace Flekosoft.Common.Collection
         /// <returns></returns>
         protected override bool InternalContains(T item)
         {
-            return InternalList.Contains(item);
+            return InternalCollection.Contains(item);
         }
 
         /// <summary>
@@ -41,7 +48,7 @@ namespace Flekosoft.Common.Collection
         /// <returns></returns>
         protected override bool InternalRemove(T item)
         {
-            return InternalList.Remove(item);
+            return InternalCollection.Remove(item);
         }
 
         /// <summary>
@@ -51,7 +58,7 @@ namespace Flekosoft.Common.Collection
         /// <returns></returns>
         protected override T InternalGetItem(int index)
         {
-            return InternalList[index];
+            return InternalCollection[index];
         }
 
         /// <summary>
@@ -61,7 +68,7 @@ namespace Flekosoft.Common.Collection
         /// <returns></returns>
         protected override int InternalIndexOf(T item)
         {
-            return InternalList.IndexOf(item);
+            return InternalCollection.IndexOf(item);
         }
 
         /// <summary>
@@ -73,7 +80,7 @@ namespace Flekosoft.Common.Collection
         {
             try
             {
-                InternalList.RemoveAt(index);
+                InternalCollection.RemoveAt(index);
                 return true;
             }
             catch (ArgumentOutOfRangeException)
@@ -88,7 +95,7 @@ namespace Flekosoft.Common.Collection
         /// <returns></returns>
         protected override ReadOnlyCollection<T> InternalAsReadOnly()
         {
-            return new List<T>(InternalList).AsReadOnly();
+            return new List<T>(InternalCollection).AsReadOnly();
         }
 
         /// <summary>
@@ -97,7 +104,7 @@ namespace Flekosoft.Common.Collection
         /// <returns></returns>
         protected override IEnumerator InternalGetEnumerator()
         {
-            return InternalList.GetEnumerator();
+            return InternalCollection.GetEnumerator();
         }
 
         /// <summary>
@@ -105,12 +112,12 @@ namespace Flekosoft.Common.Collection
         /// </summary>
         protected override void InternalClear()
         {
-            foreach (T item in InternalList)
+            foreach (T item in InternalCollection)
             {
                 var ds = item as IDisposable;
                 ds?.Dispose();
             }
-            InternalList.Clear();
+            InternalCollection.Clear();
         }
 
         /// <summary>
@@ -119,7 +126,7 @@ namespace Flekosoft.Common.Collection
         /// <returns></returns>
         protected override int InternalGetCount()
         {
-            return InternalList.Count;
+            return InternalCollection.Count;
         }
     }
 }

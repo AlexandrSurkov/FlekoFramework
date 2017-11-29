@@ -58,6 +58,7 @@ namespace Flekosoft.Common.Collection
             // ReSharper disable once UseNullPropagation
             CollectionChanged?.Invoke(this, eventArgs);
         }
+
         protected override void Dispose(bool disposing)
         {
             if (disposing)

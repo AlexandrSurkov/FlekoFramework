@@ -1,32 +1,43 @@
-﻿using Flekosoft.Common.Collection;
+﻿using System;
+using Flekosoft.Common.Collection;
 
 namespace Flekosoft.Common.Serialization
 {
-    public abstract class CollectionSerializer
+    public abstract class CollectionSerializer<T>:Serializer<T>
     {
-        protected CollectionBase Collection { get; }
-
-        protected CollectionSerializer(CollectionBase collection)
+        protected CollectionSerializer(T serialisableObject) : base(serialisableObject)
         {
-            Collection = collection;
-            Collection.CollectionChanged += Collection_CollectionChanged;
+            _collection = serialisableObject as CollectionBase;
+            if(_collection == null) throw new ArgumentException("serialisableObject must be nested from CollectionBase");
+
+            _collection.CollectionChanged += SerialisableObject_CollectionChanged;
+            _collection.PropertyChanged += SerialisableObject_PropertyChanged;
         }
 
-        private void Collection_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        private readonly CollectionBase _collection;
+
+        private void SerialisableObject_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
             Serialize();
         }
 
-        public void Serialize()
+        private void SerialisableObject_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+            Serialize();
+        }
+
+        public override void Serialize()
         {
             InternalSerialize();
         }
 
-        public void Deserialize()
+        public override void Deserialize()
         {
-            Collection.CollectionChanged -= Collection_CollectionChanged;
+            _collection.CollectionChanged -= SerialisableObject_CollectionChanged;
+            _collection.PropertyChanged -= SerialisableObject_PropertyChanged;
             InternalDeserialize();
-            Collection.CollectionChanged += Collection_CollectionChanged;
+            _collection.CollectionChanged += SerialisableObject_CollectionChanged;
+            _collection.PropertyChanged += SerialisableObject_PropertyChanged;
         }
 
         public abstract void InternalSerialize();

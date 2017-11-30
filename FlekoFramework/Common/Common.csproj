@@ -69,6 +69,7 @@
     <Compile Include="Serialization\ISerializabe.cs" />
     <Compile Include="Serialization\ISerializer.cs" />
     <Compile Include="Serialization\Serializer.cs" />
+    <Compile Include="Serialization\SerializerCollection.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

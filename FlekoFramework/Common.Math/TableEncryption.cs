@@ -1,8 +1,6 @@
 ﻿//using System;
-//using System.Runtime.CompilerServices;
 //using System.Text;
 
-//[assembly: InternalsVisibleTo("UnitTestsProject")]
 //namespace Flekosoft.Common.Math
 //{
 //    /// <summary>
@@ -10,15 +8,11 @@
 //    /// </summary>
 //    public static class TableEncryption
 //    {
-
 //        #region StringConversion
 //        /// <summary>
 //        /// Таблица для преобразования в строку и обратно
 //        /// </summary>
 //        private static readonly char[] Table = { 'Q', 'A', 'Z', 'X', 'S', 'W', '1', '2', 'E', 'D', 'C', '3', 'V', 'F', 'R', '4', 'B', 'G', 'T', '5', 'N', 'H', 'Y', '6', 'U', 'J', 'M', '7', 'I', 'K', '8', 'L' };
-
-
-
 
 //        /// <summary>
 //        /// Проверка таблицы на повторяющиеся символы
@@ -52,12 +46,10 @@
 //            return true;
 //        }
 
-
 //        internal static string HexToString(byte[] src, bool useRandomeXor)
 //        {
 //            return HexToString(src, useRandomeXor, 4);
 //        }
-
 
 //        /// <summary>
 //        /// Формирование строки из массива байт.
@@ -226,7 +218,6 @@
 
 //            return rez.ToString();
 //        }
-
 
 //        internal static byte[] StringToHex(string src)
 //        {

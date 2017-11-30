@@ -2,8 +2,7 @@
 
 namespace Flekosoft.Common.Math
 {
-    // ReSharper disable once InconsistentNaming
-    public static class CRC8
+    public static class Crc8
     {
         public enum Crc8Type
         {
@@ -42,19 +41,19 @@ namespace Flekosoft.Common.Math
         }
 
         /// <summary>
-        /// Рассчитать контрольную сумму
+        /// Calculate crc
         /// </summary>
-        /// <param name="type">Тип полинома</param>
-        /// <param name="source">исходная последовательность для рассчета</param>
-        /// <param name="length">количество элементов для рассчета</param>
-        /// <param name="offset">смещение относительно начала для начала рассчета</param>
+        /// <param name="type">Polinom type</param>
+        /// <param name="source">source for calculation</param>
+        /// <param name="length">num of elements</param>
+        /// <param name="offset">array offset from begining</param>
         /// <returns></returns>
-        public static byte Calculate(Crc8Type type , byte[] source, int length, int offset)
+        public static byte Calculate(Crc8Type type, byte[] source, int length, int offset)
         {
             if (source == null)
-                throw new ArgumentNullException("source");
+                throw new ArgumentNullException(nameof(source));
             if (source.Length < offset + length)
-                throw new ArgumentException("offset and length");
+                throw new ArgumentException($"{nameof(offset)} and {nameof(length)}");
 
             byte[] table = GenerateTable(type);
 

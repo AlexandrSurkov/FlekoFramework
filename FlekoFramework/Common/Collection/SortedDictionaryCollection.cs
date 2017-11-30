@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -9,7 +8,7 @@ namespace Flekosoft.Common.Collection
     public class SortedDictionaryCollection<TK, TV> : DictionaryCollectionBase<TK, TV>
     {
         protected SortedDictionary<TK, TV> InternalCollection { get; }
-        public SortedDictionaryCollection(string collectionName, IComparer<TK> comparer) : base(collectionName)
+        public SortedDictionaryCollection(string collectionName, bool disposeItemsOnRemove, IComparer<TK> comparer) : base(collectionName, disposeItemsOnRemove)
         {
             InternalCollection = new SortedDictionary<TK, TV>(comparer);
         }
@@ -21,10 +20,9 @@ namespace Flekosoft.Common.Collection
 
         protected override void InternalClear()
         {
-            foreach (TV item in InternalCollection.Values)
+            foreach (TV value in InternalCollection.Values)
             {
-                var ds = item as IDisposable;
-                ds?.Dispose();
+                TryToDispose(value);
             }
             InternalCollection.Clear();
         }

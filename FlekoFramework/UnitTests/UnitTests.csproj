@@ -74,6 +74,8 @@
     <Compile Include="Common.Video\FrameProcessorTests.cs" />
     <Compile Include="Common.Video\VideoSourceTests.cs" />
     <Compile Include="Common\Collection\ListCollectionTests.cs" />
+    <Compile Include="Common\Collection\DictionaryCollectionTests.cs" />
+    <Compile Include="Common\Collection\SortedDictionaryCollectionTests.cs" />
     <Compile Include="Common\FiniteStateMachine\StateMashineTests.cs" />
     <Compile Include="Common\Logging\LoggingTests.cs" />
     <Compile Include="Common\Messaging\MessagingTests.cs" />

@@ -6,19 +6,31 @@ using Flekosoft.Common.Logging;
 
 namespace Flekosoft.Common.Collection
 {
-    public abstract class CollectionBase: PropertyChangedErrorNotifyDisposableBase, IEnumerable,INotifyCollectionChanged
+    public abstract class CollectionBase : PropertyChangedErrorNotifyDisposableBase, IEnumerable, INotifyCollectionChanged
     {
         protected readonly object LockObject = new object();
 
-        protected CollectionBase(string collectionName)
+        protected CollectionBase(string collectionName, bool disposeItemsOnRemove)
         {
             CollectionName = collectionName;
+            DisposeItemsOnRemove = disposeItemsOnRemove;
         }
 
-        public string CollectionName { get;}
+        protected bool DisposeItemsOnRemove { get; }
+
+        public string CollectionName { get; }
         protected abstract IEnumerator InternalGetEnumerator();
         protected abstract void InternalClear();
         protected abstract int InternalGetCount();
+
+        protected void TryToDispose(object obj)
+        {
+            if (DisposeItemsOnRemove)
+            {
+                var disposableItem = obj as IDisposable;
+                disposableItem?.Dispose();
+            }
+        }
 
         public override string ToString()
         {

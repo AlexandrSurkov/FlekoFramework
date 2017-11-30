@@ -8,7 +8,7 @@ namespace Flekosoft.Common.Collection
 {
     public abstract class DictionaryCollectionBase<TK, TV> : CollectionBase
     {
-        protected DictionaryCollectionBase(string collectionName) : base(collectionName)
+        protected DictionaryCollectionBase(string collectionName, bool disposeItemsOnRemove) : base(collectionName, disposeItemsOnRemove)
         {
         }
 
@@ -111,8 +111,7 @@ namespace Flekosoft.Common.Collection
                 Logger.Instance.AppendLog(new LogRecord(DateTime.Now,
                     new List<string> { $"{CollectionName}: Item \"{value}\" with key \"{key}\" was removed" }, LogRecordLevel.Info));
                 OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, new List<TV> { value }));
-                var disposableItem = value as IDisposable;
-                disposableItem?.Dispose();
+                TryToDispose(value);
             }
             return res;
         }

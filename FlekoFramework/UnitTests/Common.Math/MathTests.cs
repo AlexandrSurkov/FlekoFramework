@@ -5,7 +5,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace Flekosoft.UnitTests.Common.Math
 {
     [TestClass]
-    public class UtilsTest
+    public class MathTests
     {
         [TestMethod]
         public void Tests()

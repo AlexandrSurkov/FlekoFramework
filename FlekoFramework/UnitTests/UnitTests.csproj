@@ -62,7 +62,8 @@
     <Compile Include="Common.Math\LineSegment3DTests.cs" />
     <Compile Include="Common.Math\PlaneTest.cs" />
     <Compile Include="Common.Math\RectTests.cs" />
-    <Compile Include="Common.Math\UtilsTest.cs" />
+    <Compile Include="Common.Math\Crc8Tests.cs" />
+    <Compile Include="Common.Math\MathTests.cs" />
     <Compile Include="Common.Math\Vector2DTests.cs" />
     <Compile Include="Common.Math\Vector3DTests.cs" />
     <Compile Include="Common.Network\AsyncNetworkExchangeDriverTest.cs" />

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using Flekosoft.Common;
@@ -7,7 +8,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Flekosoft.UnitTests.Common.Collection
 {
-    class ListItemTestClass : PropertyChangedErrorNotifyDisposableBase
+    class SortedDictionaryItemTestClass : PropertyChangedErrorNotifyDisposableBase
     {
         private int _prop;
 
@@ -25,8 +26,20 @@ namespace Flekosoft.UnitTests.Common.Collection
         }
     }
 
+    class SortedDictionaryItemTestCollectionComparer : IComparer<int>
+    {
+        public int Compare(int x, int y)
+        {
+            if (x == y) return 0;
+            if (x > y) return 1;
+            if (x < y) return -1;
+
+            return 0;
+        }
+    }
+
     [TestClass]
-    public class ListCollectionTests
+    public class SortedDictionaryCollectionTests
     {
         private NotifyCollectionChangedEventArgs _notifyCollectionChangedEventArgs;
         private PropertyChangedEventArgs _propertyChangedEventArgs;
@@ -35,7 +48,7 @@ namespace Flekosoft.UnitTests.Common.Collection
         public void CollectionBaseTest()
         {
             var name = "TestCollection";
-            ListCollection<ListItemTestClass> collection = new ListCollection<ListItemTestClass>(name, true);
+            SortedDictionaryCollection<int, DictionaryItemTestClass> collection = new SortedDictionaryCollection<int, DictionaryItemTestClass>(name, true, new SortedDictionaryItemTestCollectionComparer());
             collection.CollectionChanged += Collection_CollectionChanged;
             collection.PropertyChanged += Collection_PropertyChanged;
 
@@ -47,8 +60,8 @@ namespace Flekosoft.UnitTests.Common.Collection
             Assert.AreEqual(0, collection.Count);
             Assert.IsNull(_notifyCollectionChangedEventArgs);
             Assert.IsNull(_propertyChangedEventArgs);
-            var item = new ListItemTestClass();
-            collection.Add(item);
+            var item = new DictionaryItemTestClass();
+            collection.Add(0, item);
             Assert.IsNull(_propertyChangedEventArgs);
             Assert.IsNotNull(_notifyCollectionChangedEventArgs);
             Assert.AreEqual(NotifyCollectionChangedAction.Add, _notifyCollectionChangedEventArgs.Action);
@@ -58,9 +71,9 @@ namespace Flekosoft.UnitTests.Common.Collection
             {
                 _notifyCollectionChangedEventArgs = null;
                 _propertyChangedEventArgs = null;
-                item = new ListItemTestClass() { Prop = i + 1 };
+                item = new DictionaryItemTestClass() { Prop = i + 1 };
                 Assert.IsNull(_notifyCollectionChangedEventArgs);
-                collection.Add(item);
+                collection.Add(i + 1, item);
                 Assert.IsNull(_propertyChangedEventArgs);
                 Assert.IsNotNull(_notifyCollectionChangedEventArgs);
                 Assert.AreEqual(NotifyCollectionChangedAction.Add, _notifyCollectionChangedEventArgs.Action);
@@ -75,25 +88,12 @@ namespace Flekosoft.UnitTests.Common.Collection
             _propertyChangedEventArgs = null;
             Assert.IsNull(_notifyCollectionChangedEventArgs);
             Assert.IsNull(_propertyChangedEventArgs);
-            collection.Remove(item);
+            collection.Remove(collection.KeyOf(item));
             Assert.IsNull(_propertyChangedEventArgs);
             Assert.IsNotNull(_notifyCollectionChangedEventArgs);
             Assert.AreEqual(NotifyCollectionChangedAction.Remove, _notifyCollectionChangedEventArgs.Action);
             Assert.AreEqual(item, _notifyCollectionChangedEventArgs.OldItems[0]);
             Assert.AreEqual(10, collection.Count);
-
-
-            _notifyCollectionChangedEventArgs = null;
-            _propertyChangedEventArgs = null;
-            Assert.IsNull(_notifyCollectionChangedEventArgs);
-            item = collection[5];
-            collection.RemoveAt(5);
-            Assert.IsNotNull(_notifyCollectionChangedEventArgs);
-            Assert.IsNull(_propertyChangedEventArgs);
-            Assert.AreEqual(NotifyCollectionChangedAction.Remove, _notifyCollectionChangedEventArgs.Action);
-            Assert.AreEqual(item, _notifyCollectionChangedEventArgs.OldItems[0]);
-            Assert.AreEqual(9, collection.Count);
-
 
             collection.Dispose();
             Assert.AreEqual(true, collection.IsDisposed);
@@ -104,7 +104,7 @@ namespace Flekosoft.UnitTests.Common.Collection
         public void CollectionCollectionChangedEventTest()
         {
             var name = "TestCollection";
-            ListCollection<ListItemTestClass> collection = new ListCollection<ListItemTestClass>(name, true);
+            SortedDictionaryCollection<int, DictionaryItemTestClass> collection = new SortedDictionaryCollection<int, DictionaryItemTestClass>(name, true, new SortedDictionaryItemTestCollectionComparer());
             collection.CollectionChanged += Collection_CollectionChanged;
             collection.PropertyChanged += Collection_PropertyChanged;
 
@@ -112,8 +112,8 @@ namespace Flekosoft.UnitTests.Common.Collection
             _notifyCollectionChangedEventArgs = null;
             _propertyChangedEventArgs = null;
             Assert.IsNull(_notifyCollectionChangedEventArgs);
-            var item = new ListItemTestClass();
-            collection.Add(item);
+            var item = new DictionaryItemTestClass();
+            collection.Add(0, item);
             Assert.IsNotNull(_notifyCollectionChangedEventArgs);
             Assert.AreEqual(NotifyCollectionChangedAction.Add, _notifyCollectionChangedEventArgs.Action);
             Assert.AreEqual(item, _notifyCollectionChangedEventArgs.NewItems[0]);
@@ -133,8 +133,8 @@ namespace Flekosoft.UnitTests.Common.Collection
             _notifyCollectionChangedEventArgs = null;
             _propertyChangedEventArgs = null;
             Assert.IsNull(_notifyCollectionChangedEventArgs);
-            item = new ListItemTestClass();
-            collection.Add(item);
+            item = new DictionaryItemTestClass();
+            collection.Add(1, item);
             Assert.IsNotNull(_notifyCollectionChangedEventArgs);
             Assert.AreEqual(NotifyCollectionChangedAction.Add, _notifyCollectionChangedEventArgs.Action);
             Assert.AreEqual(item, _notifyCollectionChangedEventArgs.NewItems[0]);
@@ -153,8 +153,8 @@ namespace Flekosoft.UnitTests.Common.Collection
             _notifyCollectionChangedEventArgs = null;
             _propertyChangedEventArgs = null;
             Assert.IsNull(_notifyCollectionChangedEventArgs);
-            item = new ListItemTestClass();
-            collection.Add(item);
+            item = new DictionaryItemTestClass();
+            collection.Add(2, item);
             Assert.IsNotNull(_notifyCollectionChangedEventArgs);
             Assert.AreEqual(NotifyCollectionChangedAction.Add, _notifyCollectionChangedEventArgs.Action);
             Assert.AreEqual(item, _notifyCollectionChangedEventArgs.NewItems[0]);
@@ -174,32 +174,12 @@ namespace Flekosoft.UnitTests.Common.Collection
             _propertyChangedEventArgs = null;
             Assert.IsNull(_notifyCollectionChangedEventArgs);
             Assert.IsNull(_propertyChangedEventArgs);
-            collection.Remove(item);
+            collection.Remove(collection.KeyOf(item));
             Assert.IsNull(_propertyChangedEventArgs);
             Assert.IsNotNull(_notifyCollectionChangedEventArgs);
             Assert.AreEqual(NotifyCollectionChangedAction.Remove, _notifyCollectionChangedEventArgs.Action);
             Assert.AreEqual(item, _notifyCollectionChangedEventArgs.OldItems[0]);
             Assert.AreEqual(2, collection.Count);
-            Assert.IsTrue(item.IsDisposed);
-
-            _notifyCollectionChangedEventArgs = null;
-            Assert.IsNull(_notifyCollectionChangedEventArgs);
-            item.Prop = item.Prop + 1;
-            Assert.IsNull(_notifyCollectionChangedEventArgs);
-            Assert.IsNull(_propertyChangedEventArgs);
-
-            //RemoveAt
-            _notifyCollectionChangedEventArgs = null;
-            _propertyChangedEventArgs = null;
-            Assert.IsNull(_notifyCollectionChangedEventArgs);
-            Assert.IsNull(_propertyChangedEventArgs);
-            item = collection[0];
-            collection.RemoveAt(0);
-            Assert.IsNull(_propertyChangedEventArgs);
-            Assert.IsNotNull(_notifyCollectionChangedEventArgs);
-            Assert.AreEqual(NotifyCollectionChangedAction.Remove, _notifyCollectionChangedEventArgs.Action);
-            Assert.AreEqual(item, _notifyCollectionChangedEventArgs.OldItems[0]);
-            Assert.AreEqual(1, collection.Count);
             Assert.IsTrue(item.IsDisposed);
 
             _notifyCollectionChangedEventArgs = null;
@@ -245,36 +225,38 @@ namespace Flekosoft.UnitTests.Common.Collection
         public void EnumirationTest()
         {
             var name = "TestCollection";
-            ListCollection<ListItemTestClass> collection = new ListCollection<ListItemTestClass>(name, true);
+            SortedDictionaryCollection<int, DictionaryItemTestClass> collection = new SortedDictionaryCollection<int, DictionaryItemTestClass>(name, true, new SortedDictionaryItemTestCollectionComparer());
             collection.CollectionChanged += Collection_CollectionChanged;
 
-            List<ListItemTestClass> items = new List<ListItemTestClass>();
+            List<DictionaryItemTestClass> items = new List<DictionaryItemTestClass>();
 
             for (int i = 0; i < 10; i++)
             {
-                var item = new ListItemTestClass() { Prop = i + 1 };
-                collection.Add(item);
+                var item = new DictionaryItemTestClass() { Prop = i + 1 };
+                collection.Add(i, item);
                 items.Add(item);
             }
 
             var index = 0;
-            foreach (ListItemTestClass item in collection)
+            foreach (KeyValuePair<int, DictionaryItemTestClass> item in collection)
             {
-                Assert.AreEqual(items[index], item);
+                Assert.AreEqual(index, item.Key);
+                Assert.AreEqual(items[index], item.Value);
                 index++;
             }
 
             for (int i = 0; i < 10; i++)
             {
-                Assert.IsTrue(collection.Contains(items[i]));
+                Assert.IsTrue(collection.ContainsKey(i));
+                Assert.IsTrue(collection.ContainsValue(items[i]));
                 Assert.AreEqual(items[i], collection[i]);
-                Assert.AreEqual(i, collection.IndexOf(items[i]));
+                Assert.AreEqual(i, collection.KeyOf(items[i]));
             }
 
             var ro = collection.AsReadOnly();
 
             index = 0;
-            foreach (ListItemTestClass item in ro)
+            foreach (DictionaryItemTestClass item in ro)
             {
                 Assert.AreEqual(items[index], item);
                 index++;
@@ -286,8 +268,8 @@ namespace Flekosoft.UnitTests.Common.Collection
             }
 
 
-            var testItem = new ListItemTestClass() { Prop = 101 };
-            Assert.IsFalse(collection.Contains(testItem));
+            var testItem = new DictionaryItemTestClass() { Prop = 101 };
+            Assert.IsFalse(collection.ContainsValue(testItem));
 
             collection.Dispose();
 
@@ -298,15 +280,15 @@ namespace Flekosoft.UnitTests.Common.Collection
         public void DisposeTest()
         {
             var name = "TestCollection";
-            ListCollection<ListItemTestClass> collection = new ListCollection<ListItemTestClass>(name, true);
+            SortedDictionaryCollection<int, DictionaryItemTestClass> collection = new SortedDictionaryCollection<int, DictionaryItemTestClass>(name, true, new SortedDictionaryItemTestCollectionComparer());
             collection.CollectionChanged += Collection_CollectionChanged;
 
-            List<ListItemTestClass> items = new List<ListItemTestClass>();
+            List<DictionaryItemTestClass> items = new List<DictionaryItemTestClass>();
 
             for (int i = 0; i < 10; i++)
             {
-                var item = new ListItemTestClass() { Prop = i + 1 };
-                collection.Add(item);
+                var item = new DictionaryItemTestClass() { Prop = i + 1 };
+                collection.Add(i, item);
                 items.Add(item);
             }
 
@@ -325,57 +307,49 @@ namespace Flekosoft.UnitTests.Common.Collection
         {
             // Items are disposing in remove tests
             var name = "TestCollection";
-            ListCollection<ListItemTestClass> collection = new ListCollection<ListItemTestClass>(name, true);
+            SortedDictionaryCollection<int, DictionaryItemTestClass> collection = new SortedDictionaryCollection<int, DictionaryItemTestClass>(name, true, new SortedDictionaryItemTestCollectionComparer());
             collection.CollectionChanged += Collection_CollectionChanged;
 
-            List<ListItemTestClass> items = new List<ListItemTestClass>();
+            List<DictionaryItemTestClass> items = new List<DictionaryItemTestClass>();
 
             for (int i = 0; i < 10; i++)
             {
-                var item = new ListItemTestClass() { Prop = i + 1 };
-                collection.Add(item);
+                var item = new DictionaryItemTestClass() { Prop = i + 1 };
+                collection.Add(i, item);
                 items.Add(item);
             }
 
             var di = collection[0];
-            collection.Remove(di);
-            Assert.IsTrue(di.IsDisposed);
-
-            di = collection[3];
-            collection.RemoveAt(3);
+            collection.Remove(0);
             Assert.IsTrue(di.IsDisposed);
 
             collection.Dispose();
 
-            for (int i = 0; i < 8; i++)
+            for (int i = 0; i < 9; i++)
             {
                 Assert.IsTrue(items[i].IsDisposed);
             }
 
             // Item are NOT disposing in remove tests
-            collection = new ListCollection<ListItemTestClass>(name, false);
+            collection = new SortedDictionaryCollection<int, DictionaryItemTestClass>(name, false, new SortedDictionaryItemTestCollectionComparer());
             collection.CollectionChanged += Collection_CollectionChanged;
 
-            items = new List<ListItemTestClass>();
+            items = new List<DictionaryItemTestClass>();
 
             for (int i = 0; i < 10; i++)
             {
-                var item = new ListItemTestClass() { Prop = i + 1 };
-                collection.Add(item);
+                var item = new DictionaryItemTestClass() { Prop = i + 1 };
+                collection.Add(i, item);
                 items.Add(item);
             }
 
             di = collection[0];
-            collection.Remove(di);
-            Assert.IsFalse(di.IsDisposed);
-
-            di = collection[3];
-            collection.RemoveAt(3);
+            collection.Remove(0);
             Assert.IsFalse(di.IsDisposed);
 
             collection.Dispose();
 
-            for (int i = 0; i < 8; i++)
+            for (int i = 0; i < 9; i++)
             {
                 Assert.IsFalse(items[i].IsDisposed);
             }

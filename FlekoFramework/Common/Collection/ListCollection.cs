@@ -10,7 +10,7 @@ namespace Flekosoft.Common.Collection
     {
         protected List<T> InternalCollection { get; } = new List<T>();
 
-        public ListCollection(string collectionName) : base(collectionName)
+        public ListCollection(string collectionName, bool disposeItemsOnRemove) : base(collectionName, disposeItemsOnRemove)
         {
         }
 
@@ -114,8 +114,7 @@ namespace Flekosoft.Common.Collection
         {
             foreach (T item in InternalCollection)
             {
-                var ds = item as IDisposable;
-                ds?.Dispose();
+                TryToDispose(item);
             }
             InternalCollection.Clear();
         }

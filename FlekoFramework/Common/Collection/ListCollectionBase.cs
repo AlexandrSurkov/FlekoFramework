@@ -8,7 +8,7 @@ namespace Flekosoft.Common.Collection
 {
     public abstract class ListCollectionBase<T> : CollectionBase
     {
-        protected ListCollectionBase(string collectionName) : base(collectionName)
+        protected ListCollectionBase(string collectionName, bool disposeItemsOnRemove) : base(collectionName, disposeItemsOnRemove)
         {
         }
 
@@ -90,8 +90,7 @@ namespace Flekosoft.Common.Collection
                 Logger.Instance.AppendLog(new LogRecord(DateTime.Now,
                     new List<string> { $"{CollectionName}: The {item} was removed" }, LogRecordLevel.Info));
                 OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, new List<T> { item }));
-                var disposableItem = item as IDisposable;
-                disposableItem?.Dispose();
+                TryToDispose(item);
             }
             return res;
         }
@@ -130,8 +129,7 @@ namespace Flekosoft.Common.Collection
                     Logger.Instance.AppendLog(new LogRecord(DateTime.Now,
                         new List<string> { $"{CollectionName}: The {item} was removed" }, LogRecordLevel.Info));
                     OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, new List<T> { item }));
-                    var disposableItem = item as IDisposable;
-                    disposableItem?.Dispose();
+                    TryToDispose(item);
                 }
             }
         }

@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -9,7 +8,7 @@ namespace Flekosoft.Common.Collection
     public class DictionaryCollection<TK, TV> : DictionaryCollectionBase<TK, TV>
     {
         protected Dictionary<TK, TV> InternalCollection { get; } = new Dictionary<TK, TV>();
-        public DictionaryCollection(string collectionName) : base(collectionName)
+        public DictionaryCollection(string collectionName, bool disposeItemsOnRemove) : base(collectionName, disposeItemsOnRemove)
         {
         }
 
@@ -20,10 +19,9 @@ namespace Flekosoft.Common.Collection
 
         protected override void InternalClear()
         {
-            foreach (TV item in InternalCollection.Values)
+            foreach (TV value in InternalCollection.Values)
             {
-                var ds = item as IDisposable;
-                ds?.Dispose();
+                TryToDispose(value);
             }
             InternalCollection.Clear();
         }

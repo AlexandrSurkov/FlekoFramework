@@ -3,10 +3,11 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using Flekosoft.Common.Logging;
+using Flekosoft.Common.Serialization;
 
 namespace Flekosoft.Common.Collection
 {
-    public abstract class CollectionBase : PropertyChangedErrorNotifyDisposableBase, IEnumerable, INotifyCollectionChanged
+    public abstract class CollectionBase : PropertyChangedErrorNotifyDisposableBase, IEnumerable, INotifyCollectionChanged, ISerializabe
     {
         protected readonly object LockObject = new object();
 
@@ -15,6 +16,8 @@ namespace Flekosoft.Common.Collection
             CollectionName = collectionName;
             DisposeItemsOnRemove = disposeItemsOnRemove;
         }
+
+        public List<ISerializer> Serializers { get; } = new List<ISerializer>();
 
         protected bool DisposeItemsOnRemove { get; }
 

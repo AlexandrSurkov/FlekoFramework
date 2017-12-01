@@ -52,13 +52,19 @@ namespace Flekosoft.Common.Collection
         }
         public void Clear()
         {
+            InternalClear(true);
+        }
+
+        private void InternalClear(bool sendCollectionChanged)
+        {
             lock (LockObject)
             {
                 InternalClear();
             }
             Logger.Instance.AppendLog(new LogRecord(DateTime.Now, new List<string> { $"{CollectionName} was cleared" }, LogRecordLevel.Info));
-            OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
+            if (sendCollectionChanged) OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
         }
+
         public IEnumerator GetEnumerator()
         {
             lock (LockObject)
@@ -78,7 +84,7 @@ namespace Flekosoft.Common.Collection
         {
             if (disposing)
             {
-                Clear();
+                InternalClear(false);
                 CollectionChanged = null;
             }
             base.Dispose(disposing);

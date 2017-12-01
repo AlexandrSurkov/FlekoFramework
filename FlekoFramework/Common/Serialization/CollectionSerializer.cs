@@ -3,12 +3,12 @@ using Flekosoft.Common.Collection;
 
 namespace Flekosoft.Common.Serialization
 {
-    public abstract class CollectionSerializer<T>:Serializer<T>
+    public abstract class CollectionSerializer<T> : Serializer<T>
     {
         protected CollectionSerializer(T serialisableObject) : base(serialisableObject)
         {
             _collection = serialisableObject as CollectionBase;
-            if(_collection == null) throw new ArgumentException("serialisableObject must be nested from CollectionBase");
+            if (_collection == null) throw new ArgumentException("serialisableObject must be nested from CollectionBase");
 
             _collection.CollectionChanged += SerialisableObject_CollectionChanged;
             _collection.PropertyChanged += SerialisableObject_PropertyChanged;
@@ -16,9 +16,11 @@ namespace Flekosoft.Common.Serialization
 
         private readonly CollectionBase _collection;
 
+        protected abstract bool CheckPropertyChanged(System.ComponentModel.PropertyChangedEventArgs e);
+
         private void SerialisableObject_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
-            Serialize();
+            if (CheckPropertyChanged(e)) Serialize();
         }
 
         private void SerialisableObject_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)

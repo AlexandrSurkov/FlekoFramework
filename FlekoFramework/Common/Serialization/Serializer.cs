@@ -2,7 +2,7 @@
 
 namespace Flekosoft.Common.Serialization
 {
-    public abstract class Serializer<T>: ISerializer
+    public abstract class Serializer<T> : DisposableBase, ISerializer
     {
         protected Serializer(T serialisableObject)
         {

@@ -1,6 +1,8 @@
-﻿namespace Flekosoft.Common.Serialization
+﻿using System;
+
+namespace Flekosoft.Common.Serialization
 {
-    public interface ISerializer
+    public interface ISerializer : IDisposable
     {
         void Serialize();
         void Deserialize();

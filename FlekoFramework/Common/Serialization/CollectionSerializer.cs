@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using Flekosoft.Common.Collection;
+using Flekosoft.Common.Logging;
 
 namespace Flekosoft.Common.Serialization
 {
@@ -16,11 +18,15 @@ namespace Flekosoft.Common.Serialization
 
         private readonly CollectionBase _collection;
 
-        protected abstract bool CheckPropertyChanged(System.ComponentModel.PropertyChangedEventArgs e);
+        protected virtual bool CheckPropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            if (!e.PropertyName.Contains("Collection[")) return true;
+            return false;
+        }
 
         private void SerialisableObject_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
-            if (CheckPropertyChanged(e)) Serialize();
+            if (CheckPropertyChanged(sender, e)) Serialize();
         }
 
         private void SerialisableObject_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
@@ -31,6 +37,7 @@ namespace Flekosoft.Common.Serialization
         public override void Serialize()
         {
             InternalSerialize();
+            Logger.Instance.AppendLog(new LogRecord(DateTime.Now, new List<string> { $"{_collection.CollectionName}: Serialized" }, LogRecordLevel.Debug));
         }
 
         public override void Deserialize()
@@ -40,6 +47,7 @@ namespace Flekosoft.Common.Serialization
             InternalDeserialize();
             _collection.CollectionChanged += SerialisableObject_CollectionChanged;
             _collection.PropertyChanged += SerialisableObject_PropertyChanged;
+            Logger.Instance.AppendLog(new LogRecord(DateTime.Now, new List<string> { $"{_collection.CollectionName}: Deserialized" }, LogRecordLevel.Debug));
         }
 
         public abstract void InternalSerialize();

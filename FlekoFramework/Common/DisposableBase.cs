@@ -1,9 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
+using Flekosoft.Common.Serialization;
 
 namespace Flekosoft.Common
 {
-    public abstract class DisposableBase : LoggingBase, IDisposable
+    public abstract class DisposableBase : LoggingBase, IDisposable, ISerializabe
     {
         #region IDisposable Members
         private bool _disposed;
@@ -26,6 +26,10 @@ namespace Flekosoft.Common
             {
                 if (disposing)
                 {
+                    foreach (var serializer in Serializers)
+                    {
+                        serializer.Dispose();
+                    }
                 }
                 _disposed = true;
             }

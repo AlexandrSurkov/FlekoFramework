@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using Flekosoft.Common.Logging;
+using Flekosoft.Common.Serialization;
 
 namespace Flekosoft.Common
 {
@@ -19,5 +20,7 @@ namespace Flekosoft.Common
         {
             if (SendDebugMessages) Logger.Instance.AppendDebug(messages);
         }
+
+        public List<ISerializer> Serializers { get; } = new List<ISerializer>();
     }
 }

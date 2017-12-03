@@ -200,10 +200,7 @@ namespace Flekosoft.UnitTests.Common.Collection
             Assert.IsNull(_propertyChangedEventArgs);
             collection.Dispose();
             Assert.IsNull(_propertyChangedEventArgs);
-            Assert.IsNotNull(_notifyCollectionChangedEventArgs);
-            Assert.AreEqual(NotifyCollectionChangedAction.Reset, _notifyCollectionChangedEventArgs.Action);
-            Assert.IsNull(_notifyCollectionChangedEventArgs.NewItems);
-            Assert.IsNull(_notifyCollectionChangedEventArgs.OldItems);
+            Assert.IsNull(_notifyCollectionChangedEventArgs);
 
             Assert.AreEqual(true, collection.IsDisposed);
         }

@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using Flekosoft.Common.Collection;
-using Flekosoft.Common.Logging;
 
 namespace Flekosoft.Common.Serialization
 {
@@ -37,7 +35,7 @@ namespace Flekosoft.Common.Serialization
         public override void Serialize()
         {
             InternalSerialize();
-            Logger.Instance.AppendLog(new LogRecord(DateTime.Now, new List<string> { $"{_collection.CollectionName}: Serialized" }, LogRecordLevel.Debug));
+            AppendDebugMessage($"{_collection.CollectionName}: Serialized");
         }
 
         public override void Deserialize()
@@ -47,7 +45,7 @@ namespace Flekosoft.Common.Serialization
             InternalDeserialize();
             _collection.CollectionChanged += SerialisableObject_CollectionChanged;
             _collection.PropertyChanged += SerialisableObject_PropertyChanged;
-            Logger.Instance.AppendLog(new LogRecord(DateTime.Now, new List<string> { $"{_collection.CollectionName}: Deserialized" }, LogRecordLevel.Debug));
+            AppendDebugMessage($"{_collection.CollectionName}: Deserialized");
         }
 
         public abstract void InternalSerialize();

@@ -83,6 +83,7 @@
     <Compile Include="Common\Observable\ObservableTests.cs" />
     <Compile Include="Common\PropertyChangedErrorNotifyDisposableBaseTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Serialization\CollectionSerializerTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

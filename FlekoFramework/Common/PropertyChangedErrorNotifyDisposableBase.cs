@@ -8,14 +8,17 @@ namespace Flekosoft.Common
         {
         }
 
-        protected PropertyChangedErrorNotifyDisposableBase(string name):base(name)
+        protected PropertyChangedErrorNotifyDisposableBase(string name) : base(name)
         {
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
+
+        protected bool SendPropertyChangedEvent { get; set; } = true;
         protected void OnPropertyChanged(string propertyName)
         {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+            if (SendPropertyChangedEvent)
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
         protected override void Dispose(bool disposing)

@@ -44,6 +44,7 @@ namespace Flekosoft.Common.Logging
             {
                 try
                 {
+                    if (_queueWaitHandle.SafeWaitHandle.IsClosed) continue;
                     if (_queueWaitHandle.WaitOne(Timeout.Infinite))
                     {
                         LogRecord record;
@@ -58,8 +59,10 @@ namespace Flekosoft.Common.Logging
                                 AppendLogRecordInternal(record);
                             }
                         }
-                        if (_logRecords.IsEmpty) _queueWaitHandle.Reset();
-                        else _queueWaitHandle.Set();
+                        if (_logRecords.IsEmpty)
+                            if (!_queueWaitHandle.SafeWaitHandle.IsClosed) _queueWaitHandle.Reset();
+                            else
+                            if (!_queueWaitHandle.SafeWaitHandle.IsClosed) _queueWaitHandle.Set();
                     }
                 }
                 catch (ThreadAbortException)
@@ -75,7 +78,7 @@ namespace Flekosoft.Common.Logging
 
         public LogRecordLevel LogLevel
         {
-            get { return _logLevel; }
+            get => _logLevel;
             set
             {
                 if (_logLevel != value)
@@ -88,7 +91,7 @@ namespace Flekosoft.Common.Logging
 
         public DateTimeFormat DateTimeFormat
         {
-            get { return _dateTimeFormat; }
+            get => _dateTimeFormat;
             set
             {
                 if (_dateTimeFormat != value)
@@ -126,7 +129,8 @@ namespace Flekosoft.Common.Logging
                 case LogRecordLevel.Fatal:
                     result += "\tFATAL\t";
                     break;
-                default: result += "\t\t";
+                default:
+                    result += "\t\t";
                     break;
             }
             return result;
@@ -134,7 +138,7 @@ namespace Flekosoft.Common.Logging
         public void AppendLogRecord(LogRecord logRecord)
         {
             _logRecords.Enqueue(logRecord);
-            _queueWaitHandle?.Set();
+            if (!_queueWaitHandle.SafeWaitHandle.IsClosed) _queueWaitHandle?.Set();
         }
 
         protected abstract void AppendLogRecordInternal(LogRecord logRecord);

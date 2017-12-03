@@ -25,6 +25,11 @@ namespace Flekosoft.Common
             ErrorEvent?.Invoke(this, new ErrorEventArgs(exception));
         }
 
+        public override string ToString()
+        {
+            return Name;
+        }
+
         protected override void Dispose(bool disposing)
         {
             if (disposing)

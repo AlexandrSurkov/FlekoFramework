@@ -64,7 +64,7 @@ namespace Flekosoft.Common.Collection
             if (res)
             {
                 Logger.Instance.AppendLog(new LogRecord(DateTime.Now,
-                    new List<string> { $"{CollectionName}: The \"{item}\" was added" }, LogRecordLevel.Info));
+                    new List<string> { $"{Name}: The \"{item}\" was added" }, LogRecordLevel.Info));
                 OnCollectionChanged(
                     new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, new List<T> { item }));
             }
@@ -88,7 +88,7 @@ namespace Flekosoft.Common.Collection
             if (res)
             {
                 Logger.Instance.AppendLog(new LogRecord(DateTime.Now,
-                    new List<string> { $"{CollectionName}: The {item} was removed" }, LogRecordLevel.Info));
+                    new List<string> { $"{Name}: The {item} was removed" }, LogRecordLevel.Info));
                 OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, new List<T> { item }));
                 TryToDispose(item);
             }
@@ -127,7 +127,7 @@ namespace Flekosoft.Common.Collection
                 if (res)
                 {
                     Logger.Instance.AppendLog(new LogRecord(DateTime.Now,
-                        new List<string> { $"{CollectionName}: The {item} was removed" }, LogRecordLevel.Info));
+                        new List<string> { $"{Name}: The {item} was removed" }, LogRecordLevel.Info));
                     OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, new List<T> { item }));
                     TryToDispose(item);
                 }

@@ -58,7 +58,7 @@ namespace Flekosoft.Common.Collection
             if (InternalContainsKey(key))
             {
                 Logger.Instance.AppendLog(new LogRecord(DateTime.Now,
-                    new List<string> { $"{CollectionName}: Key \"{key}\" allready exist" }, LogRecordLevel.Info));
+                    new List<string> { $"{Name}: Key \"{key}\" allready exist" }, LogRecordLevel.Info));
                 return false;
             }
             lock (LockObject)
@@ -68,7 +68,7 @@ namespace Flekosoft.Common.Collection
             if (res)
             {
                 Logger.Instance.AppendLog(new LogRecord(DateTime.Now,
-                    new List<string> { $"{CollectionName}: Item \"{value}\" with key \"{key}\" was added" }, LogRecordLevel.Info));
+                    new List<string> { $"{Name}: Item \"{value}\" with key \"{key}\" was added" }, LogRecordLevel.Info));
                 OnCollectionChanged(
                     new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, new List<TV> { value }));
             }
@@ -97,7 +97,7 @@ namespace Flekosoft.Common.Collection
             if (!InternalContainsKey(key))
             {
                 Logger.Instance.AppendLog(new LogRecord(DateTime.Now,
-                    new List<string> { $"{CollectionName}: Key \"{key}\" does not exist" }, LogRecordLevel.Info));
+                    new List<string> { $"{Name}: Key \"{key}\" does not exist" }, LogRecordLevel.Info));
                 return false;
             }
             var value = this[key];
@@ -109,7 +109,7 @@ namespace Flekosoft.Common.Collection
             if (res)
             {
                 Logger.Instance.AppendLog(new LogRecord(DateTime.Now,
-                    new List<string> { $"{CollectionName}: Item \"{value}\" with key \"{key}\" was removed" }, LogRecordLevel.Info));
+                    new List<string> { $"{Name}: Item \"{value}\" with key \"{key}\" was removed" }, LogRecordLevel.Info));
                 OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, new List<TV> { value }));
                 TryToDispose(value);
             }

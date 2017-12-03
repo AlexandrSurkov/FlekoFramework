@@ -52,7 +52,7 @@ namespace Flekosoft.UnitTests.Common.Collection
             collection.CollectionChanged += Collection_CollectionChanged;
             collection.PropertyChanged += Collection_PropertyChanged;
 
-            Assert.AreEqual(name, collection.CollectionName);
+            Assert.AreEqual(name, collection.Name);
             Assert.AreEqual(name, collection.ToString());
 
             _notifyCollectionChangedEventArgs = null;

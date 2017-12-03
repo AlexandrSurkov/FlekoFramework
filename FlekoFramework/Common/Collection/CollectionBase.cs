@@ -10,15 +10,12 @@ namespace Flekosoft.Common.Collection
     {
         protected readonly object LockObject = new object();
 
-        protected CollectionBase(string collectionName, bool disposeItemsOnRemove)
+        protected CollectionBase(string collectionName, bool disposeItemsOnRemove):base(collectionName)
         {
-            CollectionName = collectionName;
             DisposeItemsOnRemove = disposeItemsOnRemove;
         }
 
         protected bool DisposeItemsOnRemove { get; }
-
-        public string CollectionName { get; }
         protected abstract IEnumerator InternalGetEnumerator();
         protected abstract void InternalClear();
         protected abstract int InternalGetCount();
@@ -30,11 +27,6 @@ namespace Flekosoft.Common.Collection
                 var disposableItem = obj as IDisposable;
                 disposableItem?.Dispose();
             }
-        }
-
-        public override string ToString()
-        {
-            return CollectionName;
         }
 
         public int Count
@@ -58,7 +50,7 @@ namespace Flekosoft.Common.Collection
             {
                 InternalClear();
             }
-            Logger.Instance.AppendLog(new LogRecord(DateTime.Now, new List<string> { $"{CollectionName} was cleared" }, LogRecordLevel.Info));
+            Logger.Instance.AppendLog(new LogRecord(DateTime.Now, new List<string> { $"{Name} was cleared" }, LogRecordLevel.Info));
             if (sendCollectionChanged) OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
         }
 
@@ -81,12 +73,13 @@ namespace Flekosoft.Common.Collection
         {
             if (disposing)
             {
+                SendPropertyChangedEvent = false;
                 //Because of serialisation we should send CollectionChnagedEvent only on Clean not on Dispose
                 InternalClear(false);
                 CollectionChanged = null;
             }
             base.Dispose(disposing);
-            AppendDebugMessage($"{CollectionName} was Disposed");
+            AppendDebugMessage($"{Name} was Disposed");
         }
     }
 }

@@ -10,7 +10,7 @@ namespace Flekosoft.Common.Collection
     {
         protected readonly object LockObject = new object();
 
-        protected CollectionBase(string collectionName, bool disposeItemsOnRemove):base(collectionName)
+        protected CollectionBase(string collectionName, bool disposeItemsOnRemove) : base(collectionName)
         {
             DisposeItemsOnRemove = disposeItemsOnRemove;
         }
@@ -41,17 +41,12 @@ namespace Flekosoft.Common.Collection
         }
         public void Clear()
         {
-            InternalClear(true);
-        }
-
-        private void InternalClear(bool sendCollectionChanged)
-        {
             lock (LockObject)
             {
                 InternalClear();
             }
             Logger.Instance.AppendLog(new LogRecord(DateTime.Now, new List<string> { $"{Name} was cleared" }, LogRecordLevel.Info));
-            if (sendCollectionChanged) OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
+            OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
         }
 
         public IEnumerator GetEnumerator()
@@ -65,17 +60,14 @@ namespace Flekosoft.Common.Collection
         public event NotifyCollectionChangedEventHandler CollectionChanged;
         protected void OnCollectionChanged(NotifyCollectionChangedEventArgs eventArgs)
         {
-            // ReSharper disable once UseNullPropagation
-            CollectionChanged?.Invoke(this, eventArgs);
+            if (!IsDisposing) CollectionChanged?.Invoke(this, eventArgs);
         }
 
         protected override void Dispose(bool disposing)
         {
             if (disposing)
             {
-                SendPropertyChangedEvent = false;
-                //Because of serialisation we should send CollectionChnagedEvent only on Clean not on Dispose
-                InternalClear(false);
+                Clear();
                 CollectionChanged = null;
             }
             base.Dispose(disposing);

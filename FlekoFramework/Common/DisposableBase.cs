@@ -14,10 +14,22 @@ namespace Flekosoft.Common
             get { return _disposed; }
         }
 
+        protected bool IsDisposing
+        {
+            // ReSharper disable once ConvertPropertyToExpressionBody
+            get;
+            set;
+        }
+
         public void Dispose()
         {
-            Dispose(!IsDisposed);
-            GC.SuppressFinalize(this);
+            if (!IsDisposed)
+            {
+                IsDisposing = true;
+                Dispose(IsDisposing);
+                GC.SuppressFinalize(this);
+                IsDisposing = false;
+            }
         }
 
         protected virtual void Dispose(bool disposing)

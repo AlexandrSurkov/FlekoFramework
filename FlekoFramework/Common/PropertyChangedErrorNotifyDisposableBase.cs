@@ -13,11 +13,9 @@ namespace Flekosoft.Common
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
-
-        protected bool SendPropertyChangedEvent { get; set; } = true;
         protected void OnPropertyChanged(string propertyName)
         {
-            if (SendPropertyChangedEvent)
+            if (!IsDisposing)
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 

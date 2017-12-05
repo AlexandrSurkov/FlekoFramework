@@ -34,6 +34,7 @@ namespace Flekosoft.UnitTests.Common
             if (disposing)
             {
                 DisposeCalled = true;
+                OnPropertyChanged("Dispose");
             }
             base.Dispose(disposing);
         }
@@ -81,6 +82,17 @@ namespace Flekosoft.UnitTests.Common
             var className = "ClassName";
             tc = new TestClass(className);
             Assert.AreEqual(className, tc.Name);
+        }
+
+        [TestMethod]
+        public void PripertyChangedDisposeTest()
+        {
+            var tc = new TestClass();
+            tc.PropertyChanged += Tc_PropertyChanged;
+            PropertyChangedEvent = null;
+            tc.Dispose();
+            Assert.IsNull(PropertyChangedEvent);
+
         }
 
         public PropertyChangedEventArgs PropertyChangedEvent { get; set; }

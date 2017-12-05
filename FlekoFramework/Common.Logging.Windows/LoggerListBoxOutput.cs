@@ -42,7 +42,7 @@ namespace Flekosoft.Common.Logging.Windows
 
         public uint MaximumLines
         {
-            get { return _maximumLines; }
+            get => _maximumLines;
             set
             {
                 if (_maximumLines != value)
@@ -95,10 +95,17 @@ namespace Flekosoft.Common.Logging.Windows
         {
             _logBox.SuspendLayout();
 
-            if (_logRecordsList.Count > MaximumLines)
+            while (_logRecordsList.Count > MaximumLines)
             {
                 _logRecordsList.RemoveAt(0);
             }
+
+            while (_logBox.Items.Count > MaximumLines)
+            {
+                _logBox.Items.RemoveAt(0);
+            }
+            
+
             _appendStringsList.Clear();
             foreach (LogRecord record in _logRecordsList)
             {
@@ -130,6 +137,8 @@ namespace Flekosoft.Common.Logging.Windows
                 var oldItemsCount = _logBox.Items.Count;
                 var newItemsCount = _appendStringsList.Count;
 
+                //if (newItemsCount < oldItemsCount) _logBox.Items.AddRange(_appendStringsList.ToArray());
+                //else _logBox.Items.AddRange(_appendStringsList.GetRange(oldItemsCount, newItemsCount - oldItemsCount).ToArray());
                 _logBox.Items.AddRange(_appendStringsList.GetRange(oldItemsCount, newItemsCount - oldItemsCount).ToArray());
             }
 

@@ -47,8 +47,7 @@ namespace Flekosoft.Common.Logging
                     if (_queueWaitHandle.SafeWaitHandle.IsClosed) continue;
                     if (_queueWaitHandle.WaitOne(Timeout.Infinite))
                     {
-                        LogRecord record;
-                        if (_logRecords.TryDequeue(out record))
+                        if (_logRecords.TryDequeue(out var record))
                         {
                             if (LogLevel <= record.RecordType)
                             {

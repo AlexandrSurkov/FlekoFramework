@@ -1,7 +1,6 @@
 ﻿using System.IO;
 using System.Net;
 using System.Text;
-using System.Web;
 
 namespace Flekosoft.Common.Network.Http
 {

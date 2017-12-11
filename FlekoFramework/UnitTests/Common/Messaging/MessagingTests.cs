@@ -1,6 +1,6 @@
 ﻿using System.Threading;
 using Flekosoft.Common.Logging;
-using FlekoSoft.Common.Messaging;
+using Flekosoft.Common.Messaging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Flekosoft.UnitTests.Common.Messaging

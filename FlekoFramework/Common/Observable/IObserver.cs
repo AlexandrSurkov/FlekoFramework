@@ -1,4 +1,4 @@
-﻿namespace FlekoSoft.Common.Observable
+﻿namespace Flekosoft.Common.Observable
 {
     public interface IObserver
     {

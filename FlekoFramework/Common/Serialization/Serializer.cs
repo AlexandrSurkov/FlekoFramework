@@ -32,7 +32,7 @@ namespace Flekosoft.Common.Serialization
         {
             InternalSerialize();
             if (_propertyChangedObject == null) return;
-            AppendDebugMessage(!string.IsNullOrEmpty(_propertyChangedObject.Name)
+            AppendDebugLogMessage(!string.IsNullOrEmpty(_propertyChangedObject.Name)
                 ? $"{_propertyChangedObject.Name}: Serialized"
                 : $"{_propertyChangedObject}: Serialized");
         }
@@ -44,7 +44,7 @@ namespace Flekosoft.Common.Serialization
             if (_propertyChangedObject != null)
             {
                 _propertyChangedObject.PropertyChanged += SerialisableObject_PropertyChanged;
-                AppendDebugMessage(!string.IsNullOrEmpty(_propertyChangedObject.Name)
+                AppendDebugLogMessage(!string.IsNullOrEmpty(_propertyChangedObject.Name)
                     ? $"{_propertyChangedObject.Name}: Deserialized"
                     : $"{_propertyChangedObject}: Deserialized");
             }

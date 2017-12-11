@@ -1,6 +1,6 @@
-﻿using FlekoSoft.Common.Messaging;
+﻿using Flekosoft.Common.Messaging;
 
-namespace FlekoSoft.Common.FiniteStateMachine
+namespace Flekosoft.Common.FiniteStateMachine
 {
     /// <summary>
     /// Состояние, в конечном автомате

@@ -6,7 +6,7 @@ using System.ComponentModel;
 
 namespace Flekosoft.Common.Collection
 {
-    public class ListCollection<T> : ListCollectionBase<T>
+    public partial class ListCollection<T> : ListCollectionBase<T>,ICustomTypeDescriptor
     {
         protected List<T> InternalCollection { get; } = new List<T>();
 

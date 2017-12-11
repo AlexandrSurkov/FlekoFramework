@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using FlekoSoft.Common.Observable;
+using Flekosoft.Common.Observable;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Flekosoft.UnitTests.Common.Observable

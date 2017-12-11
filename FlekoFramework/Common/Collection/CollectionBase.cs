@@ -45,7 +45,7 @@ namespace Flekosoft.Common.Collection
             {
                 InternalClear();
             }
-            Logger.Instance.AppendLog(new LogRecord(DateTime.Now, new List<string> { $"{Name} was cleared" }, LogRecordLevel.Info));
+            AppendLogMessage(new LogRecord(DateTime.Now, new List<string> { $"{Name} was cleared" }, LogRecordLevel.Info));
             OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
         }
 
@@ -71,7 +71,7 @@ namespace Flekosoft.Common.Collection
                 CollectionChanged = null;
             }
             base.Dispose(disposing);
-            AppendDebugMessage($"{Name} was Disposed");
+            AppendDebugLogMessage($"{Name} was Disposed");
         }
     }
 }

@@ -3,7 +3,7 @@ using Flekosoft.Common.Serialization;
 
 namespace Flekosoft.Common
 {
-    public abstract class DisposableBase : LoggingBase, IDisposable, ISerializabe
+    public abstract class DisposableBase : LoggingSerializableBase, IDisposable, ISerializabe
     {
         #region IDisposable Members
         private bool _disposed;

@@ -48,7 +48,7 @@ namespace Flekosoft.UnitTests.Common.Collection
             Assert.IsNull(_notifyCollectionChangedEventArgs);
             Assert.IsNull(_propertyChangedEventArgs);
             var item = new ListItemTestClass();
-            collection.Add(item);
+            Assert.IsTrue(collection.Add(item));
             Assert.IsNull(_propertyChangedEventArgs);
             Assert.IsNotNull(_notifyCollectionChangedEventArgs);
             Assert.AreEqual(NotifyCollectionChangedAction.Add, _notifyCollectionChangedEventArgs.Action);
@@ -60,7 +60,7 @@ namespace Flekosoft.UnitTests.Common.Collection
                 _propertyChangedEventArgs = null;
                 item = new ListItemTestClass() { Prop = i + 1 };
                 Assert.IsNull(_notifyCollectionChangedEventArgs);
-                collection.Add(item);
+                Assert.IsTrue(collection.Add(item));
                 Assert.IsNull(_propertyChangedEventArgs);
                 Assert.IsNotNull(_notifyCollectionChangedEventArgs);
                 Assert.AreEqual(NotifyCollectionChangedAction.Add, _notifyCollectionChangedEventArgs.Action);

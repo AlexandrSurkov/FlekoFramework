@@ -5,7 +5,7 @@ using System.ComponentModel;
 
 namespace Flekosoft.Common.Collection
 {
-    public class SortedDictionaryCollection<TK, TV> : DictionaryCollectionBase<TK, TV>
+    public partial class SortedDictionaryCollection<TK, TV> : DictionaryCollectionBase<TK, TV>, ICustomTypeDescriptor
     {
         protected SortedDictionary<TK, TV> InternalCollection { get; }
         public SortedDictionaryCollection(string collectionName, bool disposeItemsOnRemove, IComparer<TK> comparer) : base(collectionName, disposeItemsOnRemove)

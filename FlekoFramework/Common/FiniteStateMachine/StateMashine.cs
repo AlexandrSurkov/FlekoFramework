@@ -1,7 +1,6 @@
-﻿using Flekosoft.Common;
-using FlekoSoft.Common.Messaging;
+﻿using Flekosoft.Common.Messaging;
 
-namespace FlekoSoft.Common.FiniteStateMachine
+namespace Flekosoft.Common.FiniteStateMachine
 {
     /// <summary>
     ///Finite-state machine
@@ -121,11 +120,11 @@ namespace FlekoSoft.Common.FiniteStateMachine
 
             if (_previousState == null)
             {
-                AppendDebugMessage(_owner + " StateMashine.\tState changed to " + _currentState);
+                AppendDebugLogMessage(_owner + " StateMashine.\tState changed to " + _currentState);
             }
             else
             {
-                AppendDebugMessage(_owner + " StateMashine.\tState changed from: " + _previousState + " to " +
+                AppendDebugLogMessage(_owner + " StateMashine.\tState changed from: " + _previousState + " to " +
                                             _currentState);
             }
         }

@@ -1,15 +1,14 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using Flekosoft.Common;
 
-namespace FlekoSoft.Common.Messaging
+namespace Flekosoft.Common.Messaging
 {
     /// <summary>
     /// Диспетчер сообщений.
     /// Singleton класс, глобально доступный всем.
     /// </summary>
-    public class MessageDispatcher: LoggingBase
+    public class MessageDispatcher: LoggingSerializableBase
     {
         #region Singleton part
         public static MessageDispatcher Instance { get; } = new MessageDispatcher();
@@ -37,7 +36,7 @@ namespace FlekoSoft.Common.Messaging
         {
             if (delayMs <= 0)
             {
-                AppendDebugMessage("MessageDispatcher.\tDispatching message: ");
+                AppendDebugLogMessage("MessageDispatcher.\tDispatching message: ");
                 ProcessMessage(message);
             }
             else
@@ -45,7 +44,7 @@ namespace FlekoSoft.Common.Messaging
                 DateTime dispatchTime = DateTime.Now.AddMilliseconds(delayMs);
                 var wrapper = new DelayedMessage(message, dispatchTime);
                 _messages.Enqueue(wrapper);
-                AppendDebugMessage("MessageDispatcher.\tMessage delayed: " + wrapper);
+                AppendDebugLogMessage("MessageDispatcher.\tMessage delayed: " + wrapper);
             }
         }
 
@@ -63,7 +62,7 @@ namespace FlekoSoft.Common.Messaging
             {
                 if (_messages.TryDequeue(out mw))
                 {
-                    AppendDebugMessage("MessageDispatcher.\tDispatching delayed message (Dispatch time = " + mw.DispatchTime.ToString("hh:mm:ss.fffffff") + "): ");
+                    AppendDebugLogMessage("MessageDispatcher.\tDispatching delayed message (Dispatch time = " + mw.DispatchTime.ToString("hh:mm:ss.fffffff") + "): ");
                     ProcessMessage(mw.Message);
                 }
                 peeked = _messages.TryPeek(out mw);
@@ -83,7 +82,7 @@ namespace FlekoSoft.Common.Messaging
                 if (message.Receiver == null)
                 {
                     handler.HandleMessage(message);
-                    AppendDebugMessage("\t\t\tBroadcast message dispatched: " + message + " Receiver: " + handler);
+                    AppendDebugLogMessage("\t\t\tBroadcast message dispatched: " + message + " Receiver: " + handler);
                 }
                 else
                 {
@@ -91,11 +90,11 @@ namespace FlekoSoft.Common.Messaging
                     {
                         if (!handler.HandleMessage(message))
                         {
-                            AppendDebugMessage("\t\t\tMessage not handled: " + message);
+                            AppendDebugLogMessage("\t\t\tMessage not handled: " + message);
                         }
                         else
                         {
-                            AppendDebugMessage("\t\t\tMessage dispatched: " + message);
+                            AppendDebugLogMessage("\t\t\tMessage dispatched: " + message);
                         }
                     }
                 }
@@ -111,11 +110,11 @@ namespace FlekoSoft.Common.Messaging
             if (!_handlers.Contains(handler))
             {
                 _handlers.Add(handler);
-                AppendDebugMessage("MessageDispatcher.\tHandler registred: " + handler);
+                AppendDebugLogMessage("MessageDispatcher.\tHandler registred: " + handler);
             }
             else
             {
-                AppendDebugMessage("MessageDispatcher.\tHandler has allready registred: " + handler);
+                AppendDebugLogMessage("MessageDispatcher.\tHandler has allready registred: " + handler);
             }
         }
 
@@ -128,11 +127,11 @@ namespace FlekoSoft.Common.Messaging
             if (_handlers.Contains(handler))
             {
                 _handlers.Remove(handler);
-                AppendDebugMessage("MessageDispatcher.\tHandler removed: " + handler);
+                AppendDebugLogMessage("MessageDispatcher.\tHandler removed: " + handler);
             }
             else
             {
-                AppendDebugMessage("MessageDispatcher.\tHandler is not registred: " + handler);
+                AppendDebugLogMessage("MessageDispatcher.\tHandler is not registred: " + handler);
             }
         }
     }

@@ -1,4 +1,4 @@
-﻿namespace FlekoSoft.Common.Messaging
+﻿namespace Flekosoft.Common.Messaging
 {
     public class MessageHandler: IMessageHandler
     {

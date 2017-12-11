@@ -5,7 +5,8 @@ using System.ComponentModel;
 
 namespace Flekosoft.Common.Collection
 {
-    public class DictionaryCollection<TK, TV> : DictionaryCollectionBase<TK, TV>
+    [TypeConverter(typeof(ExpandableObjectConverter))]
+    public partial class DictionaryCollection<TK, TV> : DictionaryCollectionBase<TK, TV>, ICustomTypeDescriptor
     {
         protected Dictionary<TK, TV> InternalCollection { get; } = new Dictionary<TK, TV>();
         public DictionaryCollection(string collectionName, bool disposeItemsOnRemove) : base(collectionName, disposeItemsOnRemove)

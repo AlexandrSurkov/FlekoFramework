@@ -1,7 +1,7 @@
 ﻿using Flekosoft.Common.Logging;
 using Flekosoft.UnitTests.Common.Messaging;
-using FlekoSoft.Common.FiniteStateMachine;
-using FlekoSoft.Common.Messaging;
+using Flekosoft.Common.FiniteStateMachine;
+using Flekosoft.Common.Messaging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Flekosoft.UnitTests.Common.FiniteStateMachine

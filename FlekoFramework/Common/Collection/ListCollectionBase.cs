@@ -54,7 +54,7 @@ namespace Flekosoft.Common.Collection
         /// <returns></returns>
         protected abstract ReadOnlyCollection<T> InternalAsReadOnly();
 
-        public void Add(T item)
+        public bool Add(T item)
         {
             bool res;
             lock (LockObject)
@@ -63,11 +63,12 @@ namespace Flekosoft.Common.Collection
             }
             if (res)
             {
-                Logger.Instance.AppendLog(new LogRecord(DateTime.Now,
+                AppendLogMessage(new LogRecord(DateTime.Now,
                     new List<string> { $"{Name}: The \"{item}\" was added" }, LogRecordLevel.Info));
                 OnCollectionChanged(
                     new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, new List<T> { item }));
             }
+            return res;
         }
 
         public bool Contains(T item)
@@ -87,7 +88,7 @@ namespace Flekosoft.Common.Collection
             }
             if (res)
             {
-                Logger.Instance.AppendLog(new LogRecord(DateTime.Now,
+                AppendLogMessage(new LogRecord(DateTime.Now,
                     new List<string> { $"{Name}: The {item} was removed" }, LogRecordLevel.Info));
                 OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, new List<T> { item }));
                 TryToDispose(item);
@@ -126,7 +127,7 @@ namespace Flekosoft.Common.Collection
                 }
                 if (res)
                 {
-                    Logger.Instance.AppendLog(new LogRecord(DateTime.Now,
+                    AppendLogMessage(new LogRecord(DateTime.Now,
                         new List<string> { $"{Name}: The {item} was removed" }, LogRecordLevel.Info));
                     OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, new List<T> { item }));
                     TryToDispose(item);

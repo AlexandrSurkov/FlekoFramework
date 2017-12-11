@@ -1,4 +1,4 @@
-﻿//using FlekoSoft.Common.Observable;
+﻿//using Flekosoft.Common.Observable;
 
 namespace Flekosoft.Common.Math
 {

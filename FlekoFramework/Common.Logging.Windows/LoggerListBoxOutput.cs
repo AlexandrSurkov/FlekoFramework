@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Windows.Forms;
 
 namespace Flekosoft.Common.Logging.Windows
 {
@@ -12,12 +11,13 @@ namespace Flekosoft.Common.Logging.Windows
         private readonly List<LogRecord> _logRecordsList = new List<LogRecord>();
         private readonly List<string> _appendStringsList = new List<string>();
 
-        private readonly ListBox _logBox;
+        private readonly LoggingListBox _logBox;
         private string _filter = string.Empty;
-        private uint _maximumLines = 5000;
+        private uint _maximumLines = 500;
+        private DateTime _lastUpdateTime = DateTime.MinValue;
 
 
-        public LoggerListBoxOutput(ListBox listBox)
+        public LoggerListBoxOutput(LoggingListBox listBox)
         {
             _logBox = listBox;
             _appendTextDelegate = AppendText;
@@ -82,7 +82,14 @@ namespace Flekosoft.Common.Logging.Windows
         public void AppendText(LogRecord logRecord)
         {
             _logRecordsList.Add(logRecord);
+            var now = DateTime.Now;
+            var diff = now - _lastUpdateTime;
             UpdateListBox(false);
+            if (diff.TotalMilliseconds > 100)
+            {
+                UpdateListBox(false);
+                _lastUpdateTime = DateTime.Now;
+            }
         }
 
 
@@ -91,28 +98,40 @@ namespace Flekosoft.Common.Logging.Windows
             _logRecordsList.Clear();
             UpdateListBox(true);
         }
+
         void UpdateListBox(bool clear)
         {
             _logBox.SuspendLayout();
+            _logBox.SuspendRedraw = true;
+            _logBox.BeginUpdate();
+
+            int linesCount = 0;
 
             while (_logRecordsList.Count > MaximumLines)
             {
+                linesCount += _logRecordsList[0].LogStrings.Count;
                 _logRecordsList.RemoveAt(0);
+                //_logBox.TopIndex = _logBox.Items.Count - 1;
             }
 
-            while (_logBox.Items.Count > MaximumLines)
+            for (int i = 0; i < linesCount; i++)
             {
-                _logBox.Items.RemoveAt(0);
+                if (_logBox.Items.Count > 0)
+                    _logBox.Items.RemoveAt(0);
+                _logBox.TopIndex = _logBox.Items.Count - 1;
             }
-            
 
             _appendStringsList.Clear();
+            linesCount = 0;
             foreach (LogRecord record in _logRecordsList)
             {
                 if (LogLevel <= record.RecordType)
                 {
                     if (Filter == String.Empty)
+                    {
                         _appendStringsList.AddRange(record.LogStrings);
+                        linesCount += record.LogStrings.Count;
+                    }
                     else
                     {
                         foreach (string logString in record.LogStrings)
@@ -120,6 +139,7 @@ namespace Flekosoft.Common.Logging.Windows
                             if (logString.Contains(Filter))
                             {
                                 _appendStringsList.AddRange(record.LogStrings);
+                                linesCount += record.LogStrings.Count;
                                 break;
                             }
                         }
@@ -135,7 +155,7 @@ namespace Flekosoft.Common.Logging.Windows
             else
             {
                 var oldItemsCount = _logBox.Items.Count;
-                var newItemsCount = _appendStringsList.Count;
+                var newItemsCount = linesCount;
 
                 //if (newItemsCount < oldItemsCount) _logBox.Items.AddRange(_appendStringsList.ToArray());
                 //else _logBox.Items.AddRange(_appendStringsList.GetRange(oldItemsCount, newItemsCount - oldItemsCount).ToArray());
@@ -144,7 +164,10 @@ namespace Flekosoft.Common.Logging.Windows
 
             _logBox.TopIndex = _logBox.Items.Count - 1;
 
+            _logBox.SuspendRedraw = false;
+            _logBox.EndUpdate();
             _logBox.ResumeLayout();
+
         }
 
         protected override void AppendLogRecordInternal(LogRecord logRecord)

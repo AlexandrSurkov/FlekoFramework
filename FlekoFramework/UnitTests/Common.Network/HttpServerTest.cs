@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Net;
-using System.Threading;
-using Flekosoft.Common.Network;
 using Flekosoft.Common.Network.Http;
 using Flekosoft.Common.Network.Tcp;
 using Microsoft.VisualStudio.TestTools.UnitTesting;

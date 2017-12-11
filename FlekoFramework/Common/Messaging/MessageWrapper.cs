@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace FlekoSoft.Common.Messaging
+namespace Flekosoft.Common.Messaging
 {
     /// <summary>
     /// Хранилище отложенных сообщений

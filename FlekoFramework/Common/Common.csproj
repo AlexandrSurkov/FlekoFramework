@@ -39,6 +39,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Collection\CollectionBase.cs" />
+    <Compile Include="Collection\ComponentModel\ListCollectionItemPropertyDescription.cs" />
+    <Compile Include="Collection\ComponentModel\DictionaryCollectionItemPropertyDescription.cs" />
+    <Compile Include="Collection\ComponentModel\ListCollectionCustomTypeDescriptor.cs" />
+    <Compile Include="Collection\ComponentModel\SortedDictionaryCollectionCustomTypeDescriptor.cs" />
+    <Compile Include="Collection\ComponentModel\DictionaryCollectionCustomTypeDescriptor.cs" />
     <Compile Include="Collection\DictionaryCollection.cs" />
     <Compile Include="Collection\DictionaryCollectionBase.cs" />
     <Compile Include="Collection\ListCollection.cs" />
@@ -48,7 +53,7 @@
     <Compile Include="ErrorNotifyDisposableBase.cs" />
     <Compile Include="FiniteStateMachine\State.cs" />
     <Compile Include="FiniteStateMachine\StateMashine.cs" />
-    <Compile Include="LoggingBase.cs" />
+    <Compile Include="LoggingSerializableBase.cs" />
     <Compile Include="Logging\Definitions.cs" />
     <Compile Include="Logging\Logger.cs" />
     <Compile Include="Logging\LoggerConsoleOutput.cs" />

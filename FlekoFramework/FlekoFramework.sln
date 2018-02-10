@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.27004.2010
+VisualStudioVersion = 15.0.27130.2024
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common", "Common\Common.csproj", "{C1C745EC-463E-49DC-A457-EE232A4D59E2}"
 EndProject
@@ -16,6 +16,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common.Math", "Common.Math\Common.Math.csproj", "{D105322A-19A9-4677-A6C6-3B0638EF1AA6}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common.Serizalization.Windows", "Common.Serizalization.Windows\Common.Serizalization.Windows.csproj", "{62AACB26-338C-4C17-AEFF-4F88D25B56CF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common.Accounts", "Common.Accounts\Common.Accounts.csproj", "{7C879491-C449-409C-B4C9-710CB8923CFE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -51,6 +53,10 @@ Global
 		{62AACB26-338C-4C17-AEFF-4F88D25B56CF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{62AACB26-338C-4C17-AEFF-4F88D25B56CF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{62AACB26-338C-4C17-AEFF-4F88D25B56CF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7C879491-C449-409C-B4C9-710CB8923CFE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7C879491-C449-409C-B4C9-710CB8923CFE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7C879491-C449-409C-B4C9-710CB8923CFE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7C879491-C449-409C-B4C9-710CB8923CFE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -59,7 +65,7 @@ Global
 		SolutionGuid = {0B5BC4C4-6BE3-421E-A1A8-DE39F7B832E3}
 	EndGlobalSection
 	GlobalSection(TeamFoundationVersionControl) = preSolution
-		SccNumberOfProjects = 8
+		SccNumberOfProjects = 9
 		SccEnterpriseProvider = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
 		SccTeamFoundationServer = https://flekosoft.visualstudio.com/
 		SccLocalPath0 = .
@@ -84,5 +90,8 @@ Global
 		SccProjectUniqueName7 = Common.Serizalization.Windows\\Common.Serizalization.Windows.csproj
 		SccProjectName7 = Common.Serizalization.Windows
 		SccLocalPath7 = Common.Serizalization.Windows
+		SccProjectUniqueName8 = Common.Accounts\\Common.Accounts.csproj
+		SccProjectName8 = Common.Accounts
+		SccLocalPath8 = Common.Accounts
 	EndGlobalSection
 EndGlobal

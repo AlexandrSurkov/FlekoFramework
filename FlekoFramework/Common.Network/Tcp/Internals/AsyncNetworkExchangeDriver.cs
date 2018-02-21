@@ -225,7 +225,7 @@ namespace Flekosoft.Common.Network.Tcp.Internals
         //                        var written = _networkInterface.Write(data);
         //                        if (written != data.Length)
         //                        {
-        //                            throw new NetworkWriteException($"{Name}.SendDataSync: Send error. bytes to send " +
+        //                            throw new NetworkWriteException($"{InstanceName}.SendDataSync: Send error. bytes to send " +
         //                                                                   data.Length + " but sent " +
         //                                                                   written + " bytes ");
         //                        }
@@ -314,7 +314,7 @@ namespace Flekosoft.Common.Network.Tcp.Internals
                                     len -= written;
                                     ////if (written != data.Length)
                                     ////{
-                                    ////    throw new NetworkWriteException($"{Name}.SendDataSync: Send error. bytes to send " +
+                                    ////    throw new NetworkWriteException($"{InstanceName}.SendDataSync: Send error. bytes to send " +
                                     ////                                    data.Length + " but sent " +
                                     ////                                    written + " bytes ");
                                     ////}

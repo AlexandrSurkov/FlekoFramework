@@ -8,7 +8,7 @@ namespace Flekosoft.Common.Collection
 {
     public abstract class ListCollectionBase<T> : CollectionBase
     {
-        protected ListCollectionBase(string collectionName, bool disposeItemsOnRemove) : base(collectionName, disposeItemsOnRemove)
+        protected ListCollectionBase(string collectionInstanceName, bool disposeItemsOnRemove) : base(collectionInstanceName, disposeItemsOnRemove)
         {
         }
 
@@ -64,7 +64,7 @@ namespace Flekosoft.Common.Collection
             if (res)
             {
                 AppendLogMessage(new LogRecord(DateTime.Now,
-                    new List<string> { $"{Name}: The \"{item}\" was added" }, LogRecordLevel.Info));
+                    new List<string> { $"{InstanceName}: The \"{item}\" was added" }, LogRecordLevel.Info));
                 OnCollectionChanged(
                     new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, new List<T> { item }));
             }
@@ -89,7 +89,7 @@ namespace Flekosoft.Common.Collection
             if (res)
             {
                 AppendLogMessage(new LogRecord(DateTime.Now,
-                    new List<string> { $"{Name}: The {item} was removed" }, LogRecordLevel.Info));
+                    new List<string> { $"{InstanceName}: The {item} was removed" }, LogRecordLevel.Info));
                 OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, new List<T> { item }));
                 TryToDispose(item);
             }
@@ -128,7 +128,7 @@ namespace Flekosoft.Common.Collection
                 if (res)
                 {
                     AppendLogMessage(new LogRecord(DateTime.Now,
-                        new List<string> { $"{Name}: The {item} was removed" }, LogRecordLevel.Info));
+                        new List<string> { $"{InstanceName}: The {item} was removed" }, LogRecordLevel.Info));
                     OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, new List<T> { item }));
                     TryToDispose(item);
                 }

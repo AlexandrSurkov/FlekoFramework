@@ -53,6 +53,7 @@
     <Compile Include="ErrorNotifyDisposableBase.cs" />
     <Compile Include="FiniteStateMachine\State.cs" />
     <Compile Include="FiniteStateMachine\StateMashine.cs" />
+    <Compile Include="IUniqueEntity.cs" />
     <Compile Include="LoggingSerializableBase.cs" />
     <Compile Include="Logging\Definitions.cs" />
     <Compile Include="Logging\Logger.cs" />

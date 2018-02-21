@@ -10,7 +10,7 @@ namespace Flekosoft.Common.Collection
     {
         protected List<T> InternalCollection { get; } = new List<T>();
 
-        public ListCollection(string collectionName, bool disposeItemsOnRemove) : base(collectionName, disposeItemsOnRemove)
+        public ListCollection(string collectionInstanceName, bool disposeItemsOnRemove) : base(collectionInstanceName, disposeItemsOnRemove)
         {
         }
 

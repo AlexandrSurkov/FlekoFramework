@@ -10,7 +10,7 @@ namespace Flekosoft.Common.Collection
     {
         protected readonly object LockObject = new object();
 
-        protected CollectionBase(string collectionName, bool disposeItemsOnRemove) : base(collectionName)
+        protected CollectionBase(string collectionInstanceName, bool disposeItemsOnRemove) : base(collectionInstanceName)
         {
             DisposeItemsOnRemove = disposeItemsOnRemove;
         }
@@ -45,7 +45,7 @@ namespace Flekosoft.Common.Collection
             {
                 InternalClear();
             }
-            AppendLogMessage(new LogRecord(DateTime.Now, new List<string> { $"{Name} was cleared" }, LogRecordLevel.Info));
+            AppendLogMessage(new LogRecord(DateTime.Now, new List<string> { $"{InstanceName} was cleared" }, LogRecordLevel.Info));
             OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
         }
 
@@ -71,7 +71,7 @@ namespace Flekosoft.Common.Collection
                 CollectionChanged = null;
             }
             base.Dispose(disposing);
-            AppendDebugLogMessage($"{Name} was Disposed");
+            AppendDebugLogMessage($"{InstanceName} was Disposed");
         }
     }
 }

@@ -8,7 +8,7 @@ namespace Flekosoft.Common
         {
         }
 
-        protected PropertyChangedErrorNotifyDisposableBase(string name) : base(name)
+        protected PropertyChangedErrorNotifyDisposableBase(string instanceName) : base(instanceName)
         {
         }
 

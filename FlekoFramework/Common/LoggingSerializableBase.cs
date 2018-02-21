@@ -7,7 +7,6 @@ namespace Flekosoft.Common
 {
     public abstract class LoggingSerializableBase
     {
-       
         public LogRecordLevel LogLevel { get; set; }
 
         protected void AppendExceptionLogMessage(Exception ex)

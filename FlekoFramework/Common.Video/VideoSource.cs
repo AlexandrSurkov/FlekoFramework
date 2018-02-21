@@ -62,7 +62,7 @@ namespace Flekosoft.Common.Video
                     _name = value;
                     OnPropertyChanged(nameof(Name));
 #if DEBUG
-                    Logger.Instance.AppendLog(new LogRecord(DateTime.Now, new List<string> { $"VideoSource {this}: Name was changed to {_name}" }, LogRecordLevel.Debug));
+                    Logger.Instance.AppendLog(new LogRecord(DateTime.Now, new List<string> { $"VideoSource {this}: InstanceName was changed to {_name}" }, LogRecordLevel.Debug));
 #endif
                 }
             }

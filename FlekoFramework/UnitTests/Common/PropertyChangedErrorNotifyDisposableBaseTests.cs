@@ -13,7 +13,7 @@ namespace Flekosoft.UnitTests.Common
 
         }
 
-        public TestClass(string name) : base(name)
+        public TestClass(string instanceName) : base(instanceName)
         {
 
         }
@@ -47,7 +47,7 @@ namespace Flekosoft.UnitTests.Common
         public void Test()
         {
             var tc = new TestClass();
-            Assert.IsTrue(string.IsNullOrEmpty(tc.Name));
+            Assert.IsTrue(string.IsNullOrEmpty(tc.InstanceName));
 
             tc.ErrorEvent += Tc_ErrorEvent;
             ErrorEvent = null;
@@ -81,7 +81,7 @@ namespace Flekosoft.UnitTests.Common
 
             var className = "ClassName";
             tc = new TestClass(className);
-            Assert.AreEqual(className, tc.Name);
+            Assert.AreEqual(className, tc.InstanceName);
         }
 
         [TestMethod]

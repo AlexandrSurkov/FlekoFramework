@@ -8,7 +8,7 @@ namespace Flekosoft.Common.Collection
     public partial class SortedDictionaryCollection<TK, TV> : DictionaryCollectionBase<TK, TV>, ICustomTypeDescriptor
     {
         protected SortedDictionary<TK, TV> InternalCollection { get; }
-        public SortedDictionaryCollection(string collectionName, bool disposeItemsOnRemove, IComparer<TK> comparer) : base(collectionName, disposeItemsOnRemove)
+        public SortedDictionaryCollection(string collectionInstanceName, bool disposeItemsOnRemove, IComparer<TK> comparer) : base(collectionInstanceName, disposeItemsOnRemove)
         {
             InternalCollection = new SortedDictionary<TK, TV>(comparer);
         }

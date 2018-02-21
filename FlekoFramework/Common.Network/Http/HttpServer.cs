@@ -170,7 +170,7 @@ namespace Flekosoft.Common.Network.Http
 //            _thread = new Thread(ThreadProc)
 //            {
 //                IsBackground = true,
-//                Name = "HttpClientListener"
+//                InstanceName = "HttpClientListener"
 //            };
 //            _thread.Start();
 

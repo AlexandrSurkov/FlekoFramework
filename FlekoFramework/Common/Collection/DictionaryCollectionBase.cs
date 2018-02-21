@@ -8,7 +8,7 @@ namespace Flekosoft.Common.Collection
 {
     public abstract class DictionaryCollectionBase<TK, TV> : CollectionBase
     {
-        protected DictionaryCollectionBase(string collectionName, bool disposeItemsOnRemove) : base(collectionName, disposeItemsOnRemove)
+        protected DictionaryCollectionBase(string collectionInstanceName, bool disposeItemsOnRemove) : base(collectionInstanceName, disposeItemsOnRemove)
         {
         }
 
@@ -58,7 +58,7 @@ namespace Flekosoft.Common.Collection
             if (InternalContainsKey(key))
             {
                 AppendLogMessage(new LogRecord(DateTime.Now,
-                    new List<string> { $"{Name}: Key \"{key}\" allready exist" }, LogRecordLevel.Info));
+                    new List<string> { $"{InstanceName}: Key \"{key}\" allready exist" }, LogRecordLevel.Info));
                 return false;
             }
             lock (LockObject)
@@ -68,7 +68,7 @@ namespace Flekosoft.Common.Collection
             if (res)
             {
                 AppendLogMessage(new LogRecord(DateTime.Now,
-                    new List<string> { $"{Name}: Item \"{value}\" with key \"{key}\" was added" }, LogRecordLevel.Info));
+                    new List<string> { $"{InstanceName}: Item \"{value}\" with key \"{key}\" was added" }, LogRecordLevel.Info));
                 OnCollectionChanged(
                     new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, new List<TV> { value }));
             }
@@ -97,7 +97,7 @@ namespace Flekosoft.Common.Collection
             if (!InternalContainsKey(key))
             {
                 AppendLogMessage(new LogRecord(DateTime.Now,
-                    new List<string> { $"{Name}: Key \"{key}\" does not exist" }, LogRecordLevel.Info));
+                    new List<string> { $"{InstanceName}: Key \"{key}\" does not exist" }, LogRecordLevel.Info));
                 return false;
             }
             var value = this[key];
@@ -109,7 +109,7 @@ namespace Flekosoft.Common.Collection
             if (res)
             {
                 AppendLogMessage(new LogRecord(DateTime.Now,
-                    new List<string> { $"{Name}: Item \"{value}\" with key \"{key}\" was removed" }, LogRecordLevel.Info));
+                    new List<string> { $"{InstanceName}: Item \"{value}\" with key \"{key}\" was removed" }, LogRecordLevel.Info));
                 OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, new List<TV> { value }));
                 TryToDispose(value);
             }

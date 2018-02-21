@@ -5,28 +5,28 @@ namespace Flekosoft.Common
 {
     public abstract class ErrorNotifyDisposableBase : DisposableBase
     {
-        protected ErrorNotifyDisposableBase(string name)
+        protected ErrorNotifyDisposableBase(string instanceName)
         {
-            Name = name;
+            InstanceName = instanceName;
         }
 
         protected ErrorNotifyDisposableBase()
         {
-            Name = string.Empty;
+            InstanceName = string.Empty;
         }
 
-        public string Name { get; }
+        public string InstanceName { get; }
         public event EventHandler<ErrorEventArgs> ErrorEvent;
         protected void OnErrorEvent(Exception exception)
         {
-            AppendExceptionLogMessage(new Exception(Name, exception));
+            AppendExceptionLogMessage(new Exception(InstanceName, exception));
             // ReSharper disable once UseNullPropagation
             ErrorEvent?.Invoke(this, new ErrorEventArgs(exception));
         }
 
         public override string ToString()
         {
-            return Name;
+            return InstanceName;
         }
 
         protected override void Dispose(bool disposing)

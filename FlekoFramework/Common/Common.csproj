@@ -38,6 +38,7 @@
     <Reference Include="System" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Assembly.cs" />
     <Compile Include="Collection\CollectionBase.cs" />
     <Compile Include="Collection\ComponentModel\ListCollectionItemPropertyDescription.cs" />
     <Compile Include="Collection\ComponentModel\DictionaryCollectionItemPropertyDescription.cs" />

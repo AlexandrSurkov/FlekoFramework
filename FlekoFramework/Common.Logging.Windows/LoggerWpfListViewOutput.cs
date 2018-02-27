@@ -151,10 +151,13 @@ namespace Flekosoft.Common.Logging.Windows
                 var oldItemsCount = _listView.Items.Count;
                 var newItemsCount = linesCount;
 
-                //if (newItemsCount < oldItemsCount) _logBox.Items.AddRange(_appendStringsList.ToArray());
-                //else _logBox.Items.AddRange(_appendStringsList.GetRange(oldItemsCount, newItemsCount - oldItemsCount).ToArray());
-
                 var range = _appendStringsList.GetRange(oldItemsCount, newItemsCount - oldItemsCount).ToArray();
+
+                if (newItemsCount < oldItemsCount)
+                {
+                    range = _appendStringsList.ToArray();
+                }
+                
                 foreach (string s in range)
                 {
                     _listView.Items.Add(s);
@@ -172,7 +175,7 @@ namespace Flekosoft.Common.Logging.Windows
         {
             if (!_listView.Dispatcher.CheckAccess())
             {
-                _listView.Dispatcher.Invoke(_appendTextDelegate, logRecord);
+                _listView.Dispatcher.BeginInvoke(_appendTextDelegate, logRecord);
             }
             else
             {

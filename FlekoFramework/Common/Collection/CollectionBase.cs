@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using Flekosoft.Common.Logging;
 
@@ -14,12 +13,30 @@ namespace Flekosoft.Common.Collection
         protected CollectionBase(string collectionInstanceName, bool disposeItemsOnRemove) : base(collectionInstanceName)
         {
             DisposeItemsOnRemove = disposeItemsOnRemove;
+            IsUpdateMode = false;
         }
 
         protected bool DisposeItemsOnRemove { get; }
         protected abstract IEnumerator InternalGetEnumerator();
         protected abstract void InternalClear();
         protected abstract int InternalGetCount();
+
+        protected abstract void InternalBeginUpdate();
+        protected abstract void InternalEndUpdate();
+
+        protected bool IsUpdateMode { get; private set; }
+
+        public void BeginUpdate()
+        {
+            IsUpdateMode = true;
+            InternalBeginUpdate();
+        }
+
+        public void EndUpdate()
+        {
+            IsUpdateMode = false;
+            InternalEndUpdate();
+        }
 
         protected void TryToDispose(object obj)
         {

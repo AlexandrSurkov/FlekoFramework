@@ -8,6 +8,10 @@ namespace Flekosoft.Common.Collection
 {
     public abstract class ListCollectionBase<T> : CollectionBase
     {
+        private readonly List<T> _addUpdateList = new List<T>();
+        private readonly List<string> _updateLogList = new List<string>();
+        private readonly List<T> _removeUpdateList = new List<T>();
+
         protected ListCollectionBase(string collectionInstanceName, bool disposeItemsOnRemove) : base(collectionInstanceName, disposeItemsOnRemove)
         {
         }
@@ -54,6 +58,25 @@ namespace Flekosoft.Common.Collection
         /// <returns></returns>
         protected abstract ReadOnlyCollection<T> InternalAsReadOnly();
 
+        protected override void InternalBeginUpdate()
+        {
+            _addUpdateList.Clear();
+            _removeUpdateList.Clear();
+            _updateLogList.Clear();
+        }
+
+        protected override void InternalEndUpdate()
+        {
+            OnCollectionChanged(
+                new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, _addUpdateList));
+            OnCollectionChanged(
+                new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, _removeUpdateList));
+            AppendLogMessage(new LogRecord(DateTime.Now, _updateLogList, LogRecordLevel.Info));
+            _addUpdateList.Clear();
+            _removeUpdateList.Clear();
+            _updateLogList.Clear();
+        }
+
         public bool Add(T item)
         {
             bool res;
@@ -63,9 +86,12 @@ namespace Flekosoft.Common.Collection
             }
             if (res)
             {
-                AppendLogMessage(new LogRecord(DateTime.Now,
-                    new List<string> { $"{InstanceName}: The \"{item}\" was added" }, LogRecordLevel.Info));
-                OnCollectionChanged(
+                var logStr = $"{InstanceName}: The \"{item}\" was added";
+                if (IsUpdateMode) _updateLogList.Add(logStr);
+                else AppendLogMessage(new LogRecord(DateTime.Now, new List<string> { logStr }, LogRecordLevel.Info));
+                
+                if (IsUpdateMode) _addUpdateList.Add(item);
+                else OnCollectionChanged(
                     new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, new List<T> { item }));
             }
             return res;
@@ -88,9 +114,12 @@ namespace Flekosoft.Common.Collection
             }
             if (res)
             {
-                AppendLogMessage(new LogRecord(DateTime.Now,
-                    new List<string> { $"{InstanceName}: The {item} was removed" }, LogRecordLevel.Info));
-                OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, new List<T> { item }));
+                var logStr = $"{InstanceName}: The {item} was removed";
+                if (IsUpdateMode) _updateLogList.Add(logStr);
+                else AppendLogMessage(new LogRecord(DateTime.Now, new List<string> { logStr }, LogRecordLevel.Info));
+
+                if (IsUpdateMode) _removeUpdateList.Add(item);
+                else OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, new List<T> { item }));
                 TryToDispose(item);
             }
             return res;
@@ -127,9 +156,12 @@ namespace Flekosoft.Common.Collection
                 }
                 if (res)
                 {
-                    AppendLogMessage(new LogRecord(DateTime.Now,
-                        new List<string> { $"{InstanceName}: The {item} was removed" }, LogRecordLevel.Info));
-                    OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, new List<T> { item }));
+                    var logStr = $"{InstanceName}: The {item} was removed";
+                    if (IsUpdateMode) _updateLogList.Add(logStr);
+                    else AppendLogMessage(new LogRecord(DateTime.Now, new List<string> { logStr }, LogRecordLevel.Info));
+                    
+                    if (IsUpdateMode) _removeUpdateList.Add(item);
+                    else  OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, new List<T> { item }));
                     TryToDispose(item);
                 }
             }

@@ -65,10 +65,10 @@ namespace Flekosoft.Common.Collection
 
         protected override void InternalEndUpdate()
         {
-            OnCollectionChanged(
-                new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, _addUpdateList));
-            OnCollectionChanged(
-                new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, _removeUpdateList));
+            if (_addUpdateList.Count > 0) OnCollectionChanged(
+                new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, new List<TV>(_addUpdateList)));
+            if (_removeUpdateList.Count > 0) OnCollectionChanged(
+                new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, new List<TV>(_removeUpdateList)));
             AppendLogMessage(new LogRecord(DateTime.Now, _updateLogList, LogRecordLevel.Info));
             _addUpdateList.Clear();
             _removeUpdateList.Clear();
@@ -138,7 +138,7 @@ namespace Flekosoft.Common.Collection
                 if (IsUpdateMode) _updateLogList.Add(logStr);
                 else AppendLogMessage(new LogRecord(DateTime.Now, new List<string> { logStr }, LogRecordLevel.Info));
 
-                if (IsUpdateMode) _addUpdateList.Add(value);
+                if (IsUpdateMode) _removeUpdateList.Add(value);
                 else OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, new List<TV> { value }));
                 TryToDispose(value);
             }

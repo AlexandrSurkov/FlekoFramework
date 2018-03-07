@@ -340,6 +340,73 @@ namespace Flekosoft.UnitTests.Common.Collection
 
         }
 
+        [TestMethod]
+        public void CollectionUpdateTest()
+        {
+            var name = "TestCollection";
+            DictionaryCollection<int, DictionaryItemTestClass> collection = new DictionaryCollection<int, DictionaryItemTestClass>(name, true);
+            collection.CollectionChanged += Collection_CollectionChanged;
+            var itemList = new List<DictionaryItemTestClass>();
+
+
+            _notifyCollectionChangedEventArgs = null;
+            Assert.AreEqual(0, collection.Count);
+            Assert.IsNull(_notifyCollectionChangedEventArgs);
+            Assert.IsNull(_propertyChangedEventArgs);
+            var item = new DictionaryItemTestClass();
+            Assert.IsTrue(collection.Add(0, item));
+            Assert.IsNotNull(_notifyCollectionChangedEventArgs);
+            Assert.AreEqual(NotifyCollectionChangedAction.Add, _notifyCollectionChangedEventArgs.Action);
+            Assert.AreEqual(item, _notifyCollectionChangedEventArgs.NewItems[0]);
+            Assert.IsNull(_notifyCollectionChangedEventArgs.OldItems);
+            Assert.AreEqual(1, collection.Count);
+            collection.BeginUpdate();
+            for (int i = 0; i < 10; i++)
+            {
+                _notifyCollectionChangedEventArgs = null;
+                item = new DictionaryItemTestClass() { Prop = i + 1 };
+                itemList.Add(item);
+                Assert.IsNull(_notifyCollectionChangedEventArgs);
+                Assert.IsTrue(collection.Add(i + 1, item));
+                Assert.IsNull(_notifyCollectionChangedEventArgs);
+            }
+            Assert.AreEqual(11, collection.Count);
+            Assert.IsNull(_notifyCollectionChangedEventArgs);
+            collection.EndUpdate();
+
+            Assert.IsNotNull(_notifyCollectionChangedEventArgs);
+            Assert.AreEqual(NotifyCollectionChangedAction.Add, _notifyCollectionChangedEventArgs.Action);
+            for (int i = 0; i < itemList.Count; i++)
+            {
+                Assert.AreEqual(itemList[i], _notifyCollectionChangedEventArgs.NewItems[i]);
+            }
+            Assert.IsNull(_notifyCollectionChangedEventArgs.OldItems);
+
+
+            collection.BeginUpdate();
+            for (int i = 0; i < 10; i++)
+            {
+                _notifyCollectionChangedEventArgs = null;
+                Assert.IsNull(_notifyCollectionChangedEventArgs);
+                collection.Remove(i + 1);
+                Assert.IsNull(_notifyCollectionChangedEventArgs);
+            }
+            Assert.AreEqual(1, collection.Count);
+            Assert.IsNull(_notifyCollectionChangedEventArgs);
+            collection.EndUpdate();
+
+            Assert.IsNotNull(_notifyCollectionChangedEventArgs);
+            Assert.AreEqual(NotifyCollectionChangedAction.Remove, _notifyCollectionChangedEventArgs.Action);
+            Assert.IsNotNull(_notifyCollectionChangedEventArgs.OldItems);
+            for (int i = 0; i < itemList.Count; i++)
+            {
+                Assert.AreEqual(itemList[i], _notifyCollectionChangedEventArgs.OldItems[i]);
+            }
+            Assert.IsNull(_notifyCollectionChangedEventArgs.NewItems);
+
+            collection.Dispose();
+        }
+
         private void Collection_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
             _propertyChangedEventArgs = e;

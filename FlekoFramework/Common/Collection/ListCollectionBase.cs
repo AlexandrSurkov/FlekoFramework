@@ -67,10 +67,10 @@ namespace Flekosoft.Common.Collection
 
         protected override void InternalEndUpdate()
         {
-            OnCollectionChanged(
-                new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, _addUpdateList));
-            OnCollectionChanged(
-                new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, _removeUpdateList));
+            if (_addUpdateList.Count > 0) OnCollectionChanged(
+                   new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, new List<T>(_addUpdateList)));
+            if (_removeUpdateList.Count > 0) OnCollectionChanged(
+                new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, new List<T>(_removeUpdateList)));
             AppendLogMessage(new LogRecord(DateTime.Now, _updateLogList, LogRecordLevel.Info));
             _addUpdateList.Clear();
             _removeUpdateList.Clear();
@@ -89,7 +89,7 @@ namespace Flekosoft.Common.Collection
                 var logStr = $"{InstanceName}: The \"{item}\" was added";
                 if (IsUpdateMode) _updateLogList.Add(logStr);
                 else AppendLogMessage(new LogRecord(DateTime.Now, new List<string> { logStr }, LogRecordLevel.Info));
-                
+
                 if (IsUpdateMode) _addUpdateList.Add(item);
                 else OnCollectionChanged(
                     new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, new List<T> { item }));
@@ -159,9 +159,9 @@ namespace Flekosoft.Common.Collection
                     var logStr = $"{InstanceName}: The {item} was removed";
                     if (IsUpdateMode) _updateLogList.Add(logStr);
                     else AppendLogMessage(new LogRecord(DateTime.Now, new List<string> { logStr }, LogRecordLevel.Info));
-                    
+
                     if (IsUpdateMode) _removeUpdateList.Add(item);
-                    else  OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, new List<T> { item }));
+                    else OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, new List<T> { item }));
                     TryToDispose(item);
                 }
             }

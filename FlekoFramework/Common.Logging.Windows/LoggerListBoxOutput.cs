@@ -17,7 +17,7 @@ namespace Flekosoft.Common.Logging.Windows
         private DateTime _lastUpdateTime = DateTime.MinValue;
 
 
-        public LoggerListBoxOutput(LoggingListBox listBox)
+        public LoggerListBoxOutput(LoggingListBox listBox) : base("Logger ListBox output")
         {
             _logBox = listBox;
             _appendTextDelegate = AppendText;

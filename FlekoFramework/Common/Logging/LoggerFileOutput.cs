@@ -5,7 +5,7 @@ namespace Flekosoft.Common.Logging
     public class LoggerFileOutput : LoggerOutput
     {
         private readonly string _logFilePath;
-        public LoggerFileOutput(string logFilePath)
+        public LoggerFileOutput(string logFilePath) : base("Logger file output")
         {
             _logFilePath = logFilePath;
         }

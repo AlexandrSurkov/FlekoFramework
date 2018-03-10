@@ -15,6 +15,10 @@ namespace Flekosoft.UnitTests.Common.Logging
         {
             LogRecord = logRecord;
         }
+
+        public Writer() : base("TestLogOutput")
+        {
+        }
     }
 
     [TestClass]
@@ -111,7 +115,9 @@ namespace Flekosoft.UnitTests.Common.Logging
                 Logger.Instance.AppendLog(logRecord);
                 Thread.Sleep(5);//Wait until async threads did their work
 
-                var str = sw.GetStringBuilder().ToString();
+                var strs = sw.GetStringBuilder().ToString().Split(new string[] { "\r\n" }, StringSplitOptions.RemoveEmptyEntries);
+                var str = $"{strs[1]}\r\n{strs[2]}\r\n";
+
                 var srcStr = $"{logRecord.LogStrings[0]}\r\n{logRecord.LogStrings[1]}\r\n";
                 var res = String.CompareOrdinal(str, srcStr);
                 Assert.AreEqual(0, res, str);
@@ -119,7 +125,8 @@ namespace Flekosoft.UnitTests.Common.Logging
                 Logger.Instance.LogerOutputs.Clear();
 
                 Logger.Instance.AppendLog(logRecord);
-                str = sw.GetStringBuilder().ToString();
+                strs = sw.GetStringBuilder().ToString().Split(new string[] { "\r\n" }, StringSplitOptions.RemoveEmptyEntries);
+                str = $"{strs[1]}\r\n{strs[2]}\r\n";
                 srcStr = $"{logRecord.LogStrings[0]}\r\n{logRecord.LogStrings[1]}\r\n";
                 res = String.CompareOrdinal(str, srcStr);
                 Assert.AreEqual(0, res, str);

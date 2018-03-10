@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.IO;
 
 namespace Flekosoft.Common
 {
@@ -14,6 +15,12 @@ namespace Flekosoft.Common
                 }
             }
             return false;
+        }
+
+        public static string GetPath(System.Reflection.Assembly assembly)
+        {
+            var file = assembly.Location;
+            return Path.GetDirectoryName(file);
         }
     }
 }

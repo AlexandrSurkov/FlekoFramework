@@ -82,6 +82,9 @@
     <Compile Include="Common\Messaging\MessagingTests.cs" />
     <Compile Include="Common\Observable\ObservableTests.cs" />
     <Compile Include="Common\PropertyChangedErrorNotifyDisposableBaseTests.cs" />
+    <Compile Include="Plugins\TestPlugin.cs" />
+    <Compile Include="Plugins\PluginManagerTests.cs" />
+    <Compile Include="Plugins\PluginTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Serialization\CollectionSerializerTests.cs" />
   </ItemGroup>
@@ -100,6 +103,10 @@
     <ProjectReference Include="..\Common.Network\Common.Network.csproj">
       <Project>{41D3FED6-A0E5-481B-A84F-8E6E409466ED}</Project>
       <Name>Common.Network</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Common.Plugins\Common.Plugins.csproj">
+      <Project>{285B4569-4570-4CB7-AF27-358538194C70}</Project>
+      <Name>Common.Plugins</Name>
     </ProjectReference>
     <ProjectReference Include="..\Common.Video\Common.Video.csproj">
       <Project>{4DE7BC71-64DC-46CD-A326-580D1EC78BF6}</Project>

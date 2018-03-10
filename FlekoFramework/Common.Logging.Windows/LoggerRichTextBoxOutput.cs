@@ -9,7 +9,7 @@ namespace Flekosoft.Common.Logging.Windows
 
         private readonly RichTextBox _logBox;
 
-        public LoggerRichTextBoxOutput(RichTextBox listBox)
+        public LoggerRichTextBoxOutput(RichTextBox listBox) : base("Logger RichTextBox output")
         {
             _logBox = listBox;
             _appendTextDelegate = AppendText;

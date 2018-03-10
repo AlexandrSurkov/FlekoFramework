@@ -19,7 +19,7 @@ namespace Flekosoft.Common.Logging
         private LogRecordLevel _logLevel;
         private DateTimeFormat _dateTimeFormat;
 
-        protected LoggerOutput()
+        protected LoggerOutput(string instanceName) : base(instanceName)
         {
             _cultureInfo = CultureInfo.CurrentCulture;
             _uiCultureInfo = CultureInfo.CurrentUICulture;

@@ -11,5 +11,9 @@ namespace Flekosoft.Common.Logging
                 Console.WriteLine(logString);
             }
         }
+
+        public LoggerConsoleOutput() : base("Logger console output")
+        {
+        }
     }
 }

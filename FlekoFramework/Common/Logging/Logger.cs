@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Flekosoft.Common.Collection;
 
 namespace Flekosoft.Common.Logging
 {
@@ -13,7 +14,7 @@ namespace Flekosoft.Common.Logging
 
         public static LoggerOutput ConsoleOutput = new LoggerConsoleOutput();
 
-        public List<LoggerOutput> LogerOutputs { get; } = new List<LoggerOutput>();
+        public ListCollection<LoggerOutput> LogerOutputs { get; } = new ListCollection<LoggerOutput>("Logger outputs collection", true);
 
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]

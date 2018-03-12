@@ -1,7 +1,7 @@
-﻿namespace Common.Plugins.Windows
+﻿namespace Flekosoft.Common.Plugins.Windows
 {
-    public interface IWinFormsControlPlugin
+    public interface IWinFormsControlPlugin : IPlugin
     {
-        System.Windows.Forms.ContainerControl GetControl();
+        System.Windows.Forms.ContainerControl GetControl(object instance);
     }
 }

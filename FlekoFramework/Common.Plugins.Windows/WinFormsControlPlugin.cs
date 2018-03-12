@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Windows.Forms;
-using Flekosoft.Common.Plugins;
 
-namespace Common.Plugins.Windows
+namespace Flekosoft.Common.Plugins.Windows
 {
     public abstract class WinFormsControlPlugin : Plugin, IWinFormsControlPlugin
     {
@@ -10,12 +9,16 @@ namespace Common.Plugins.Windows
         {
         }
 
-        protected abstract ContainerControl InternalGetControl();
+        protected abstract ContainerControl InternalGetControl(object instance);
 
 
-        public ContainerControl GetControl()
+        public ContainerControl GetControl(object instance)
         {
-            return InternalGetControl();
+            if (Type == instance.GetType())
+            {
+                return InternalGetControl(instance);
+            }
+            return null;
         }
     }
 }

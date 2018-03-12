@@ -7,8 +7,8 @@
     <ProjectGuid>{8F141FFE-B2B1-4E46-B39C-B0E81BEC6998}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Common.Plugins.Windows</RootNamespace>
-    <AssemblyName>Common.Plugins.Windows</AssemblyName>
+    <RootNamespace>Flekosoft.Common.Plugins.Windows</RootNamespace>
+    <AssemblyName>Flekosoft.Common.Plugins.Windows</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile>Client</TargetFrameworkProfile>

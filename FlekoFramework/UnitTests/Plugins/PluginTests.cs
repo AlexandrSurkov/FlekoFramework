@@ -12,8 +12,8 @@ namespace Flekosoft.UnitTests.Plugins
             var guid = Guid.NewGuid();
             var name = "23";
             var desc = "wqe";
-            var type = typeof(TestPluginInstance);
-            var tp = new TestPlugin(guid, type, name, desc, false);
+            var type = typeof(TestPluginInstance1);
+            var tp = new TestPluginType1(guid, type, name, desc, false);
 
             Assert.AreEqual(guid, tp.Guid);
             Assert.AreEqual(name, tp.Name);
@@ -22,7 +22,7 @@ namespace Flekosoft.UnitTests.Plugins
 
             var instance = tp.GetInstance();
             Assert.AreEqual(tp.Type, instance.GetType());
-            var p = instance as TestPluginInstance;
+            var p = instance as TestPluginInstance1;
             Assert.IsNotNull(p);
 
             Assert.IsFalse(p.IsDisposed);
@@ -36,17 +36,17 @@ namespace Flekosoft.UnitTests.Plugins
             var guid = Guid.NewGuid();
             var name = "23";
             var desc = "wqe";
-            var type = typeof(TestPluginInstance);
-            var tp = new TestPlugin(guid, type, name, desc, false);
+            var type = typeof(TestPluginInstance1);
+            var tp = new TestPluginType1(guid, type, name, desc, false);
 
             var instance1 = tp.GetInstance();
             Assert.AreEqual(tp.Type, instance1.GetType());
-            var p1 = instance1 as TestPluginInstance;
+            var p1 = instance1 as TestPluginInstance1;
             Assert.IsNotNull(p1);
 
             var instance2 = tp.GetInstance();
             Assert.AreEqual(tp.Type, instance2.GetType());
-            var p2 = instance2 as TestPluginInstance;
+            var p2 = instance2 as TestPluginInstance1;
             Assert.IsNotNull(p2);
 
             Assert.AreNotEqual(instance1, instance2);
@@ -65,17 +65,17 @@ namespace Flekosoft.UnitTests.Plugins
             var guid = Guid.NewGuid();
             var name = "23";
             var desc = "wqe";
-            var type = typeof(TestPluginInstance);
-            var tp = new TestPlugin(guid, type, name, desc, true);
+            var type = typeof(TestPluginInstance1);
+            var tp = new TestPluginType1(guid, type, name, desc, true);
 
             var instance1 = tp.GetInstance();
             Assert.AreEqual(tp.Type, instance1.GetType());
-            var p1 = instance1 as TestPluginInstance;
+            var p1 = instance1 as TestPluginInstance1;
             Assert.IsNotNull(p1);
 
             var instance2 = tp.GetInstance();
             Assert.AreEqual(tp.Type, instance2.GetType());
-            var p2 = instance2 as TestPluginInstance;
+            var p2 = instance2 as TestPluginInstance1;
             Assert.IsNotNull(p2);
 
             Assert.AreEqual(instance1, instance2);

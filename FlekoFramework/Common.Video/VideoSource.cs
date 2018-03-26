@@ -52,7 +52,7 @@ namespace Flekosoft.Common.Video
             }
         }
 
-        public new string Name
+        public string Name
         {
             get { return _name; }
             set

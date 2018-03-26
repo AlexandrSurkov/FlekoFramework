@@ -75,7 +75,7 @@ namespace Flekosoft.Common.Logging
             }
         }
 
-        public LogRecordLevel LogLevel
+        public new LogRecordLevel LogLevel
         {
             get => _logLevel;
             set

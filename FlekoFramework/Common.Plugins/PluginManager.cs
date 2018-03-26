@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using Flekosoft.Common.Collection;
 
 namespace Flekosoft.Common.Plugins
@@ -24,16 +26,75 @@ namespace Flekosoft.Common.Plugins
         private readonly List<IPlugin> _plugins = new List<IPlugin>();
         public ListCollection<IPluginProvider> PluginProviders { get; } = new ListCollection<IPluginProvider>("Plugin providers collection", true);
 
-        public PluginManager()
-        {
-        }
-
+        /// <summary>
+        /// Get all IPlugin instances
+        /// </summary>
+        /// <returns></returns>
         public ReadOnlyCollection<IPlugin> GetPlugins()
         {
             if (_plugins.Count == 0) ReloadPlugins();
             return _plugins.AsReadOnly();
         }
 
+        /// <summary>
+        /// Get all instances of type T where T inherits IPlugin
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public ReadOnlyCollection<T> GetPlugins<T>()
+        {
+            var res = new List<T>();
+            if (typeof(T) == typeof(IPlugin) || typeof(T).GetInterfaces().Contains(typeof(IPlugin)))
+            {
+                var pl = GetPlugins();
+                foreach (IPlugin plugin in pl)
+                {
+                    var interfaces = plugin.GetType().GetInterfaces();
+                    if (interfaces.Contains(typeof(T)) || plugin is T) res.Add((T)plugin);
+                }
+            }
+            return res.AsReadOnly();
+        }
+
+        /// <summary>
+        /// Get all instances of type T where T inherits IPlugin and IPlugin.Type equals type
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="type"></param>
+        /// <returns></returns>
+        public ReadOnlyCollection<T> GetPlugins<T>(Type type)
+        {
+            var res = new List<T>();
+            var pl = GetPlugins<T>();
+            foreach (var unknown in pl)
+            {
+                var plugin = unknown as IPlugin;
+                if (plugin?.Type == type) res.Add(unknown);
+            }
+            return res.AsReadOnly();
+        }
+
+        public T GetPlugin<T>(string name)
+        {
+            var pl = GetPlugins<T>();
+
+            foreach (var unknown in pl)
+            {
+                var plugin = unknown as IPlugin;
+                if (plugin?.Name == name) return unknown;
+            }
+            return default(T);
+        }
+
+        public IPlugin GetPlugin(string name)
+        {
+            return GetPlugin<IPlugin>(name);
+        }
+
+
+        /// <summary>
+        /// Reload all IPlugin instances from all providers
+        /// </summary>
         public void ReloadPlugins()
         {
             ClearPlugins();

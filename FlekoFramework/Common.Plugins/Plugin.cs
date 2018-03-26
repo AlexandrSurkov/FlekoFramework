@@ -32,19 +32,13 @@ namespace Flekosoft.Common.Plugins
                 _instancesList.Add(instance);
                 return instance;
             }
-            else
+            if (_instancesList.Count == 0)
             {
-                if (_instancesList.Count == 0)
-                {
-                    var instance = InternalGetInstance();
-                    _instancesList.Add(instance);
-                    return instance;
-                }
-                else
-                {
-                    return _instancesList[0];
-                }
+                var instance = InternalGetInstance();
+                _instancesList.Add(instance);
+                return instance;
             }
+            return _instancesList[0];
         }
 
         public bool IsSingleInstance { get; }

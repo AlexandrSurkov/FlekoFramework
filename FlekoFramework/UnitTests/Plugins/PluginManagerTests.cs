@@ -59,6 +59,12 @@ namespace Flekosoft.UnitTests.Plugins
             var psI1 = pm.GetPlugins<ITestPluginType1>();
             Assert.AreEqual(provider1.PluginsCount + provider3.Plugins1Count, psI1.Count);
 
+            var pst = pm.GetPlugins(typeof(TestPluginInstance1));
+            Assert.AreEqual(provider1.PluginsCount + provider3.Plugins1Count, pst.Count);
+
+            pst = pm.GetPlugins(typeof(TestPluginInstance2));
+            Assert.AreEqual(provider3.Plugins2Count, pst.Count);
+
             var ps1 = pm.GetPlugins<TestPluginType1>();
             Assert.AreEqual(provider1.PluginsCount + provider3.Plugins1Count, ps1.Count);
 
@@ -67,6 +73,9 @@ namespace Flekosoft.UnitTests.Plugins
 
             ps1 = pm.GetPlugins<TestPluginType1>(typeof(TestPluginInstance2));
             Assert.AreEqual(0, ps1.Count);
+
+            ps1 = pm.GetPlugins<TestPluginType1>(typeof(IDisposable));
+            Assert.AreEqual(provider1.PluginsCount + provider3.Plugins1Count, ps1.Count);
 
             var psI2 = pm.GetPlugins<ITestPluginType2>();
             Assert.AreEqual(provider3.Plugins2Count, psI2.Count);

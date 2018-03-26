@@ -60,18 +60,26 @@ namespace Flekosoft.Common.Plugins
         /// Get all instances of type T where T inherits IPlugin and IPlugin.Type equals type
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <param name="type"></param>
+        /// <param name="instanceType"></param>
         /// <returns></returns>
-        public ReadOnlyCollection<T> GetPlugins<T>(Type type)
+        public ReadOnlyCollection<T> GetPlugins<T>(Type instanceType)
         {
             var res = new List<T>();
             var pl = GetPlugins<T>();
             foreach (var unknown in pl)
             {
-                var plugin = unknown as IPlugin;
-                if (plugin?.Type == type) res.Add(unknown);
+                if (unknown is IPlugin plugin)
+                {
+                    if (plugin.Type == instanceType || plugin.Type.GetInterfaces().Contains(instanceType))
+                        res.Add(unknown);
+                }
             }
             return res.AsReadOnly();
+        }
+
+        public ReadOnlyCollection<IPlugin> GetPlugins(Type instanceType)
+        {
+            return GetPlugins<IPlugin>(instanceType);
         }
 
         public T GetPlugin<T>(string name)

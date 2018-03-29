@@ -6,6 +6,7 @@ namespace Flekosoft.Common.Plugins
     public abstract class Plugin : PropertyChangedErrorNotifyDisposableBase, IPlugin
     {
         readonly List<object> _instancesList = new List<object>();
+        private bool _isEnabled;
 
         protected Plugin(Guid guid, Type type, string name, string description, bool isSingleInstance) : base($"{name} ({guid})")
         {
@@ -23,6 +24,20 @@ namespace Flekosoft.Common.Plugins
         public string Description { get; }
 
         public Type Type { get; }
+
+        public bool IsEnabled
+        {
+            get => _isEnabled;
+            set
+            {
+                if (_isEnabled != value)
+                {
+                    AppendDebugLogMessage($"{this}.{nameof(IsEnabled)} was changed from {_isEnabled} to {value}");
+                    _isEnabled = value;
+                    OnPropertyChanged(nameof(IsEnabled));
+                }
+            }
+        }
 
         public object GetInstance()
         {

@@ -24,6 +24,15 @@ namespace Flekosoft.Common.Network.Http
             return respond;
         }
 
+        public string CreateInternalServerErrorRespond()
+        {
+            var respond = "HTTP/1.1 500 Internal Server Error\r\n";
+            respond += "Content-Type: text/plain\r\n";
+            respond += "Content-Length: 0\r\n";
+            respond += "Connection: close\r\n\r\n";
+            return respond;
+        }
+
         protected override void ProcessDataInternal(NetworkDataEventArgs e)
         {
             _networkReceivedString += Encoding.UTF8.GetString(e.Data);

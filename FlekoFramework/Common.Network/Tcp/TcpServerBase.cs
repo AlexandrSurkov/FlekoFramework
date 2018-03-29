@@ -12,6 +12,7 @@ namespace Flekosoft.Common.Network.Tcp
     {
         private readonly List<ListenSocket> _listenSockets = new List<ListenSocket>();
         private bool _isStarted;
+        private bool _connectRequestThreadPaused = true;
 
         private readonly Thread _waitConnectionThread;
         private readonly object _listenSocketsSyncObject = new object();
@@ -31,7 +32,7 @@ namespace Flekosoft.Common.Network.Tcp
         /// </summary>
         public bool IsStarted
         {
-            get { return _isStarted; }
+            get => _isStarted;
             protected set
             {
                 if (_isStarted != value)
@@ -88,8 +89,9 @@ namespace Flekosoft.Common.Network.Tcp
                 {
                     lock (_listenSocketsSyncObject)
                     {
-                        if (IsStarted)
+                        if (!_connectRequestThreadPaused)
                         {
+                            IsStarted = true;
                             var removeList = new List<SocketAsyncNetworkExchangeDriver>();
 
                             foreach (ListenSocket ls in _listenSockets)
@@ -118,7 +120,7 @@ namespace Flekosoft.Common.Network.Tcp
                                     //{
                                     ls.AcceptBeginned = true; //STRONG in this order! First is Accept begin = true. Second is  Begin Accept !!!
                                     ls.Socket.BeginAccept(AcceptCallback, ls);
-                                    
+
                                     //}
                                 }
                                 catch (ThreadAbortException)
@@ -130,6 +132,7 @@ namespace Flekosoft.Common.Network.Tcp
                         else
                         {
                             ClearSocketLists();
+                            IsStarted = false;
                         }
                     }
                     Thread.Sleep(1);
@@ -184,13 +187,21 @@ namespace Flekosoft.Common.Network.Tcp
                 {
                     OnErrorEvent(ex);
                 }
-                IsStarted = true;
+                _connectRequestThreadPaused = false;
+            }
+            while (IsStarted == false)
+            {
+                Thread.Sleep(1);
             }
         }
 
         public void Stop()
         {
-            IsStarted = false;
+            _connectRequestThreadPaused = true;
+            while (IsStarted)
+            {
+                Thread.Sleep(1);
+            }
         }
 
         public bool Write(byte[] data, IPEndPoint localEndPoint, IPEndPoint remoteEndPoint)
@@ -380,6 +391,7 @@ namespace Flekosoft.Common.Network.Tcp
         {
             if (disposing)
             {
+                Stop();
                 if (_waitConnectionThread != null)
                 {
                     if (_waitConnectionThread.IsAlive)
@@ -387,7 +399,6 @@ namespace Flekosoft.Common.Network.Tcp
                         _waitConnectionThread.Abort();
                     }
                 }
-                Stop();
                 ClearSocketLists();
 
                 StoppedEvent = null;

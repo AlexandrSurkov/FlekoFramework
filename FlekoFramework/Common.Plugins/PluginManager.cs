@@ -99,6 +99,23 @@ namespace Flekosoft.Common.Plugins
             return GetPlugin<IPlugin>(name);
         }
 
+        public T GetPlugin<T>(Guid guid)
+        {
+            var pl = GetPlugins<T>();
+
+            foreach (var unknown in pl)
+            {
+                var plugin = unknown as IPlugin;
+                if (plugin?.Guid == guid) return unknown;
+            }
+            return default(T);
+        }
+
+        public IPlugin GetPlugin(Guid guid)
+        {
+            return GetPlugin<IPlugin>(guid);
+        }
+
 
         /// <summary>
         /// Reload all IPlugin instances from all providers

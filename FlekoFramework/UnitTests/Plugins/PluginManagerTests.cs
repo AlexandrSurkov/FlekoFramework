@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using Flekosoft.Common.Plugins;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -104,6 +105,15 @@ namespace Flekosoft.UnitTests.Plugins
 
             var pit4 = pm.GetPlugin<TestPluginType2>(name);
             Assert.IsNull(pit4);
+
+            var pgs = pm.GetPlugins();
+            foreach (IPlugin plugin in pgs)
+            {
+                Assert.AreEqual(plugin,pm.GetPlugin(plugin.Guid));
+
+                if(plugin.GetType().GetInterfaces().Contains(typeof(ITestPluginType1)))
+                    Assert.AreEqual(plugin, pm.GetPlugin<ITestPluginType1>(plugin.Guid));
+            }
 
 
             Assert.IsFalse(provider1.IsDisposed);

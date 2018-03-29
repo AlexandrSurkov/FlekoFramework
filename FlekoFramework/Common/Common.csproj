@@ -52,8 +52,10 @@
     <Compile Include="Collection\SortedDictionaryCollection.cs" />
     <Compile Include="DisposableBase.cs" />
     <Compile Include="ErrorNotifyDisposableBase.cs" />
+    <Compile Include="EventArgs.cs" />
     <Compile Include="FiniteStateMachine\State.cs" />
     <Compile Include="FiniteStateMachine\StateMashine.cs" />
+    <Compile Include="GuidReference.cs" />
     <Compile Include="IUniqueEntity.cs" />
     <Compile Include="LoggingSerializableBase.cs" />
     <Compile Include="Logging\Definitions.cs" />

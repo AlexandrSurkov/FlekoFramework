@@ -20,6 +20,11 @@ namespace Flekosoft.UnitTests.Plugins
             Assert.AreEqual(desc, tp.Description);
             Assert.AreEqual(type, tp.Type);
 
+            tp.IsEnabled = false;
+            Assert.AreEqual(false, tp.IsEnabled);
+            tp.IsEnabled = true;
+            Assert.AreEqual(true, tp.IsEnabled);
+
             var instance = tp.GetInstance();
             Assert.AreEqual(tp.Type, instance.GetType());
             var p = instance as TestPluginInstance1;

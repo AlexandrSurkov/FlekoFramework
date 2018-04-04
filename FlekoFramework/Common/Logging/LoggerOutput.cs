@@ -83,7 +83,7 @@ namespace Flekosoft.Common.Logging
                 if (_logLevel != value)
                 {
                     _logLevel = value;
-                    OnPropertyChanged(nameof(LogRecordLevel));
+                    OnPropertyChanged(nameof(LogLevel));
                 }
             }
         }

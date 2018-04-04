@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Threading;
 using System.Windows.Controls;
 
 namespace Flekosoft.Common.Logging.Windows
@@ -15,28 +16,55 @@ namespace Flekosoft.Common.Logging.Windows
         private readonly ListView _listView;
         private string _filter = string.Empty;
         private uint _maximumLines = 500;
-        private DateTime _lastUpdateTime = DateTime.MinValue;
+        //private DateTime _lastUpdateTime = DateTime.MinValue;
+
+        private readonly Thread _updateThread;
 
 
         public LoggerWpfListViewOutput(ListView listView) : base("Logger WpfListBox output")
         {
             _listView = listView;
             _appendTextDelegate = AppendText;
+            _updateThread = new Thread(UpdateThread);
+            _updateThread.Start();
             PropertyChanged += LoggerListBoxOutput_PropertyChanged;
+        }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
+        void UpdateThread(object o)
+        {
+            while (true)
+            {
+                try
+                {
+                    Thread.Sleep(100);
+                    {
+                        _listView.Dispatcher.Invoke(new Action(delegate { UpdateListBox(false); }));
+                    }
+                }
+                catch (ThreadAbortException)
+                {
+                    break;
+                }
+                catch (Exception ex)
+                {
+                    OnErrorEvent(ex);
+                }
+            }
         }
 
         private void LoggerListBoxOutput_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
             if (!_listView.Dispatcher.CheckAccess()) // CheckAccess returns true if you're on the dispatcher thread
             {
-                if (e.PropertyName == "LogLevel")
+                if (e.PropertyName == nameof(LogLevel))
                 {
                     _listView.Dispatcher.Invoke(new Action(delegate { UpdateListBox(true); }));
                 }
             }
             else
             {
-                if (e.PropertyName == "LogLevel")
+                if (e.PropertyName == nameof(LogLevel))
                 {
                     UpdateListBox(true);
                 }
@@ -73,14 +101,14 @@ namespace Flekosoft.Common.Logging.Windows
         public void AppendText(LogRecord logRecord)
         {
             _logRecordsList.Add(logRecord);
-            var now = DateTime.Now;
-            var diff = now - _lastUpdateTime;
-            UpdateListBox(false);
-            if (diff.TotalMilliseconds > 100)
-            {
-                UpdateListBox(false);
-                _lastUpdateTime = DateTime.Now;
-            }
+            //var now = DateTime.Now;
+            //var diff = now - _lastUpdateTime;
+            ////UpdateListBox(false);
+            //if (diff.TotalMilliseconds > 100)
+            //{
+            //    UpdateListBox(false);
+            //    _lastUpdateTime = DateTime.Now;
+            //}
         }
 
 
@@ -138,6 +166,10 @@ namespace Flekosoft.Common.Logging.Windows
                 }
             }
 
+            var oldItemsCount = _listView.Items.Count;
+            var newItemsCount = linesCount;
+            var delta = newItemsCount - oldItemsCount;
+
             if (clear)
             {
                 _listView.Items.Clear();
@@ -148,23 +180,17 @@ namespace Flekosoft.Common.Logging.Windows
             }
             else
             {
-                var oldItemsCount = _listView.Items.Count;
-                var newItemsCount = linesCount;
+
 
                 var range = _appendStringsList.GetRange(oldItemsCount, newItemsCount - oldItemsCount).ToArray();
 
-                if (newItemsCount < oldItemsCount)
-                {
-                    range = _appendStringsList.ToArray();
-                }
-                
                 foreach (string s in range)
                 {
                     _listView.Items.Add(s);
                 }
             }
 
-            if (_listView.Items.Count > 0)
+            if (_listView.Items.Count > 0 && delta != 0)
             {
                 _listView.ScrollIntoView(_listView.Items[_listView.Items.Count - 1]);
             }
@@ -181,6 +207,21 @@ namespace Flekosoft.Common.Logging.Windows
             {
                 _appendTextDelegate(logRecord);
             }
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                if (_updateThread != null)
+                {
+                    if (_updateThread.IsAlive)
+                    {
+                        _updateThread.Abort();
+                    }
+                }
+            }
+            base.Dispose(disposing);
         }
     }
 }

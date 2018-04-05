@@ -41,15 +41,20 @@ namespace Flekosoft.Common.Plugins
 
         public object GetInstance()
         {
+            return GetInstance(null);
+        }
+
+        public object GetInstance(object param)
+        {
             if (!IsSingleInstance)
             {
-                var instance = InternalGetInstance();
+                var instance = InternalGetInstance(param);
                 _instancesList.Add(instance);
                 return instance;
             }
             if (_instancesList.Count == 0)
             {
-                var instance = InternalGetInstance();
+                var instance = InternalGetInstance(param);
                 _instancesList.Add(instance);
                 return instance;
             }
@@ -58,7 +63,7 @@ namespace Flekosoft.Common.Plugins
 
         public bool IsSingleInstance { get; }
 
-        protected abstract object InternalGetInstance();
+        protected abstract object InternalGetInstance(object param);
 
         protected override void Dispose(bool disposing)
         {

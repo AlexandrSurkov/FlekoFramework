@@ -22,7 +22,7 @@ namespace Flekosoft.UnitTests.Plugins
         {
         }
 
-        protected override object InternalGetInstance()
+        protected override object InternalGetInstance(object param)
         {
             return new TestPluginInstance1();
         }
@@ -34,7 +34,7 @@ namespace Flekosoft.UnitTests.Plugins
         {
         }
 
-        protected override object InternalGetInstance()
+        protected override object InternalGetInstance(object param)
         {
             return new TestPluginInstance2();
         }

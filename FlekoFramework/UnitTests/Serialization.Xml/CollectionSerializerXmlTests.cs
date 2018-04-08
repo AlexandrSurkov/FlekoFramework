@@ -19,11 +19,6 @@ namespace Flekosoft.UnitTests.Serialization.Xml
         {
             throw new NotImplementedException();
         }
-
-        public override void ClearSerializedData()
-        {
-            throw new NotImplementedException();
-        }
     }
 
     [TestClass]
@@ -56,7 +51,7 @@ namespace Flekosoft.UnitTests.Serialization.Xml
             s.XmlRoot.AppendChild(element);
             Assert.AreEqual(2, s.XmlRoot.ChildNodes.Count);
 
-            s.XmlRoot.RemoveAll();
+            s.ClearSerializedData();
             Assert.AreEqual(0, s.XmlRoot.ChildNodes.Count);
 
             s.Dispose();

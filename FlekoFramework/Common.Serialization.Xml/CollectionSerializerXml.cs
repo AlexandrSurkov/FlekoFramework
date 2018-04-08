@@ -15,10 +15,5 @@ namespace Flekosoft.Common.Serialization.Xml
 
         public XmlDocument XmlDocument { get;}
         public XmlElement XmlRoot { get; }
-
-        public override void ClearSerializedData()
-        {
-            XmlRoot.RemoveAll();
-        }
     }
 }

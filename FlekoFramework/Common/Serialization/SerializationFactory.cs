@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Collections.Specialized;
-using Flekosoft.Common.Collection;
 
 namespace Flekosoft.Common.Serialization
 {

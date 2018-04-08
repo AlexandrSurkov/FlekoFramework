@@ -54,6 +54,7 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Common.Math\EllipseTests.cs" />
@@ -87,7 +88,11 @@
     <Compile Include="Plugins\PluginManagerTests.cs" />
     <Compile Include="Plugins\PluginTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Serialization.Xml\SerializerXmlTests.cs" />
+    <Compile Include="Serialization.Xml\CollectionSerializerXmlTests.cs" />
     <Compile Include="Serialization\CollectionSerializerTests.cs" />
+    <Compile Include="Serialization\Heplers.cs" />
+    <Compile Include="Serialization\SerializationFactoryTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Common.Logging.Windows\Common.Logging.Windows.csproj">
@@ -105,6 +110,10 @@
     <ProjectReference Include="..\Common.Plugins\Common.Plugins.csproj">
       <Project>{285B4569-4570-4CB7-AF27-358538194C70}</Project>
       <Name>Common.Plugins</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Common.Serialization.Xml\Common.Serialization.Xml.csproj">
+      <Project>{C5E158BC-AB08-4A68-9B27-643DE27C10E7}</Project>
+      <Name>Common.Serialization.Xml</Name>
     </ProjectReference>
     <ProjectReference Include="..\Common.Video\Common.Video.csproj">
       <Project>{4DE7BC71-64DC-46CD-A326-580D1EC78BF6}</Project>

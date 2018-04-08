@@ -1,0 +1,9 @@
+D:\WORKDIR\Git\FlekoFramework\FlekoFramework\Common.Serialization.Xml\bin\Debug\Flekosoft.Common.Serialization.Xml.dll
+D:\WORKDIR\Git\FlekoFramework\FlekoFramework\Common.Serialization.Xml\bin\Debug\Flekosoft.Common.Serialization.Xml.pdb
+D:\WORKDIR\Git\FlekoFramework\FlekoFramework\Common.Serialization.Xml\bin\Debug\Flekosoft.Common.dll
+D:\WORKDIR\Git\FlekoFramework\FlekoFramework\Common.Serialization.Xml\bin\Debug\Flekosoft.Common.pdb
+D:\WORKDIR\Git\FlekoFramework\FlekoFramework\Common.Serialization.Xml\obj\Debug\Common.Serialization.Xml.csprojResolveAssemblyReference.cache
+D:\WORKDIR\Git\FlekoFramework\FlekoFramework\Common.Serialization.Xml\obj\Debug\Common.Serialization.Xml.csproj.CoreCompileInputs.cache
+D:\WORKDIR\Git\FlekoFramework\FlekoFramework\Common.Serialization.Xml\obj\Debug\Common.Serialization.Xml.csproj.CopyComplete
+D:\WORKDIR\Git\FlekoFramework\FlekoFramework\Common.Serialization.Xml\obj\Debug\Flekosoft.Common.Serialization.Xml.dll
+D:\WORKDIR\Git\FlekoFramework\FlekoFramework\Common.Serialization.Xml\obj\Debug\Flekosoft.Common.Serialization.Xml.pdb

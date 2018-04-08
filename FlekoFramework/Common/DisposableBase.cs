@@ -37,6 +37,7 @@ namespace Flekosoft.Common
                     {
                         serializer.Dispose();
                     }
+                    Serializers.Clear();
                 }
                 _disposed = true;
             }

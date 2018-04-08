@@ -31,8 +31,7 @@ namespace Flekosoft.Common.Serialization
         public virtual void Serialize()
         {
             InternalSerialize();
-            if (_propertyChangedObject == null) return;
-            AppendDebugLogMessage(!string.IsNullOrEmpty(_propertyChangedObject.InstanceName)
+            AppendDebugLogMessage(!string.IsNullOrEmpty(_propertyChangedObject?.InstanceName)
                 ? $"{_propertyChangedObject.InstanceName}: Serialized"
                 : $"{_propertyChangedObject}: Serialized");
         }

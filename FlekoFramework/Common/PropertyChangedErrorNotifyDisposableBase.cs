@@ -12,11 +12,15 @@ namespace Flekosoft.Common
         {
         }
 
+        public bool IsNotifyPropertyChangedEnabled { get; set; } = true;
+
         public event PropertyChangedEventHandler PropertyChanged;
         protected void OnPropertyChanged(string propertyName)
         {
             if (!IsDisposing)
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+            {
+                if (IsNotifyPropertyChangedEnabled) PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+            }
         }
 
         protected override void Dispose(bool disposing)

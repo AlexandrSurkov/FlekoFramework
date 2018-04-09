@@ -1,20 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
+﻿using System.IO;
 using System.Xml;
-using Flekosoft.Common.Logging;
 
 namespace Flekosoft.Common.Serialization.Xml
 {
-    public abstract class CollectionSerializerXml<T>: CollectionSerializer<T>, ISerializerXml
+    public abstract class CollectionSerializerXml<T> : CollectionSerializer<T>, ISerializerXml
     {
         private CollectionSerializerXml(T serialisableObject, string rootName, string storagePath, string fileName, bool storeToFile) : base(serialisableObject)
         {
             XmlDocument = new XmlDocument();
             XmlDeclaration dec = XmlDocument.CreateXmlDeclaration("1.0", null, null);
             XmlDocument.AppendChild(dec);
-            XmlRoot = XmlDocument.CreateElement(rootName);
-            XmlDocument.AppendChild(XmlRoot);
+            XmlDocument.AppendChild(XmlDocument.CreateElement(rootName));
 
             StoreToFile = storeToFile;
 
@@ -44,16 +40,53 @@ namespace Flekosoft.Common.Serialization.Xml
         }
 
         public XmlDocument XmlDocument { get; }
-        public XmlElement XmlRoot { get; }
+        public XmlElement XmlRoot => (XmlElement)XmlDocument.ChildNodes[1];
+
         public string StoragePath { get; } = string.Empty;
         public string FileName { get; } = string.Empty;
         public bool StoreToFile { get; }
 
+        public override void Serialize()
+        {
+            ClearXmlRoot();
+            base.Serialize();
+            SaveToFile();
+        }
+
+        public override void Deserialize()
+        {
+            LoadFromFile();
+            base.Deserialize();
+        }
+
 
         public override void ClearSerializedData()
         {
-            if (StoreToFile) File.Delete(StoragePath + FileName);
+            if (StoreToFile)
+            {
+                if (File.Exists(StoragePath + FileName)) File.Delete(StoragePath + FileName);
+            }
+            ClearXmlRoot();
+        }
+        protected void ClearXmlRoot()
+        {
             XmlRoot.RemoveAll();
+        }
+
+        protected void SaveToFile()
+        {
+            if (StoreToFile) XmlDocument.Save(StoragePath + FileName);
+        }
+
+        protected void LoadFromFile()
+        {
+            if (StoreToFile)
+            {
+                ClearXmlRoot();
+
+                if (File.Exists(StoragePath + FileName))
+                    XmlDocument.Load(StoragePath + FileName);
+            }
         }
 
         protected bool CheckFileExist()

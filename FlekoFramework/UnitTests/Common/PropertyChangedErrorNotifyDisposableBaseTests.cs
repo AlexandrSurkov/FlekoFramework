@@ -91,6 +91,24 @@ namespace Flekosoft.UnitTests.Common
             tc.PropertyChanged += Tc_PropertyChanged;
             PropertyChangedEvent = null;
             tc.Dispose();
+            tc.SendPropertyChanged("123");
+            Assert.IsNull(PropertyChangedEvent);
+
+        }
+
+
+        [TestMethod]
+        public void IsNotifyPropertyChangedEnabledTest()
+        {
+            var tc = new TestClass();
+            tc.PropertyChanged += Tc_PropertyChanged;
+            var propname = "af";
+            PropertyChangedEvent = null;
+            tc.SendPropertyChanged(propname);
+            Assert.IsNotNull(PropertyChangedEvent);
+            tc.IsNotifyPropertyChangedEnabled = false;
+            PropertyChangedEvent = null;
+            tc.SendPropertyChanged(propname);
             Assert.IsNull(PropertyChangedEvent);
 
         }

@@ -1,7 +1,4 @@
-﻿using Flekosoft.Common.Logging;
-using System;
-using System.Collections.Generic;
-using System.IO;
+﻿using System.IO;
 using System.Xml;
 
 namespace Flekosoft.Common.Serialization.Xml
@@ -13,8 +10,7 @@ namespace Flekosoft.Common.Serialization.Xml
             XmlDocument = new XmlDocument();
             XmlDeclaration dec = XmlDocument.CreateXmlDeclaration("1.0", null, null);
             XmlDocument.AppendChild(dec);
-            XmlRoot = XmlDocument.CreateElement(rootName);
-            XmlDocument.AppendChild(XmlRoot);
+            XmlDocument.AppendChild(XmlDocument.CreateElement(rootName));
 
             StoreToFile = storeToFile;
 
@@ -44,10 +40,23 @@ namespace Flekosoft.Common.Serialization.Xml
         }
 
         public XmlDocument XmlDocument { get; }
-        public XmlElement XmlRoot { get; }
+        public XmlElement XmlRoot => (XmlElement)XmlDocument.ChildNodes[1];
         public string StoragePath { get; } = string.Empty;
         public string FileName { get; } = string.Empty;
         public bool StoreToFile { get; }
+        
+        public override void Serialize()
+        {
+            ClearXmlRoot();
+            base.Serialize();
+            SaveToFile();
+        }
+
+        public override void Deserialize()
+        {
+            LoadFromFile();
+            base.Deserialize();
+        }
 
 
         public override void ClearSerializedData()
@@ -56,7 +65,26 @@ namespace Flekosoft.Common.Serialization.Xml
             {
                 if (File.Exists(StoragePath + FileName)) File.Delete(StoragePath + FileName);
             }
+            ClearXmlRoot();
+        }
+        protected void ClearXmlRoot()
+        {
             XmlRoot.RemoveAll();
+        }
+
+        protected void SaveToFile()
+        {
+            if (StoreToFile) XmlDocument.Save(StoragePath + FileName);
+        }
+
+        protected void LoadFromFile()
+        {
+            if (StoreToFile)
+            {
+                ClearXmlRoot();
+                if (File.Exists(StoragePath + FileName))
+                    XmlDocument.Load(StoragePath + FileName);
+            }
         }
 
         protected bool CheckFileExist()

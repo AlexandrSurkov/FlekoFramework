@@ -1,5 +1,6 @@
-﻿using System;
+﻿using System.Globalization;
 using System.IO;
+using System.Xml;
 using Flekosoft.Common.Serialization.Xml;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -17,12 +18,20 @@ namespace Flekosoft.UnitTests.Serialization.Xml
 
         public override void InternalSerialize()
         {
-            throw new NotImplementedException();
+            var node = XmlDocument.CreateElement(nameof(SerialisableObject.Prop));
+            node.InnerText = SerialisableObject.Prop.ToString(CultureInfo.InvariantCulture);
+            XmlRoot.AppendChild(node);
         }
 
         public override void InternalDeserialize()
         {
-            throw new NotImplementedException();
+            foreach (XmlElement node in XmlRoot.ChildNodes)
+            {
+                if (node.Name == nameof(SerialisableObject.Prop))
+                {
+                    if (int.TryParse(node.InnerText, out var value)) SerialisableObject.Prop = value;
+                }
+            }
         }
 
         public bool CheckFile()
@@ -106,7 +115,31 @@ namespace Flekosoft.UnitTests.Serialization.Xml
             s = new TestXmlSerializer(item, text, path, filename);
             Assert.AreEqual(path + Path.DirectorySeparatorChar, s.StoragePath);
             s.Dispose();
+        }
 
+        [TestMethod]
+        public void FileSerialize_DeserializeTest()
+        {
+            var item = new SerializerTestItem();
+            var text = "asd";
+            var path = Path.GetTempPath();
+            var filename = "filename";
+
+            var s = new TestXmlSerializer(item, text, path, filename);
+
+            int val = 123;
+            Assert.AreNotEqual(val, item.Prop);
+            item.Prop = val;
+            s.Dispose();
+
+            item.Prop = 0;
+            Assert.AreEqual(0, item.Prop);
+            s = new TestXmlSerializer(item, text, path, filename);
+            s.Deserialize();
+            Assert.AreEqual(val, item.Prop);
+            s.ClearSerializedData();
+
+            s.Dispose();
         }
     }
 }

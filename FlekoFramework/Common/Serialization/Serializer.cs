@@ -25,11 +25,13 @@ namespace Flekosoft.Common.Serialization
 
         private void SerialisableObject_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
+            if (IsDisposed) return;
             if (CheckPropertyChanged(sender, e)) Serialize();
         }
 
         public virtual void Serialize()
         {
+            if (IsDisposed) return;
             InternalSerialize();
             AppendDebugLogMessage(!string.IsNullOrEmpty(_propertyChangedObject?.InstanceName)
                 ? $"{_propertyChangedObject.InstanceName}: Serialized"
@@ -38,6 +40,7 @@ namespace Flekosoft.Common.Serialization
 
         public virtual void Deserialize()
         {
+            if (IsDisposed) return;
             if (_propertyChangedObject != null) _propertyChangedObject.PropertyChanged -= SerialisableObject_PropertyChanged;
             InternalDeserialize();
             if (_propertyChangedObject != null)

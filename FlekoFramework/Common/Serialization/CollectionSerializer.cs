@@ -23,11 +23,13 @@ namespace Flekosoft.Common.Serialization
 
         private void SerialisableObject_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
         {
+            if (IsDisposed) return;
             Serialize();
         }
 
         public override void Deserialize()
         {
+            if (IsDisposed) return;
             _collection.CollectionChanged -= SerialisableObject_CollectionChanged;
             InternalDeserialize();
             _collection.CollectionChanged += SerialisableObject_CollectionChanged;

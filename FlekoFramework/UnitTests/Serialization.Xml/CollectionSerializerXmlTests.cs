@@ -1,5 +1,6 @@
-﻿using System;
+﻿using System.Globalization;
 using System.IO;
+using System.Xml;
 using Flekosoft.Common.Serialization.Xml;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -16,12 +17,26 @@ namespace Flekosoft.UnitTests.Serialization.Xml
 
         public override void InternalSerialize()
         {
-            throw new NotImplementedException();
+            foreach (SerializerTestItem item in SerialisableObject.AsReadOnly())
+            {
+                var node = XmlDocument.CreateElement(nameof(SerializerTestItem));
+                node.InnerText = item.Prop.ToString(CultureInfo.InvariantCulture);
+                XmlRoot.AppendChild(node);
+            }
         }
 
         public override void InternalDeserialize()
         {
-            throw new NotImplementedException();
+            foreach (XmlElement node in XmlRoot.ChildNodes)
+            {
+                if (node.Name == nameof(SerializerTestItem))
+                {
+                    if (int.TryParse(node.InnerText, out var value))
+                    {
+                        SerialisableObject.Add(new SerializerTestItem { Prop = value });
+                    }
+                }
+            }
         }
 
         public bool CheckFile()
@@ -38,7 +53,7 @@ namespace Flekosoft.UnitTests.Serialization.Xml
         {
             var item = new SerializerTestCollection();
             var text = "123sdf";
-            var s = new CollectionTestXmlSerializer(item,text);
+            var s = new CollectionTestXmlSerializer(item, text);
 
             Assert.IsFalse(s.StoreToFile);
             Assert.AreEqual(string.Empty, s.FileName);
@@ -47,7 +62,7 @@ namespace Flekosoft.UnitTests.Serialization.Xml
             Assert.IsNotNull(s.XmlDocument);
 
             Assert.IsNotNull(s.XmlRoot);
-            Assert.AreEqual(text,s.XmlRoot.Name);
+            Assert.AreEqual(text, s.XmlRoot.Name);
 
             var element = s.XmlDocument.CreateElement("element1");
             s.XmlRoot.AppendChild(element);
@@ -105,7 +120,34 @@ namespace Flekosoft.UnitTests.Serialization.Xml
             s = new CollectionTestXmlSerializer(item, text, path, filename);
             Assert.AreEqual(path + Path.DirectorySeparatorChar, s.StoragePath);
             s.Dispose();
+        }
 
+
+        [TestMethod]
+        public void FileSerialize_DeserializeTest()
+        {
+            var collection = new SerializerTestCollection();
+            var text = "asd";
+            var path = Path.GetTempPath();
+            var filename = "filename";
+
+            var s = new CollectionTestXmlSerializer(collection, text, path, filename);
+
+            int val = 123;
+            Assert.AreEqual(0, collection.Count);
+            collection.Add(new SerializerTestItem() {Prop = val});
+            s.Dispose();
+
+            collection.Clear();
+
+            s = new CollectionTestXmlSerializer(collection, text, path, filename);
+            s.Deserialize();
+
+            Assert.AreEqual(1, collection.Count);
+            Assert.AreEqual(val,collection[0].Prop);
+            s.ClearSerializedData();
+
+            s.Dispose();
         }
     }
 }

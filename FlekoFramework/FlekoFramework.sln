@@ -15,8 +15,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common.Video", "Common.Vide
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common.Math", "Common.Math\Common.Math.csproj", "{D105322A-19A9-4677-A6C6-3B0638EF1AA6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common.Serizalization.Windows", "Common.Serizalization.Windows\Common.Serizalization.Windows.csproj", "{62AACB26-338C-4C17-AEFF-4F88D25B56CF}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common.Accounts", "Common.Accounts\Common.Accounts.csproj", "{7C879491-C449-409C-B4C9-710CB8923CFE}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common.Plugins", "Common.Plugins\Common.Plugins.csproj", "{285B4569-4570-4CB7-AF27-358538194C70}"
@@ -55,10 +53,6 @@ Global
 		{D105322A-19A9-4677-A6C6-3B0638EF1AA6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D105322A-19A9-4677-A6C6-3B0638EF1AA6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D105322A-19A9-4677-A6C6-3B0638EF1AA6}.Release|Any CPU.Build.0 = Release|Any CPU
-		{62AACB26-338C-4C17-AEFF-4F88D25B56CF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{62AACB26-338C-4C17-AEFF-4F88D25B56CF}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{62AACB26-338C-4C17-AEFF-4F88D25B56CF}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{62AACB26-338C-4C17-AEFF-4F88D25B56CF}.Release|Any CPU.Build.0 = Release|Any CPU
 		{7C879491-C449-409C-B4C9-710CB8923CFE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{7C879491-C449-409C-B4C9-710CB8923CFE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7C879491-C449-409C-B4C9-710CB8923CFE}.Release|Any CPU.ActiveCfg = Release|Any CPU

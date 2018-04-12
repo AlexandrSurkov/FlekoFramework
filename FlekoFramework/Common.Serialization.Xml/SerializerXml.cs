@@ -5,7 +5,7 @@ namespace Flekosoft.Common.Serialization.Xml
 {
     public abstract class SerializerXml<T> : Serializer<T>, ISerializerXml
     {
-        private object _lockObject = new object();
+        private readonly object _lockObject = new object();
         private SerializerXml(T serialisableObject, string rootName, string storagePath, string fileName, bool storeToFile) : base(serialisableObject)
         {
             XmlDocument = new XmlDocument();
@@ -77,7 +77,14 @@ namespace Flekosoft.Common.Serialization.Xml
         {
             lock (_lockObject)
             {
-                if (StoreToFile) XmlDocument.Save(StoragePath + FileName);
+                if (StoreToFile)
+                {
+                    if (!Directory.Exists(StoragePath))
+                    {
+                        Directory.CreateDirectory(StoragePath);
+                    }
+                    XmlDocument.Save(StoragePath + FileName);
+                }
             }
         }
 

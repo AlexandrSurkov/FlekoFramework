@@ -7,6 +7,14 @@ namespace Flekosoft.Common.Logging
     {
         public List<string> LogStrings = new List<string>();
 
+        public LogRecord(LogRecord logRecord)
+        {
+            DateTime = logRecord.DateTime;
+            RecordType = logRecord.RecordType;
+            Color = logRecord.Color;
+            LogStrings.AddRange(logRecord.LogStrings);
+        }
+
         public LogRecord(DateTime dateTime, ICollection<string> logStrings, LogRecordLevel recordType)
         {
             DateTime = dateTime;

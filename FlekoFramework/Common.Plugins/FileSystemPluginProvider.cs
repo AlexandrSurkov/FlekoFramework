@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 
 namespace Flekosoft.Common.Plugins
 {
@@ -22,12 +23,17 @@ namespace Flekosoft.Common.Plugins
             var result = new List<IPlugin>();
             try
             {
-                var filesList = Directory.GetFiles(FilesFolder);
+                var filesList = Directory.GetFiles(FilesFolder, "*.dll");
                 foreach (string s in filesList)
                 {
                     try
                     {
-                        var dll = System.Reflection.Assembly.LoadFile(s);
+                        //var loadedAssemblies = AppDomain.CurrentDomain.GetAssemblies().ToList();
+                        //var loadedPaths = loadedAssemblies.Select(a => a.Location).ToArray();
+                        //var toLoad = filesList.Where(r => !loadedPaths.Contains(r, StringComparer.InvariantCultureIgnoreCase)).ToList();
+                        //toLoad.ForEach(path => loadedAssemblies.Add(AppDomain.CurrentDomain.Load(AssemblyName.GetAssemblyName(path))));
+
+                        var dll = AppDomain.CurrentDomain.Load(AssemblyName.GetAssemblyName(s));
                         foreach (Type type in dll.GetExportedTypes())
                         {
                             var interfaces = type.GetInterfaces();

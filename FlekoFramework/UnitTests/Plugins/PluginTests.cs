@@ -7,7 +7,7 @@ namespace Flekosoft.UnitTests.Plugins
     public class PluginTests
     {
         [TestMethod]
-        public void Test()
+        public void PluginTest()
         {
             var guid = Guid.NewGuid();
             var name = "23";

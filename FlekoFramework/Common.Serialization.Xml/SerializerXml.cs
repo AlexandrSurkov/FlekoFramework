@@ -48,6 +48,7 @@ namespace Flekosoft.Common.Serialization.Xml
 
         public override void Serialize()
         {
+            if (!IsEnabled) return;
             ClearXmlRoot();
             base.Serialize();
             SaveToFile();
@@ -55,6 +56,7 @@ namespace Flekosoft.Common.Serialization.Xml
 
         public override void Deserialize()
         {
+            if (!IsEnabled) return;
             LoadFromFile();
             base.Deserialize();
         }

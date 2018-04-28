@@ -7,5 +7,6 @@ namespace Flekosoft.Common.Serialization
         void Serialize();
         void Deserialize();
         void ClearSerializedData();
+        bool IsEnabled { get; set; }
     }
 }

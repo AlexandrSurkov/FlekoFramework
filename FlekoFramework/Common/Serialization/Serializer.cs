@@ -2,9 +2,23 @@
 
 namespace Flekosoft.Common.Serialization
 {
-    public abstract class Serializer<T> : DisposableBase, ISerializer
+    public abstract class Serializer<T> : PropertyChangedErrorNotifyDisposableBase, ISerializer
     {
         readonly PropertyChangedErrorNotifyDisposableBase _propertyChangedObject;
+        private bool _isEnabled = true;
+
+        public bool IsEnabled
+        {
+            get => _isEnabled;
+            set
+            {
+                if (_isEnabled != value)
+                {
+                    _isEnabled = value;
+                    OnPropertyChanged(nameof(_isEnabled));
+                }
+            }
+        }
 
         protected Serializer(T serialisableObject)
         {
@@ -32,6 +46,7 @@ namespace Flekosoft.Common.Serialization
         public virtual void Serialize()
         {
             if (IsDisposed) return;
+            if (!IsEnabled) return;
             InternalSerialize();
             AppendDebugLogMessage(!string.IsNullOrEmpty(_propertyChangedObject?.InstanceName)
                 ? $"{_propertyChangedObject.InstanceName}: Serialized"
@@ -41,6 +56,7 @@ namespace Flekosoft.Common.Serialization
         public virtual void Deserialize()
         {
             if (IsDisposed) return;
+            if (!IsEnabled) return;
             if (_propertyChangedObject != null) _propertyChangedObject.PropertyChanged -= SerialisableObject_PropertyChanged;
             InternalDeserialize();
             if (_propertyChangedObject != null)

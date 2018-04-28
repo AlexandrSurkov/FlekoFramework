@@ -84,6 +84,7 @@
     <Compile Include="Common\Observable\ObservableTests.cs" />
     <Compile Include="Common\GuidReferenceTests.cs" />
     <Compile Include="Common\PropertyChangedErrorNotifyDisposableBaseTests.cs" />
+    <Compile Include="Common\Serialization\SerializationTests.cs" />
     <Compile Include="Plugins\TestPlugin.cs" />
     <Compile Include="Plugins\PluginManagerTests.cs" />
     <Compile Include="Plugins\PluginTests.cs" />

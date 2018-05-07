@@ -59,6 +59,9 @@
     <Compile Include="Tcp\TcpServerLocalEndpoint.cs" />
     <Compile Include="Tcp\TcpClientBase.cs" />
     <Compile Include="Tcp\TcpServerBase.cs" />
+    <Compile Include="WebSocket\Definitions.cs" />
+    <Compile Include="WebSocket\WebSocketClient.cs" />
+    <Compile Include="WebSocket\WebSocketServer.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Common\Common.csproj">

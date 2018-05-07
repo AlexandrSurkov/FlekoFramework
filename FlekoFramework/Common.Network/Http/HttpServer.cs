@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Net;
 using System.Text;
 using Flekosoft.Common.Network.Tcp;
 
@@ -7,13 +8,24 @@ namespace Flekosoft.Common.Network.Http
 {
     public class HttpServer : TcpServerBase
     {
-        private string _networkReceivedString = string.Empty;
-        private readonly List<string> _httpRequest = new List<string>();
-        private readonly List<byte> _httpData = new List<byte>();
-        private int _contentIndex = 0;
-        int _contentLen = -1;
-
+        private readonly Dictionary<EndPoint, EndpointDataParser> _endpointDataParsers = new Dictionary<EndPoint, EndpointDataParser>();
         public event EventHandler<HttpRequestArgs> RequestEvent;
+
+        public HttpServer()
+        {
+            ConnectedEvent += HttpServer_ConnectedEvent;
+            DisconnectedEvent += HttpServer_DisconnectedEvent;
+        }
+
+        private void HttpServer_DisconnectedEvent(object sender, ConnectionEventArgs e)
+        {
+            if (_endpointDataParsers.ContainsKey(e.RemoteEndPoint)) _endpointDataParsers.Remove(e.RemoteEndPoint);
+        }
+
+        private void HttpServer_ConnectedEvent(object sender, ConnectionEventArgs e)
+        {
+            if (!_endpointDataParsers.ContainsKey(e.RemoteEndPoint)) _endpointDataParsers.Add(e.RemoteEndPoint, new EndpointDataParser());
+        }
 
         public string CreateOkRespond()
         {
@@ -35,77 +47,81 @@ namespace Flekosoft.Common.Network.Http
 
         protected override void ProcessDataInternal(NetworkDataEventArgs e)
         {
-            _networkReceivedString += Encoding.UTF8.GetString(e.Data);
+            if (!_endpointDataParsers.ContainsKey(e.RemoteEndPoint)) _endpointDataParsers.Add(e.RemoteEndPoint, new EndpointDataParser());
 
-            if (_contentLen != -1)
+            var parser = _endpointDataParsers[e.RemoteEndPoint];
+
+            parser.NetworkReceivedString += Encoding.UTF8.GetString(e.Data);
+
+            if (parser.ContentLen != -1)
             {
-                _contentIndex++;
-                _httpData.AddRange(e.Data);
+                parser.ContentIndex++;
+                parser.HttpData.AddRange(e.Data);
             }
 
-            if (_networkReceivedString.Contains("\r\n"))
+            if (parser.NetworkReceivedString.Contains("\r\n"))
             {
-                _httpRequest.Add(_networkReceivedString);
-                _networkReceivedString = string.Empty;
+                parser.HttpRequest.Add(parser.NetworkReceivedString);
+                parser.NetworkReceivedString = string.Empty;
             }
-            else if (_contentIndex == _contentLen)
+            else if (parser.ContentIndex == parser.ContentLen)
             {
-                _httpRequest.Add(Encoding.UTF8.GetString(_httpData.ToArray()).Trim());
-                _networkReceivedString = string.Empty;
+                parser.HttpRequest.Add(Encoding.UTF8.GetString(parser.HttpData.ToArray()).Trim());
+                parser.NetworkReceivedString = string.Empty;
 
-                HttpRequestArgs args = new HttpRequestArgs(_httpRequest.ToArray(), HttpRequestMethod.Unknown);
-                if (_httpRequest[0].Contains("GET"))
-                    args = new HttpRequestArgs(_httpRequest.ToArray(), HttpRequestMethod.Get);
-                if (_httpRequest[0].Contains("POST"))
-                    args = new HttpRequestArgs(_httpRequest.ToArray(), HttpRequestMethod.Post);
-                if (_httpRequest[0].Contains("PUT"))
-                    args = new HttpRequestArgs(_httpRequest.ToArray(), HttpRequestMethod.Put);
-                if (_httpRequest[0].Contains("DELETE"))
-                    args = new HttpRequestArgs(_httpRequest.ToArray(), HttpRequestMethod.Delete);
+                HttpRequestArgs args = new HttpRequestArgs(parser.HttpRequest.ToArray(), HttpRequestMethod.Unknown);
+                if (parser.HttpRequest[0].Contains("GET"))
+                    args = new HttpRequestArgs(parser.HttpRequest.ToArray(), HttpRequestMethod.Get);
+                if (parser.HttpRequest[0].Contains("POST"))
+                    args = new HttpRequestArgs(parser.HttpRequest.ToArray(), HttpRequestMethod.Post);
+                if (parser.HttpRequest[0].Contains("PUT"))
+                    args = new HttpRequestArgs(parser.HttpRequest.ToArray(), HttpRequestMethod.Put);
+                if (parser.HttpRequest[0].Contains("DELETE"))
+                    args = new HttpRequestArgs(parser.HttpRequest.ToArray(), HttpRequestMethod.Delete);
 
                 RequestEvent?.Invoke(this, args);
                 if (!string.IsNullOrEmpty(args.Respond))
                     Write(Encoding.UTF8.GetBytes(args.Respond), e.LocalEndPoint, e.RemoteEndPoint);
 
-                _httpRequest.Clear();
-                _contentLen = -1;
-                _contentIndex = 0;
-                _httpData.Clear();
+                parser.HttpRequest.Clear();
+                parser.ContentLen = -1;
+                parser.ContentIndex = 0;
+                parser.HttpData.Clear();
             }
 
 
-            if (_contentLen == -1 && _httpRequest.Count > 0 && _httpRequest[_httpRequest.Count - 1] == "\r\n")
+            if (parser.ContentLen == -1 && parser.HttpRequest.Count > 0 && parser.HttpRequest[parser.HttpRequest.Count - 1] == "\r\n")
             {
-                foreach (var reqStr in _httpRequest)
+                foreach (var reqStr in parser.HttpRequest)
                 {
                     if (reqStr.Contains("Content-Length"))
                     {
-                        _contentLen = int.Parse(reqStr.Split(' ')[1]);
+                        parser.ContentLen = int.Parse(reqStr.Split(' ')[1]);
                         break;
                     }
                 }
-                if (_contentLen == -1)
+                if (parser.ContentLen == -1)
                 {
-                    _networkReceivedString = string.Empty;
+                    parser.NetworkReceivedString = string.Empty;
 
-                    HttpRequestArgs args = new HttpRequestArgs(_httpRequest.ToArray(), HttpRequestMethod.Unknown);
-                    if (_httpRequest[0].Contains("GET"))
-                        args = new HttpRequestArgs(_httpRequest.ToArray(), HttpRequestMethod.Get);
-                    if (_httpRequest[0].Contains("POST"))
-                        args = new HttpRequestArgs(_httpRequest.ToArray(), HttpRequestMethod.Post);
-                    if (_httpRequest[0].Contains("PUT"))
-                        args = new HttpRequestArgs(_httpRequest.ToArray(), HttpRequestMethod.Put);
-                    if (_httpRequest[0].Contains("DELETE"))
-                        args = new HttpRequestArgs(_httpRequest.ToArray(), HttpRequestMethod.Delete);
+                    HttpRequestArgs args = new HttpRequestArgs(parser.HttpRequest.ToArray(), HttpRequestMethod.Unknown);
+                    if (parser.HttpRequest[0].Contains("GET"))
+                        args = new HttpRequestArgs(parser.HttpRequest.ToArray(), HttpRequestMethod.Get);
+                    if (parser.HttpRequest[0].Contains("POST"))
+                        args = new HttpRequestArgs(parser.HttpRequest.ToArray(), HttpRequestMethod.Post);
+                    if (parser.HttpRequest[0].Contains("PUT"))
+                        args = new HttpRequestArgs(parser.HttpRequest.ToArray(), HttpRequestMethod.Put);
+                    if (parser.HttpRequest[0].Contains("DELETE"))
+                        args = new HttpRequestArgs(parser.HttpRequest.ToArray(), HttpRequestMethod.Delete);
 
                     RequestEvent?.Invoke(this, args);
                     if (!string.IsNullOrEmpty(args.Respond))
                         Write(Encoding.UTF8.GetBytes(args.Respond), e.LocalEndPoint, e.RemoteEndPoint);
 
-                    _httpRequest.Clear();
-                    _contentLen = -1;
-                    _contentIndex = 0;
-                    _httpData.Clear();
+                    parser.HttpRequest.Clear();
+                    parser.ContentLen = -1;
+                    parser.ContentIndex = 0;
+                    parser.HttpData.Clear();
                 }
             }
         }
@@ -118,6 +134,15 @@ namespace Flekosoft.Common.Network.Http
             }
             base.Dispose(disposing);
         }
+    }
+
+    class EndpointDataParser
+    {
+        public string NetworkReceivedString = string.Empty;
+        public readonly List<string> HttpRequest = new List<string>();
+        public readonly List<byte> HttpData = new List<byte>();
+        public int ContentIndex;
+        public int ContentLen = -1;
     }
 }
 

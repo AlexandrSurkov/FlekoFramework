@@ -132,7 +132,10 @@ namespace Flekosoft.Common.Network.WebSocket
                     parser.HeaderReceived = false;
                     parser.FrameReceived = false;
                     parser.PayloadLenReceived = false;
-                    parser.MaskingKey = 0;
+                    parser.MaskingKey[0] = 0;
+                    parser.MaskingKey[1] = 0;
+                    parser.MaskingKey[2] = 0;
+                    parser.MaskingKey[3] = 0;
                     parser.PayloadLenLenght = 0;
                     parser.MaskingKeyLenght = 0;
                 }
@@ -178,10 +181,10 @@ namespace Flekosoft.Common.Network.WebSocket
                         parser.MaskingKeyLenght = 4;
                         if (parser.DataBuffer.Count == 2 + parser.PayloadLenLenght + 4)
                         {
-                            parser.MaskingKey = parser.DataBuffer[parser.DataBuffer.Count - 4] << 24 +
-                                                parser.DataBuffer[parser.DataBuffer.Count - 3] << 16 +
-                                                parser.DataBuffer[parser.DataBuffer.Count - 2] << 8 +
-                                                parser.DataBuffer[parser.DataBuffer.Count - 1] << 0;
+                            parser.MaskingKey[0] = parser.DataBuffer[parser.DataBuffer.Count - 4];
+                            parser.MaskingKey[1] = parser.DataBuffer[parser.DataBuffer.Count - 3];
+                            parser.MaskingKey[2] = parser.DataBuffer[parser.DataBuffer.Count - 2];
+                            parser.MaskingKey[3] = parser.DataBuffer[parser.DataBuffer.Count - 1];
                             parser.HeaderReceived = true;
                         }
                     }
@@ -193,6 +196,15 @@ namespace Flekosoft.Common.Network.WebSocket
                 }
                 if (parser.HeaderReceived && parser.DataBuffer.Count == 2 + parser.PayloadLenLenght + parser.MaskingKeyLenght + parser.PayloadLen)
                 {
+                    if (parser.Mask == 1)
+                    {
+                        var j = 0;
+                        for (int i = 2 + parser.PayloadLenLenght +
+                                     parser.MaskingKeyLenght; i < parser.DataBuffer.Count; i++, j++)
+                        {
+                            parser.DataBuffer[i] = (byte)(parser.DataBuffer[i] ^ parser.MaskingKey[j % 4]);
+                        }
+                    }
                     ParseFrame(e);
                     parser.IsFirstDataByte = true;
                 }
@@ -203,6 +215,7 @@ namespace Flekosoft.Common.Network.WebSocket
         {
             var data = new List<byte>();
             var parser = _endpointDataParsers[e.RemoteEndPoint];
+            var payloadStartIndex = 2 + parser.PayloadLenLenght + parser.MaskingKeyLenght;
             switch ((WebSocketOpcode)parser.Opcode)
             {
                 case WebSocketOpcode.Ping:
@@ -214,12 +227,25 @@ namespace Flekosoft.Common.Network.WebSocket
                     break;
                 case WebSocketOpcode.ConnectionClose:
                     //Close frame. Sent Close back.
+                    var connectionCloseReason = (parser.DataBuffer[payloadStartIndex] << 8) + ((int)parser.DataBuffer[payloadStartIndex + 1] << 0);
+                    ConnectionCloseEvent?.Invoke(this, new ConnectionCloseEventArgs((ConnectionCloseReason)connectionCloseReason));
+                    SendClose((ConnectionCloseReason)connectionCloseReason, e.LocalEndPoint, e.RemoteEndPoint);
                     break;
                 case WebSocketOpcode.BinaryFrame:
                 case WebSocketOpcode.TextFrame:
-                    DataReceivedEvent?.Invoke(this, new DataReceivedEventArgs(e.LocalEndPoint, e.RemoteEndPoint, (WebSocketOpcode)parser.Opcode, parser.DataBuffer.GetRange(2 + parser.PayloadLenLenght + parser.MaskingKeyLenght, parser.PayloadLen).ToArray()));
+                    DataReceivedEvent?.Invoke(this, new DataReceivedEventArgs(e.LocalEndPoint, e.RemoteEndPoint, (WebSocketOpcode)parser.Opcode, parser.DataBuffer.GetRange(payloadStartIndex, parser.PayloadLen).ToArray()));
                     break;
             }
+        }
+
+        private void SendClose(ConnectionCloseReason connectionCloseReason, IPEndPoint localEndPoint, IPEndPoint remoteEndPoint)
+        {
+            List<byte> data = new List<byte>();
+            data.Add(0x80 | (byte)WebSocketOpcode.ConnectionClose);
+            data.Add(0x02);
+            data.Add((byte)((int)connectionCloseReason >> 8));
+            data.Add((byte)connectionCloseReason);
+            Write(data.ToArray(), localEndPoint, remoteEndPoint);
         }
 
         protected override void ProcessDataInternal(NetworkDataEventArgs e)
@@ -265,8 +291,19 @@ namespace Flekosoft.Common.Network.WebSocket
             Write(buffer.ToArray(), localEndPoint, remoteEndPoint);
         }
 
+        public override void Stop()
+        {
+            var connections = GetConnections();
+            foreach (var connection in connections)
+            {
+                SendClose(ConnectionCloseReason.NormalClose, (IPEndPoint)connection.LocalEndPoint, (IPEndPoint)connection.RemoteEndPoint);
+            }
+            base.Stop();
+        }
+
         public event EventHandler<ConnectionEventArgs> HandshakeEvent;
         public event EventHandler<DataReceivedEventArgs> DataReceivedEvent;
+        public event EventHandler<ConnectionCloseEventArgs> ConnectionCloseEvent;
 
         protected override void Dispose(bool disposing)
         {
@@ -274,6 +311,7 @@ namespace Flekosoft.Common.Network.WebSocket
             {
                 HandshakeEvent = null;
                 DataReceivedEvent = null;
+                ConnectionCloseEvent = null;
             }
             base.Dispose(disposing);
         }
@@ -291,7 +329,7 @@ namespace Flekosoft.Common.Network.WebSocket
         public int Fin;
         public int Opcode;
         public int Mask;
-        public int MaskingKey;
+        public byte[] MaskingKey = new byte[4];
         public int MaskingKeyLenght;
         public int PayloadLen1;
         public int PayloadLen;

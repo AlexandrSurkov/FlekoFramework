@@ -195,7 +195,7 @@ namespace Flekosoft.Common.Network.Tcp
             }
         }
 
-        public void Stop()
+        public virtual void Stop()
         {
             _connectRequestThreadPaused = true;
             while (IsStarted)

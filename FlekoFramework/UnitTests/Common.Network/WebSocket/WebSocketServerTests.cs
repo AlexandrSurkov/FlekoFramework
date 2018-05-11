@@ -17,9 +17,11 @@ namespace Flekosoft.UnitTests.Common.Network.WebSocket
         private ConnectionEventArgs _connectionEventArgs;
         private ConnectionEventArgs _disconnectionEventArgs;
         private ConnectionEventArgs _handshakeEventArgs;
+        private ConnectionCloseEventArgs _connectionCloseEventArgs;
+        private DataReceivedEventArgs _dataReceivedEventArgs;
         private string _networkReceivedString = string.Empty;
         private readonly List<string> _httpRequest = new List<string>();
-        private readonly List<byte> _frameData = new List<byte>();
+        private readonly List<byte> _clientFrameData = new List<byte>();
         private bool _handshakeReceived;
         private bool _handshakeTest;
 
@@ -202,76 +204,76 @@ namespace Flekosoft.UnitTests.Common.Network.WebSocket
 
             var data = new List<byte>();
 
-            _frameData.Clear();
+            _clientFrameData.Clear();
             data.Clear();
             s.SendData(WebSocketOpcode.TextFrame, data.ToArray(), (IPEndPoint)s.GetConnections()[0].LocalEndPoint, (IPEndPoint)s.GetConnections()[0].RemoteEndPoint, true);
             Thread.Sleep(10);
-            Assert.AreEqual(data.Count + 2, _frameData.Count);
+            Assert.AreEqual(data.Count + 2, _clientFrameData.Count);
 
-            var fin = (_frameData[0] & 0x80) >> 7;
-            var opcode = (_frameData[0] & 0x0F);
+            var fin = (_clientFrameData[0] & 0x80) >> 7;
+            var opcode = (_clientFrameData[0] & 0x0F);
             Assert.AreEqual(0x01, fin);
             Assert.AreEqual((byte)WebSocketOpcode.TextFrame, opcode);
 
-            _frameData.Clear();
+            _clientFrameData.Clear();
             data.Clear();
             s.SendData(WebSocketOpcode.BinaryFrame, data.ToArray(), (IPEndPoint)s.GetConnections()[0].LocalEndPoint, (IPEndPoint)s.GetConnections()[0].RemoteEndPoint, false);
             Thread.Sleep(10);
-            Assert.AreEqual(data.Count + 2, _frameData.Count);
+            Assert.AreEqual(data.Count + 2, _clientFrameData.Count);
 
-            fin = (_frameData[0] & 0x80) >> 7;
-            opcode = (_frameData[0] & 0x0F);
+            fin = (_clientFrameData[0] & 0x80) >> 7;
+            opcode = (_clientFrameData[0] & 0x0F);
             Assert.AreEqual(0x00, fin);
             Assert.AreEqual((byte)WebSocketOpcode.BinaryFrame, opcode);
 
-            _frameData.Clear();
+            _clientFrameData.Clear();
             data.Clear();
             s.SendData(WebSocketOpcode.ConnectionClose, data.ToArray(), (IPEndPoint)s.GetConnections()[0].LocalEndPoint, (IPEndPoint)s.GetConnections()[0].RemoteEndPoint, true);
             Thread.Sleep(10);
-            Assert.AreEqual(data.Count + 2, _frameData.Count);
+            Assert.AreEqual(data.Count + 2, _clientFrameData.Count);
 
-            fin = (_frameData[0] & 0x80) >> 7;
-            opcode = (_frameData[0] & 0x0F);
+            fin = (_clientFrameData[0] & 0x80) >> 7;
+            opcode = (_clientFrameData[0] & 0x0F);
             Assert.AreEqual(0x01, fin);
             Assert.AreEqual((byte)WebSocketOpcode.ConnectionClose, opcode);
 
-            _frameData.Clear();
+            _clientFrameData.Clear();
             data.Clear();
             s.SendData(WebSocketOpcode.Pong, data.ToArray(), (IPEndPoint)s.GetConnections()[0].LocalEndPoint, (IPEndPoint)s.GetConnections()[0].RemoteEndPoint, false);
             Thread.Sleep(10);
-            Assert.AreEqual(data.Count + 2, _frameData.Count);
+            Assert.AreEqual(data.Count + 2, _clientFrameData.Count);
 
-            fin = (_frameData[0] & 0x80) >> 7;
-            opcode = (_frameData[0] & 0x0F);
+            fin = (_clientFrameData[0] & 0x80) >> 7;
+            opcode = (_clientFrameData[0] & 0x0F);
             Assert.AreEqual(0x00, fin);
             Assert.AreEqual((byte)WebSocketOpcode.Pong, opcode);
 
-            _frameData.Clear();
+            _clientFrameData.Clear();
             data.Clear();
             s.SendData(WebSocketOpcode.ContinuationFrame, data.ToArray(), (IPEndPoint)s.GetConnections()[0].LocalEndPoint, (IPEndPoint)s.GetConnections()[0].RemoteEndPoint, true);
             Thread.Sleep(10);
-            Assert.AreEqual(data.Count + 2, _frameData.Count);
+            Assert.AreEqual(data.Count + 2, _clientFrameData.Count);
 
-            fin = (_frameData[0] & 0x80) >> 7;
-            opcode = (_frameData[0] & 0x0F);
+            fin = (_clientFrameData[0] & 0x80) >> 7;
+            opcode = (_clientFrameData[0] & 0x0F);
             Assert.AreEqual(0x01, fin);
             Assert.AreEqual((byte)WebSocketOpcode.ContinuationFrame, opcode);
 
-            _frameData.Clear();
+            _clientFrameData.Clear();
             data.Clear();
             s.SendData(WebSocketOpcode.Ping, data.ToArray(), (IPEndPoint)s.GetConnections()[0].LocalEndPoint, (IPEndPoint)s.GetConnections()[0].RemoteEndPoint, false);
             Thread.Sleep(10);
-            Assert.AreEqual(data.Count + 2, _frameData.Count);
+            Assert.AreEqual(data.Count + 2, _clientFrameData.Count);
 
-            fin = (_frameData[0] & 0x80) >> 7;
-            opcode = (_frameData[0] & 0x0F);
+            fin = (_clientFrameData[0] & 0x80) >> 7;
+            opcode = (_clientFrameData[0] & 0x0F);
             Assert.AreEqual(0x00, fin);
             Assert.AreEqual((byte)WebSocketOpcode.Ping, opcode);
 
 
             for (int i = 0; i < 126; i += 25)
             {
-                _frameData.Clear();
+                _clientFrameData.Clear();
                 data.Clear();
                 for (int j = 0; j < i; j++)
                 {
@@ -280,16 +282,16 @@ namespace Flekosoft.UnitTests.Common.Network.WebSocket
 
                 s.SendData(WebSocketOpcode.BinaryFrame, data.ToArray(), (IPEndPoint)s.GetConnections()[0].LocalEndPoint, (IPEndPoint)s.GetConnections()[0].RemoteEndPoint, true);
                 startTime = DateTime.Now;
-                while (_frameData.Count < data.Count + 2)
+                while (_clientFrameData.Count < data.Count + 2)
                 {
                     var delta = DateTime.Now - startTime;
                     if (delta.TotalSeconds > 10) Assert.Fail();
                 }
 
-                fin = (_frameData[0] & 0x80) >> 7;
-                opcode = (_frameData[0] & 0x0F);
-                mask = (byte)((_frameData[1] & 0x80) >> 7);
-                payloadLen = (_frameData[1] & 0x7F);
+                fin = (_clientFrameData[0] & 0x80) >> 7;
+                opcode = (_clientFrameData[0] & 0x0F);
+                mask = (byte)((_clientFrameData[1] & 0x80) >> 7);
+                payloadLen = (_clientFrameData[1] & 0x7F);
 
                 Assert.AreEqual(0x01, fin);
                 Assert.AreEqual((byte)WebSocketOpcode.BinaryFrame, opcode);
@@ -297,13 +299,13 @@ namespace Flekosoft.UnitTests.Common.Network.WebSocket
                 Assert.AreEqual(i, payloadLen);
                 for (int j = 0; j < data.Count; j++)
                 {
-                    Assert.AreEqual(data[j], _frameData[j + 2]);
+                    Assert.AreEqual(data[j], _clientFrameData[j + 2]);
                 }
             }
 
             for (int i = 126; i < 65535; i += 10000)
             {
-                _frameData.Clear();
+                _clientFrameData.Clear();
                 data.Clear();
                 for (int j = 0; j < i; j++)
                 {
@@ -312,17 +314,17 @@ namespace Flekosoft.UnitTests.Common.Network.WebSocket
 
                 s.SendData(WebSocketOpcode.BinaryFrame, data.ToArray(), (IPEndPoint)s.GetConnections()[0].LocalEndPoint, (IPEndPoint)s.GetConnections()[0].RemoteEndPoint, true);
                 startTime = DateTime.Now;
-                while (_frameData.Count < data.Count + 4)
+                while (_clientFrameData.Count < data.Count + 4)
                 {
                     var delta = DateTime.Now - startTime;
                     if (delta.TotalSeconds > 10) Assert.Fail();
                 }
 
-                fin = (_frameData[0] & 0x80) >> 7;
-                opcode = (_frameData[0] & 0x0F);
-                mask = (byte)((_frameData[1] & 0x80) >> 7);
-                payloadLen1 = (byte)(_frameData[1] & 0x7F);
-                payloadLen = ((_frameData[2] << 8) + _frameData[3]);
+                fin = (_clientFrameData[0] & 0x80) >> 7;
+                opcode = (_clientFrameData[0] & 0x0F);
+                mask = (byte)((_clientFrameData[1] & 0x80) >> 7);
+                payloadLen1 = (byte)(_clientFrameData[1] & 0x7F);
+                payloadLen = ((_clientFrameData[2] << 8) + _clientFrameData[3]);
 
                 Assert.AreEqual(0x01, fin);
                 Assert.AreEqual((byte)WebSocketOpcode.BinaryFrame, opcode);
@@ -331,11 +333,11 @@ namespace Flekosoft.UnitTests.Common.Network.WebSocket
                 Assert.AreEqual(i, payloadLen);
                 for (int j = 0; j < data.Count; j++)
                 {
-                    Assert.AreEqual(data[j], _frameData[j + 4]);
+                    Assert.AreEqual(data[j], _clientFrameData[j + 4]);
                 }
             }
 
-            _frameData.Clear();
+            _clientFrameData.Clear();
             data.Clear();
             for (int j = 0; j < 65534; j++)
             {
@@ -344,17 +346,17 @@ namespace Flekosoft.UnitTests.Common.Network.WebSocket
 
             s.SendData(WebSocketOpcode.BinaryFrame, data.ToArray(), (IPEndPoint)s.GetConnections()[0].LocalEndPoint, (IPEndPoint)s.GetConnections()[0].RemoteEndPoint, true);
             startTime = DateTime.Now;
-            while (_frameData.Count < data.Count + 4)
+            while (_clientFrameData.Count < data.Count + 4)
             {
                 var delta = DateTime.Now - startTime;
                 if (delta.TotalSeconds > 10) Assert.Fail();
             }
 
-            fin = (_frameData[0] & 0x80) >> 7;
-            opcode = (_frameData[0] & 0x0F);
-            mask = (byte)((_frameData[1] & 0x80) >> 7);
-            payloadLen1 = (byte)(_frameData[1] & 0x7F);
-            payloadLen = ((_frameData[2] << 8) + _frameData[3]);
+            fin = (_clientFrameData[0] & 0x80) >> 7;
+            opcode = (_clientFrameData[0] & 0x0F);
+            mask = (byte)((_clientFrameData[1] & 0x80) >> 7);
+            payloadLen1 = (byte)(_clientFrameData[1] & 0x7F);
+            payloadLen = ((_clientFrameData[2] << 8) + _clientFrameData[3]);
 
             Assert.AreEqual(0x01, fin);
             Assert.AreEqual((byte)WebSocketOpcode.BinaryFrame, opcode);
@@ -363,12 +365,12 @@ namespace Flekosoft.UnitTests.Common.Network.WebSocket
             Assert.AreEqual(65534, payloadLen);
             for (int j = 0; j < data.Count; j++)
             {
-                Assert.AreEqual(data[j], _frameData[j + 4]);
+                Assert.AreEqual(data[j], _clientFrameData[j + 4]);
             }
 
             for (long i = 0xFFFF; i < 0x0000000000FFFFFF; i += 0x0000000000400000)
             {
-                _frameData.Clear();
+                _clientFrameData.Clear();
                 data.Clear();
                 for (int j = 0; j < i; j++)
                 {
@@ -377,24 +379,24 @@ namespace Flekosoft.UnitTests.Common.Network.WebSocket
 
                 s.SendData(WebSocketOpcode.BinaryFrame, data.ToArray(), (IPEndPoint)s.GetConnections()[0].LocalEndPoint, (IPEndPoint)s.GetConnections()[0].RemoteEndPoint, true);
                 startTime = DateTime.Now;
-                while (_frameData.Count < data.Count + 10)
+                while (_clientFrameData.Count < data.Count + 10)
                 {
                     var delta = DateTime.Now - startTime;
                     if (delta.TotalSeconds > 10) Assert.Fail();
                 }
 
-                fin = (_frameData[0] & 0x80) >> 7;
-                opcode = (_frameData[0] & 0x0F);
-                mask = (byte)((_frameData[1] & 0x80) >> 7);
-                payloadLen1 = (byte)(_frameData[1] & 0x7F);
-                payloadLen = ((_frameData[2] << 7 * 8) +
-                              (_frameData[3] << 6 * 8) +
-                              (_frameData[4] << 5 * 8) +
-                              (_frameData[5] << 4 * 8) +
-                              (_frameData[6] << 3 * 8) +
-                              (_frameData[7] << 2 * 8) +
-                              (_frameData[8] << 1 * 8) +
-                              (_frameData[9] << 0 * 8));
+                fin = (_clientFrameData[0] & 0x80) >> 7;
+                opcode = (_clientFrameData[0] & 0x0F);
+                mask = (byte)((_clientFrameData[1] & 0x80) >> 7);
+                payloadLen1 = (byte)(_clientFrameData[1] & 0x7F);
+                payloadLen = ((_clientFrameData[2] << 7 * 8) +
+                              (_clientFrameData[3] << 6 * 8) +
+                              (_clientFrameData[4] << 5 * 8) +
+                              (_clientFrameData[5] << 4 * 8) +
+                              (_clientFrameData[6] << 3 * 8) +
+                              (_clientFrameData[7] << 2 * 8) +
+                              (_clientFrameData[8] << 1 * 8) +
+                              (_clientFrameData[9] << 0 * 8));
 
                 Assert.AreEqual(0x01, fin);
                 Assert.AreEqual((byte)WebSocketOpcode.BinaryFrame, opcode);
@@ -403,7 +405,7 @@ namespace Flekosoft.UnitTests.Common.Network.WebSocket
                 Assert.AreEqual(i, payloadLen);
                 for (int j = 0; j < (int)data.Count; j++)
                 {
-                    Assert.AreEqual(data[j], _frameData[j + 10]);
+                    Assert.AreEqual(data[j], _clientFrameData[j + 10]);
                 }
             }
 
@@ -419,6 +421,195 @@ namespace Flekosoft.UnitTests.Common.Network.WebSocket
 
             c.Dispose();
             s.Dispose();
+        }
+
+        [TestMethod]
+        public void WebSocketServer_ClientToServerData_Test()
+        {
+            var clientsCount = 1;
+            var ipep = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 4444);
+            var epList = new List<TcpServerLocalEndpoint>
+            {
+                new TcpServerLocalEndpoint(ipep, clientsCount)
+            };
+
+            var s = new WebSocketServer();
+            s.ConnectedEvent += S_ConnectedEvent;
+            s.DisconnectedEvent += S_DisconnectedEvent;
+            s.HandshakeEvent += S_HandshakeEvent;
+            s.DataReceivedEvent += S_DataReceivedEvent;
+            s.Start(epList);
+
+            var c = new TcpClient();
+            c.DataReceivedEvent += C_DataReceivedEvent;
+            c.Start(ipep);
+            var startTime = DateTime.Now;
+            while (_connectionEventArgs == null)
+            {
+                var delta = DateTime.Now - startTime;
+                if (delta.TotalSeconds > 10) Assert.Fail();
+            }
+            var r = new Random((int)DateTime.Now.Ticks);
+            List<byte> key = new List<byte>();
+            for (int i = 0; i < 16; i++)
+            {
+                key.Add((byte)r.Next(32, 127));
+            }
+            var keyStr = Convert.ToBase64String(key.ToArray());
+
+            var reqStr = $"GET /Test HTTP/1.1\r\n";
+            reqStr += "Upgrade: websocket\r\n";
+            reqStr += "Connection: Upgrade\r\n";
+            reqStr += $"Sec-WebSocket-Key: {keyStr}\r\n";
+            reqStr += $"Sec-WebSocket-Version: 13\r\n\r\n";
+
+            _handshakeTest = true;
+            _handshakeReceived = false;
+            _handshakeEventArgs = null;
+            c.SendData(Encoding.UTF8.GetBytes(reqStr));
+            startTime = DateTime.Now;
+            while (_handshakeReceived == false)
+            {
+                var delta = DateTime.Now - startTime;
+                if (delta.TotalSeconds > 10) Assert.Fail();
+            }
+            startTime = DateTime.Now;
+            while (_handshakeEventArgs == null)
+            {
+                var delta = DateTime.Now - startTime;
+                if (delta.TotalSeconds > 10) Assert.Fail();
+            }
+
+
+            _handshakeTest = false;
+
+            _clientFrameData.Clear();
+
+            var data = new List<byte>();
+            for (int i = 0; i < 126; i += 25)
+            {
+                _dataReceivedEventArgs = null;
+                data.Clear();
+                data.Add(0x80 | (byte)WebSocketOpcode.TextFrame);
+                data.Add((byte)(0x80 | (byte)i));
+
+                var maskArr = new byte[] { 0x01, 0x02, 0x03, 0x04 };
+                data.AddRange(maskArr);
+
+                var unMaskedData = new List<byte>();
+                for (int j = 0; j < i; j++)
+                {
+                    unMaskedData.Add((byte)j);
+                }
+                var maskedData = new List<byte>();
+                var k = 0;
+                for (int j = 0; j < unMaskedData.Count; j++, k++)
+                {
+                    maskedData.Add((byte)(unMaskedData[j] ^ maskArr[k % 4]));
+                }
+                data.AddRange(maskedData);
+                c.SendData(data.ToArray());
+                startTime = DateTime.Now;
+                while (_dataReceivedEventArgs == null)
+                {
+                    var delta = DateTime.Now - startTime;
+                    if (delta.TotalSeconds > 10) Assert.Fail();
+                }
+
+                Assert.AreEqual(c.DestinationIpEndPoint, _dataReceivedEventArgs.LocalEndPoint);
+                for (int j = 0; j < unMaskedData.Count; j++)
+                {
+                    Assert.AreEqual(unMaskedData[j], _dataReceivedEventArgs.Data[j]);
+                }
+            }
+
+            for (int i = 126; i < 0xFFFF; i += 20000)
+            {
+                _dataReceivedEventArgs = null;
+                data.Clear();
+                data.Add(0x80 | (byte)WebSocketOpcode.TextFrame);
+                data.Add((byte)(0x80 | (byte)126));
+                data.Add((byte)(i >> 8));
+                data.Add((byte)(i));
+
+                var maskArr = new byte[] { 0x01, 0x02, 0x03, 0x04 };
+                data.AddRange(maskArr);
+
+                var unMaskedData = new List<byte>();
+                for (int j = 0; j < i; j++)
+                {
+                    unMaskedData.Add((byte)j);
+                }
+                var maskedData = new List<byte>();
+                var k = 0;
+                for (int j = 0; j < unMaskedData.Count; j++, k++)
+                {
+                    maskedData.Add((byte)(unMaskedData[j] ^ maskArr[k % 4]));
+                }
+                data.AddRange(maskedData);
+                c.SendData(data.ToArray());
+                startTime = DateTime.Now;
+                while (_dataReceivedEventArgs == null)
+                {
+                    var delta = DateTime.Now - startTime;
+                    if (delta.TotalSeconds > 10) Assert.Fail();
+                }
+
+                Assert.AreEqual(c.DestinationIpEndPoint, _dataReceivedEventArgs.LocalEndPoint);
+                for (int j = 0; j < unMaskedData.Count; j++)
+                {
+                    Assert.AreEqual(unMaskedData[j], _dataReceivedEventArgs.Data[j]);
+                }
+            }
+
+            for (int i = 0x10000; i < 0x10002; i += 1)
+            {
+                _dataReceivedEventArgs = null;
+                data.Clear();
+                data.Add(0x80 | (byte)WebSocketOpcode.TextFrame);
+                data.Add((byte)(0x80 | (byte)127));
+                data.Add((byte)(i >> 24));
+                data.Add((byte)(i >> 16));
+                data.Add((byte)(i >> 8));
+                data.Add((byte)(i));
+
+                var maskArr = new byte[] { 0x01, 0x02, 0x03, 0x04 };
+                data.AddRange(maskArr);
+
+                var unMaskedData = new List<byte>();
+                for (int j = 0; j < i; j++)
+                {
+                    unMaskedData.Add((byte)j);
+                }
+                var maskedData = new List<byte>();
+                var k = 0;
+                for (int j = 0; j < unMaskedData.Count; j++, k++)
+                {
+                    maskedData.Add((byte)(unMaskedData[j] ^ maskArr[k % 4]));
+                }
+                data.AddRange(maskedData);
+                c.SendData(data.ToArray());
+                startTime = DateTime.Now;
+                while (_dataReceivedEventArgs == null)
+                {
+                    var delta = DateTime.Now - startTime;
+                    if (delta.TotalSeconds > 10) Assert.Fail();
+                }
+
+                Assert.AreEqual(c.DestinationIpEndPoint, _dataReceivedEventArgs.LocalEndPoint);
+                for (int j = 0; j < unMaskedData.Count; j++)
+                {
+                    Assert.AreEqual(unMaskedData[j], _dataReceivedEventArgs.Data[j]);
+                }
+            }
+
+            c.Dispose();
+            s.Dispose();
+        }
+
+        private void S_DataReceivedEvent(object sender, DataReceivedEventArgs e)
+        {
+            _dataReceivedEventArgs = e;
         }
 
         [TestMethod]
@@ -482,46 +673,46 @@ namespace Flekosoft.UnitTests.Common.Network.WebSocket
             byte mask;
             long payloadLen;
 
-            _frameData.Clear();
+            _clientFrameData.Clear();
 
             c.SendData(new byte[] { 0x80 | (byte)WebSocketOpcode.Ping, 0x00 });
             startTime = DateTime.Now;
-            while (_frameData.Count < 2)
+            while (_clientFrameData.Count < 2)
             {
                 var delta = DateTime.Now - startTime;
                 if (delta.TotalSeconds > 10) Assert.Fail();
             }
-            Assert.AreEqual(2, _frameData.Count);
+            Assert.AreEqual(2, _clientFrameData.Count);
 
-            var fin = (_frameData[0] & 0x80) >> 7;
-            var opcode = (_frameData[0] & 0x0F);
+            var fin = (_clientFrameData[0] & 0x80) >> 7;
+            var opcode = (_clientFrameData[0] & 0x0F);
             Assert.AreEqual(0x01, fin);
             Assert.AreEqual(0x0A, opcode);
 
-            _frameData.Clear();
+            _clientFrameData.Clear();
             byte len = 0x03;
             c.SendData(new byte[] { 0x80 | (byte)WebSocketOpcode.Ping, len, 0x01, 0x02, 0x03 });
 
             startTime = DateTime.Now;
-            while (_frameData.Count < len + 2)
+            while (_clientFrameData.Count < len + 2)
             {
                 var delta = DateTime.Now - startTime;
                 if (delta.TotalSeconds > 10) Assert.Fail();
             }
 
-            fin = (_frameData[0] & 0x80) >> 7;
-            opcode = (_frameData[0] & 0x0F);
-            mask = (byte)((_frameData[1] & 0x80) >> 7);
-            payloadLen = (_frameData[1] & 0x7F);
+            fin = (_clientFrameData[0] & 0x80) >> 7;
+            opcode = (_clientFrameData[0] & 0x0F);
+            mask = (byte)((_clientFrameData[1] & 0x80) >> 7);
+            payloadLen = (_clientFrameData[1] & 0x7F);
 
             Assert.AreEqual(0x01, fin);
             Assert.AreEqual(0x0A, opcode);
             Assert.AreEqual(0x00, mask);
             Assert.AreEqual(3, payloadLen);
 
-            Assert.AreEqual(0x01, _frameData[2]);
-            Assert.AreEqual(0x02, _frameData[3]);
-            Assert.AreEqual(0x03, _frameData[4]);
+            Assert.AreEqual(0x01, _clientFrameData[2]);
+            Assert.AreEqual(0x02, _clientFrameData[3]);
+            Assert.AreEqual(0x03, _clientFrameData[4]);
 
 
 
@@ -536,6 +727,244 @@ namespace Flekosoft.UnitTests.Common.Network.WebSocket
 
             c.Dispose();
             s.Dispose();
+        }
+
+        [TestMethod]
+        public void WebSocketServer_CloseConnection_Test()
+        {
+            var clientsCount = 1;
+            var ipep = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 4444);
+            var epList = new List<TcpServerLocalEndpoint>
+            {
+                new TcpServerLocalEndpoint(ipep, clientsCount)
+            };
+
+            var s = new WebSocketServer();
+            s.ConnectedEvent += S_ConnectedEvent;
+            s.DisconnectedEvent += S_DisconnectedEvent;
+            s.ConnectionCloseEvent += S_ConnectionCloseEvent;
+            s.Start(epList);
+
+            var c = new TcpClient();
+            c.DataReceivedEvent += C_DataReceivedEvent;
+            c.Start(ipep);
+            var startTime = DateTime.Now;
+            while (_connectionEventArgs == null)
+            {
+                var delta = DateTime.Now - startTime;
+                if (delta.TotalSeconds > 10) Assert.Fail();
+            }
+            var r = new Random((int)DateTime.Now.Ticks);
+            List<byte> key = new List<byte>();
+            for (int i = 0; i < 16; i++)
+            {
+                key.Add((byte)r.Next(32, 127));
+            }
+            var keyStr = Convert.ToBase64String(key.ToArray());
+
+            var reqStr = $"GET /Test HTTP/1.1\r\n";
+            reqStr += "Upgrade: websocket\r\n";
+            reqStr += "Connection: Upgrade\r\n";
+            reqStr += $"Sec-WebSocket-Key: {keyStr}\r\n";
+            reqStr += $"Sec-WebSocket-Version: 13\r\n\r\n";
+
+            _handshakeTest = true;
+            _handshakeReceived = false;
+            c.SendData(Encoding.UTF8.GetBytes(reqStr));
+            startTime = DateTime.Now;
+            while (_handshakeReceived == false)
+            {
+                var delta = DateTime.Now - startTime;
+                if (delta.TotalSeconds > 10) Assert.Fail();
+            }
+
+            _handshakeTest = false;
+
+            _clientFrameData.Clear();
+            ConnectionCloseReason closeReason = ConnectionCloseReason.NormalClose;
+            List<byte> data = new List<byte>();
+            data.Add(0x80 | (byte)WebSocketOpcode.ConnectionClose);
+            data.Add(0x02);
+            data.Add((byte)((int)closeReason >> 8));
+            data.Add((byte)closeReason);
+            c.SendData(data.ToArray());
+
+            startTime = DateTime.Now;
+            _connectionCloseEventArgs = null;
+            while (_clientFrameData.Count < 4)
+            {
+                var delta = DateTime.Now - startTime;
+                if (delta.TotalSeconds > 10) Assert.Fail();
+            }
+            Assert.AreEqual(closeReason, _connectionCloseEventArgs?.ConnectionCloseReason);
+            Assert.AreEqual(4, _clientFrameData.Count);
+
+            var fin = (_clientFrameData[0] & 0x80) >> 7;
+            var opcode = (_clientFrameData[0] & 0x0F);
+            Assert.AreEqual(0x01, fin);
+            Assert.AreEqual(0x08, opcode);
+
+            Assert.AreEqual(0x02, _clientFrameData[1]);
+            Assert.AreEqual(0x03, _clientFrameData[2]);
+            Assert.AreEqual(0xE8, _clientFrameData[3]);
+
+            c.Dispose();
+            s.Dispose();
+        }
+
+        [TestMethod]
+        public void WebSocketServer_CloseConnection_OnStopServerTest()
+        {
+            var clientsCount = 1;
+            var ipep = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 4444);
+            var epList = new List<TcpServerLocalEndpoint>
+            {
+                new TcpServerLocalEndpoint(ipep, clientsCount)
+            };
+
+            var s = new WebSocketServer();
+            s.ConnectedEvent += S_ConnectedEvent;
+            s.DisconnectedEvent += S_DisconnectedEvent;
+            s.ConnectionCloseEvent += S_ConnectionCloseEvent;
+            s.Start(epList);
+
+            var c = new TcpClient();
+            c.DataReceivedEvent += C_DataReceivedEvent;
+            c.Start(ipep);
+            var startTime = DateTime.Now;
+            while (_connectionEventArgs == null)
+            {
+                var delta = DateTime.Now - startTime;
+                if (delta.TotalSeconds > 10) Assert.Fail();
+            }
+            var r = new Random((int)DateTime.Now.Ticks);
+            List<byte> key = new List<byte>();
+            for (int i = 0; i < 16; i++)
+            {
+                key.Add((byte)r.Next(32, 127));
+            }
+            var keyStr = Convert.ToBase64String(key.ToArray());
+
+            var reqStr = $"GET /Test HTTP/1.1\r\n";
+            reqStr += "Upgrade: websocket\r\n";
+            reqStr += "Connection: Upgrade\r\n";
+            reqStr += $"Sec-WebSocket-Key: {keyStr}\r\n";
+            reqStr += $"Sec-WebSocket-Version: 13\r\n\r\n";
+
+            _handshakeTest = true;
+            _handshakeReceived = false;
+            c.SendData(Encoding.UTF8.GetBytes(reqStr));
+            startTime = DateTime.Now;
+            while (_handshakeReceived == false)
+            {
+                var delta = DateTime.Now - startTime;
+                if (delta.TotalSeconds > 10) Assert.Fail();
+            }
+
+            _handshakeTest = false;
+
+            _clientFrameData.Clear();
+            s.Stop();
+            startTime = DateTime.Now;
+            _connectionCloseEventArgs = null;
+            while (_clientFrameData.Count < 4)
+            {
+                var delta = DateTime.Now - startTime;
+                if (delta.TotalSeconds > 10) Assert.Fail();
+            }
+            Assert.AreEqual(4, _clientFrameData.Count);
+
+            var fin = (_clientFrameData[0] & 0x80) >> 7;
+            var opcode = (_clientFrameData[0] & 0x0F);
+            Assert.AreEqual(0x01, fin);
+            Assert.AreEqual(0x08, opcode);
+
+            Assert.AreEqual(0x02, _clientFrameData[1]);
+            Assert.AreEqual(0x03, _clientFrameData[2]);
+            Assert.AreEqual(0xE8, _clientFrameData[3]);
+
+            c.Dispose();
+            s.Dispose();
+        }
+
+        [TestMethod]
+        public void WebSocketServer_CloseConnection_OnDisposeServerTest()
+        {
+            var clientsCount = 1;
+            var ipep = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 4444);
+            var epList = new List<TcpServerLocalEndpoint>
+            {
+                new TcpServerLocalEndpoint(ipep, clientsCount)
+            };
+
+            var s = new WebSocketServer();
+            s.ConnectedEvent += S_ConnectedEvent;
+            s.DisconnectedEvent += S_DisconnectedEvent;
+            s.ConnectionCloseEvent += S_ConnectionCloseEvent;
+            s.Start(epList);
+
+            var c = new TcpClient();
+            c.DataReceivedEvent += C_DataReceivedEvent;
+            c.Start(ipep);
+            var startTime = DateTime.Now;
+            while (_connectionEventArgs == null)
+            {
+                var delta = DateTime.Now - startTime;
+                if (delta.TotalSeconds > 10) Assert.Fail();
+            }
+            var r = new Random((int)DateTime.Now.Ticks);
+            List<byte> key = new List<byte>();
+            for (int i = 0; i < 16; i++)
+            {
+                key.Add((byte)r.Next(32, 127));
+            }
+            var keyStr = Convert.ToBase64String(key.ToArray());
+
+            var reqStr = $"GET /Test HTTP/1.1\r\n";
+            reqStr += "Upgrade: websocket\r\n";
+            reqStr += "Connection: Upgrade\r\n";
+            reqStr += $"Sec-WebSocket-Key: {keyStr}\r\n";
+            reqStr += $"Sec-WebSocket-Version: 13\r\n\r\n";
+
+            _handshakeTest = true;
+            _handshakeReceived = false;
+            c.SendData(Encoding.UTF8.GetBytes(reqStr));
+            startTime = DateTime.Now;
+            while (_handshakeReceived == false)
+            {
+                var delta = DateTime.Now - startTime;
+                if (delta.TotalSeconds > 10) Assert.Fail();
+            }
+
+            _handshakeTest = false;
+
+            _clientFrameData.Clear();
+            s.Dispose();
+            startTime = DateTime.Now;
+            _connectionCloseEventArgs = null;
+            while (_clientFrameData.Count < 4)
+            {
+                var delta = DateTime.Now - startTime;
+                if (delta.TotalSeconds > 10) Assert.Fail();
+            }
+            Assert.AreEqual(4, _clientFrameData.Count);
+
+            var fin = (_clientFrameData[0] & 0x80) >> 7;
+            var opcode = (_clientFrameData[0] & 0x0F);
+            Assert.AreEqual(0x01, fin);
+            Assert.AreEqual(0x08, opcode);
+
+            Assert.AreEqual(0x02, _clientFrameData[1]);
+            Assert.AreEqual(0x03, _clientFrameData[2]);
+            Assert.AreEqual(0xE8, _clientFrameData[3]);
+
+            c.Dispose();
+            s.Dispose();
+        }
+
+        private void S_ConnectionCloseEvent(object sender, ConnectionCloseEventArgs e)
+        {
+            _connectionCloseEventArgs = e;
         }
 
         private void S_HandshakeEvent(object sender, ConnectionEventArgs e)
@@ -564,7 +993,7 @@ namespace Flekosoft.UnitTests.Common.Network.WebSocket
             }
             else
             {
-                _frameData.AddRange(e.Data);
+                _clientFrameData.AddRange(e.Data);
             }
         }
 

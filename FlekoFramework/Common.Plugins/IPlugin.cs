@@ -11,5 +11,6 @@ namespace Flekosoft.Common.Plugins
         object GetInstance();
         object GetInstance(object param);
         bool IsSingleInstance { get; }
+        Version Version { get; }
     }
 }

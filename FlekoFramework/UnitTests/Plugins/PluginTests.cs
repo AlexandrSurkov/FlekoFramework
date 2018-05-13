@@ -13,12 +13,14 @@ namespace Flekosoft.UnitTests.Plugins
             var name = "23";
             var desc = "wqe";
             var type = typeof(TestPluginInstance1);
-            var tp = new TestPluginType1(guid, type, name, desc, false);
+            var version = new Version(1, 2, 3, 4);
+            var tp = new TestPluginType1(guid, type, name, desc, false, version);
 
             Assert.AreEqual(guid, tp.Guid);
             Assert.AreEqual(name, tp.Name);
             Assert.AreEqual(desc, tp.Description);
             Assert.AreEqual(type, tp.Type);
+            Assert.AreEqual(version, tp.Version);
 
             tp.IsEnabled = false;
             Assert.AreEqual(false, tp.IsEnabled);
@@ -42,7 +44,8 @@ namespace Flekosoft.UnitTests.Plugins
             var name = "23";
             var desc = "wqe";
             var type = typeof(TestPluginInstance1);
-            var tp = new TestPluginType1(guid, type, name, desc, false);
+            var version = new Version(1, 2, 3, 4);
+            var tp = new TestPluginType1(guid, type, name, desc, false, version);
 
             var instance1 = tp.GetInstance();
             Assert.AreEqual(tp.Type, instance1.GetType());
@@ -71,7 +74,8 @@ namespace Flekosoft.UnitTests.Plugins
             var name = "23";
             var desc = "wqe";
             var type = typeof(TestPluginInstance1);
-            var tp = new TestPluginType1(guid, type, name, desc, true);
+            var version = new Version(1, 2, 3, 4);
+            var tp = new TestPluginType1(guid, type, name, desc, true, version);
 
             var instance1 = tp.GetInstance();
             Assert.AreEqual(tp.Type, instance1.GetType());

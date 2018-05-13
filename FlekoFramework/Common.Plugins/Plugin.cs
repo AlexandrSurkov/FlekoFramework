@@ -8,13 +8,14 @@ namespace Flekosoft.Common.Plugins
         readonly List<object> _instancesList = new List<object>();
         private bool _isEnabled;
 
-        protected Plugin(Guid guid, Type type, string name, string description, bool isSingleInstance) : base($"{name} ({guid})")
+        protected Plugin(Guid guid, Type type, string name, string description, bool isSingleInstance, Version version) : base($"{name} ({guid})")
         {
             Guid = guid;
             Type = type;
             Name = name;
             Description = description;
             IsSingleInstance = isSingleInstance;
+            Version = version;
         }
 
         public Guid Guid { get; }
@@ -24,6 +25,8 @@ namespace Flekosoft.Common.Plugins
         public string Description { get; }
 
         public Type Type { get; }
+
+        public Version Version { get; }
 
         public bool IsEnabled
         {

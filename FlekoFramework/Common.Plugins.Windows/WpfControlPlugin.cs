@@ -5,7 +5,7 @@ namespace Flekosoft.Common.Plugins.Windows
 {
     public abstract class WpfControlPlugin : Plugin, IWpfControlPlugin
     {
-        protected WpfControlPlugin(Guid guid, Type type, string name, string description, bool isSingleInstance) : base(guid, type, name, description, isSingleInstance)
+        protected WpfControlPlugin(Guid guid, Type type, string name, string description, bool isSingleInstance, Version version) : base(guid, type, name, description, isSingleInstance, version)
         {
         }
 

@@ -18,7 +18,7 @@ namespace Flekosoft.UnitTests.Plugins
 
     class TestPluginType1 : Plugin, ITestPluginType1
     {
-        public TestPluginType1(Guid guid, Type type, string name, string description, bool isSingleInstance) : base(guid, type, name, description, isSingleInstance)
+        public TestPluginType1(Guid guid, Type type, string name, string description, bool isSingleInstance, Version version) : base(guid, type, name, description, isSingleInstance, version)
         {
         }
 
@@ -30,7 +30,7 @@ namespace Flekosoft.UnitTests.Plugins
 
     class TestPluginType2 : Plugin, ITestPluginType2
     {
-        public TestPluginType2(Guid guid, Type type, string name, string description, bool isSingleInstance) : base(guid, type, name, description, isSingleInstance)
+        public TestPluginType2(Guid guid, Type type, string name, string description, bool isSingleInstance, Version version) : base(guid, type, name, description, isSingleInstance, version)
         {
         }
 
@@ -58,7 +58,7 @@ namespace Flekosoft.UnitTests.Plugins
             var res = new List<IPlugin>();
             for (int i = 0; i < PluginsCount; i++)
             {
-                res.Add(new TestPluginType1(Guid.NewGuid(), typeof(TestPluginInstance1), $"Plugin type 1 {i}", $"Description {i}", false));
+                res.Add(new TestPluginType1(Guid.NewGuid(), typeof(TestPluginInstance1), $"Plugin type 1 {i}", $"Description {i}", false, new Version(1, 0, 0)));
             }
             return res.AsReadOnly();
         }
@@ -75,7 +75,7 @@ namespace Flekosoft.UnitTests.Plugins
             var res = new List<IPlugin>();
             for (int i = 0; i < PluginsCount; i++)
             {
-                res.Add(new TestPluginType2(Guid.NewGuid(), typeof(TestPluginInstance2), $"Plugin type 2 {i}", $"Description {i}", false));
+                res.Add(new TestPluginType2(Guid.NewGuid(), typeof(TestPluginInstance2), $"Plugin type 2 {i}", $"Description {i}", false, new Version(1, 0, 0)));
             }
             return res.AsReadOnly();
         }
@@ -94,11 +94,11 @@ namespace Flekosoft.UnitTests.Plugins
             var res = new List<IPlugin>();
             for (int i = 0; i < Plugins1Count; i++)
             {
-                res.Add(new TestPluginType1(Guid.NewGuid(), typeof(TestPluginInstance1), $"Plugin type 1 {i}", $"Description {i}", false));
+                res.Add(new TestPluginType1(Guid.NewGuid(), typeof(TestPluginInstance1), $"Plugin type 1 {i}", $"Description {i}", false, new Version(1, 0, 0)));
             }
             for (int i = 0; i < Plugins2Count; i++)
             {
-                res.Add(new TestPluginType2(Guid.NewGuid(), typeof(TestPluginInstance2), $"Plugin type 2 {i}", $"Description {i}", false));
+                res.Add(new TestPluginType2(Guid.NewGuid(), typeof(TestPluginInstance2), $"Plugin type 2 {i}", $"Description {i}", false, new Version(1, 0, 0)));
             }
             return res.AsReadOnly();
         }

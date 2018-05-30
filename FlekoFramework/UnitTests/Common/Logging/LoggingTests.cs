@@ -90,52 +90,66 @@ namespace Flekosoft.UnitTests.Common.Logging
             if (isShouldBeNull)
                 Assert.IsNull(_writer.LogRecord);
             else
-                Assert.AreEqual(logRecord, _writer.LogRecord);
-        }
-
-        [TestMethod]
-        public void ConsoleLogTest()
-        {
-            lock (_syncObject)
             {
-                Logger.Instance.LogerOutputs.Clear();
+                Assert.IsNotNull(_writer.LogRecord);
+                Assert.AreEqual(logRecord.Color, _writer.LogRecord?.Color);
+                Assert.AreEqual(logRecord.RecordType, _writer.LogRecord?.RecordType);
+                Assert.AreEqual(logRecord.LogStrings.Count, _writer.LogRecord?.LogStrings.Count);
 
-                var dt = DateTime.Now;
-                var s = new List<string> { DateTime.Now.Ticks.ToString(), DateTime.Now.Ticks.ToString() };
-                var c = ConsoleColor.Red;
-
-                var sw = new StringWriter();
-                Console.SetOut(sw);
-
-                var writer = Logger.ConsoleOutput;
-                writer.LogLevel = LogRecordLevel.All;
-                Logger.Instance.LogerOutputs.Add(writer);
-
-                var logRecord = new LogRecord(dt, new List<string>(s), LogRecordLevel.Fatal, c);
-                Logger.Instance.AppendLog(logRecord);
-                Thread.Sleep(5);//Wait until async threads did their work
-
-                var strs = sw.GetStringBuilder().ToString().Split(new string[] { "\r\n" }, StringSplitOptions.RemoveEmptyEntries);
-                var str = $"{strs[1]}\r\n{strs[2]}\r\n";
-
-                var srcStr = $"{logRecord.LogStrings[0]}\r\n{logRecord.LogStrings[1]}\r\n";
-                var res = String.CompareOrdinal(str, srcStr);
-                Assert.AreEqual(0, res, str);
-
-                Logger.Instance.LogerOutputs.Clear();
-
-                Logger.Instance.AppendLog(logRecord);
-                strs = sw.GetStringBuilder().ToString().Split(new string[] { "\r\n" }, StringSplitOptions.RemoveEmptyEntries);
-                str = $"{strs[1]}\r\n{strs[2]}\r\n";
-                srcStr = $"{logRecord.LogStrings[0]}\r\n{logRecord.LogStrings[1]}\r\n";
-                res = String.CompareOrdinal(str, srcStr);
-                Assert.AreEqual(0, res, str);
-
-                sw.Dispose();
-
-                Logger.Instance.LogerOutputs.Clear();
+                for (int j = 0; j < _writer.LogRecord.LogStrings.Count; j++)
+                {
+                    var strArr = _writer.LogRecord.LogStrings[j].Split('\t');
+                    Assert.AreEqual(logRecord.LogStrings[j], strArr[strArr.Length - 1]);
+                }
             }
         }
+
+        //[TestMethod]
+        //public void ConsoleLogTest()
+        //{
+        //    lock (_syncObject)
+        //    {
+        //        Logger.Instance.LogerOutputs.Clear();
+
+        //        var dt = DateTime.Now;
+        //        var s = new List<string> { DateTime.Now.Ticks.ToString(), DateTime.Now.Ticks.ToString() };
+        //        var c = ConsoleColor.Red;
+
+        //        var sw = new StringWriter();
+        //        Console.SetOut(sw);
+
+        //        var writer = Logger.ConsoleOutput;
+        //        writer.LogLevel = LogRecordLevel.All;
+        //        Logger.Instance.LogerOutputs.Add(writer);
+
+        //        var logRecord = new LogRecord(dt, new List<string>(s), LogRecordLevel.Fatal, c);
+        //        Logger.Instance.AppendLog(logRecord);
+        //        Thread.Sleep(5);//Wait until async threads did their work
+
+        //        var strs = sw.GetStringBuilder().ToString().Split(new string[] { "\r\n" }, StringSplitOptions.RemoveEmptyEntries);
+        //        var str = $"{strs[1]}\r\n{strs[2]}\r\n";
+
+        //        var strarr = str.Split('\t');
+        //        Assert.AreEqual("FATAL", strarr[1]);
+        //        var srcStr = $"{logRecord.LogStrings[0]}\r\n{logRecord.LogStrings[1]}\r\n";
+        //        Assert.AreEqual(srcStr, strarr[2]);
+
+        //        Logger.Instance.LogerOutputs.Clear();
+
+        //        Logger.Instance.AppendLog(logRecord);
+        //        strs = sw.GetStringBuilder().ToString().Split(new string[] { "\r\n" }, StringSplitOptions.RemoveEmptyEntries);
+        //        str = $"{strs[1]}\r\n{strs[2]}\r\n";
+        //        srcStr = $"{logRecord.LogStrings[0]}\r\n{logRecord.LogStrings[1]}\r\n";
+
+        //        strarr = str.Split('\t');
+        //        Assert.AreEqual("FATAL", strarr[1]);
+        //        Assert.AreEqual(srcStr, strarr[2]);
+
+        //        sw.Dispose();
+
+        //        Logger.Instance.LogerOutputs.Clear();
+        //    }
+        //}
 
         //[TestMethod]
         //public void ReachTextBoxLogTest()

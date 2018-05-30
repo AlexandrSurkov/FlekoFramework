@@ -95,7 +95,7 @@ namespace Flekosoft.UnitTests.Common.Network.Http
             while (_finishIndex < clientsCount)
             {
                 var delta = DateTime.Now - startTime;
-                if (delta.TotalMinutes > 1)
+                if (delta.TotalMinutes > 5)
                 {
                     server.Dispose();
                     Assert.Fail($"_finishIndex {_finishIndex} clientsCount {clientsCount}");

@@ -30,7 +30,7 @@ namespace Flekosoft.UnitTests.Common.Network.WebSocket
         public void WebSocketServer_HandShake_Test()
         {
             var clientsCount = 1;
-            var ipep = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 4444);
+            var ipep = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 4445);
             var epList = new List<TcpServerLocalEndpoint>
             {
                 new TcpServerLocalEndpoint(ipep, clientsCount)
@@ -52,6 +52,7 @@ namespace Flekosoft.UnitTests.Common.Network.WebSocket
             {
                 var delta = DateTime.Now - startTime;
                 if (delta.TotalSeconds > 10) Assert.Fail();
+                Thread.Sleep(1);
             }
 
             var r = new Random((int)DateTime.Now.Ticks);
@@ -77,12 +78,14 @@ namespace Flekosoft.UnitTests.Common.Network.WebSocket
             {
                 var delta = DateTime.Now - startTime;
                 if (delta.TotalSeconds > 10) Assert.Fail();
+                Thread.Sleep(1);
             }
             startTime = DateTime.Now;
             while (_handshakeEventArgs == null)
             {
                 var delta = DateTime.Now - startTime;
                 if (delta.TotalSeconds > 10) Assert.Fail();
+                Thread.Sleep(1);
             }
 
             string longKey = keyStr + "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
@@ -105,6 +108,7 @@ namespace Flekosoft.UnitTests.Common.Network.WebSocket
             {
                 var delta = DateTime.Now - startTime;
                 if (delta.TotalSeconds > 10) Assert.Fail();
+                Thread.Sleep(1);
             }
 
             c.Dispose();
@@ -115,7 +119,7 @@ namespace Flekosoft.UnitTests.Common.Network.WebSocket
         public void WebSocketServer_HandShake_Fail_Test()
         {
             var clientsCount = 1;
-            var ipep = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 4444);
+            var ipep = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 4445);
             var epList = new List<TcpServerLocalEndpoint>
             {
                 new TcpServerLocalEndpoint(ipep, clientsCount)
@@ -137,6 +141,7 @@ namespace Flekosoft.UnitTests.Common.Network.WebSocket
             {
                 var delta = DateTime.Now - startTime;
                 if (delta.TotalSeconds > 10) Assert.Fail();
+                Thread.Sleep(1);
             }
 
             var reqStr = $"123\r\n\r\n";
@@ -149,6 +154,7 @@ namespace Flekosoft.UnitTests.Common.Network.WebSocket
             {
                 var delta = DateTime.Now - startTime;
                 if (delta.TotalSeconds > 10) Assert.Fail();
+                Thread.Sleep(1);
             }
 
             Assert.AreEqual(5, _httpRequest.Count);
@@ -166,6 +172,7 @@ namespace Flekosoft.UnitTests.Common.Network.WebSocket
             {
                 var delta = DateTime.Now - startTime;
                 if (delta.TotalSeconds > 10) Assert.Fail();
+                Thread.Sleep(1);
             }
 
             c.Dispose();
@@ -176,7 +183,7 @@ namespace Flekosoft.UnitTests.Common.Network.WebSocket
         public void WebSocketServer_ServerToClientData_Test()
         {
             var clientsCount = 1;
-            var ipep = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 4444);
+            var ipep = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 4445);
             var epList = new List<TcpServerLocalEndpoint>
             {
                 new TcpServerLocalEndpoint(ipep, clientsCount)
@@ -195,6 +202,7 @@ namespace Flekosoft.UnitTests.Common.Network.WebSocket
             {
                 var delta = DateTime.Now - startTime;
                 if (delta.TotalSeconds > 10) Assert.Fail();
+                Thread.Sleep(1);
             }
 
             _handshakeTest = false;
@@ -286,6 +294,7 @@ namespace Flekosoft.UnitTests.Common.Network.WebSocket
                 {
                     var delta = DateTime.Now - startTime;
                     if (delta.TotalSeconds > 10) Assert.Fail();
+                    Thread.Sleep(1);
                 }
 
                 fin = (_clientFrameData[0] & 0x80) >> 7;
@@ -318,6 +327,7 @@ namespace Flekosoft.UnitTests.Common.Network.WebSocket
                 {
                     var delta = DateTime.Now - startTime;
                     if (delta.TotalSeconds > 10) Assert.Fail();
+                    Thread.Sleep(1);
                 }
 
                 fin = (_clientFrameData[0] & 0x80) >> 7;
@@ -350,6 +360,7 @@ namespace Flekosoft.UnitTests.Common.Network.WebSocket
             {
                 var delta = DateTime.Now - startTime;
                 if (delta.TotalSeconds > 10) Assert.Fail();
+                Thread.Sleep(1);
             }
 
             fin = (_clientFrameData[0] & 0x80) >> 7;
@@ -383,6 +394,7 @@ namespace Flekosoft.UnitTests.Common.Network.WebSocket
                 {
                     var delta = DateTime.Now - startTime;
                     if (delta.TotalSeconds > 10) Assert.Fail();
+                    Thread.Sleep(1);
                 }
 
                 fin = (_clientFrameData[0] & 0x80) >> 7;
@@ -417,6 +429,7 @@ namespace Flekosoft.UnitTests.Common.Network.WebSocket
             {
                 var delta = DateTime.Now - startTime;
                 if (delta.TotalSeconds > 10) Assert.Fail();
+                Thread.Sleep(1);
             }
 
             c.Dispose();
@@ -427,7 +440,7 @@ namespace Flekosoft.UnitTests.Common.Network.WebSocket
         public void WebSocketServer_ClientToServerData_Test()
         {
             var clientsCount = 1;
-            var ipep = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 4444);
+            var ipep = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 4445);
             var epList = new List<TcpServerLocalEndpoint>
             {
                 new TcpServerLocalEndpoint(ipep, clientsCount)
@@ -448,6 +461,7 @@ namespace Flekosoft.UnitTests.Common.Network.WebSocket
             {
                 var delta = DateTime.Now - startTime;
                 if (delta.TotalSeconds > 10) Assert.Fail();
+                Thread.Sleep(1);
             }
             var r = new Random((int)DateTime.Now.Ticks);
             List<byte> key = new List<byte>();
@@ -472,12 +486,14 @@ namespace Flekosoft.UnitTests.Common.Network.WebSocket
             {
                 var delta = DateTime.Now - startTime;
                 if (delta.TotalSeconds > 10) Assert.Fail();
+                Thread.Sleep(1);
             }
             startTime = DateTime.Now;
             while (_handshakeEventArgs == null)
             {
                 var delta = DateTime.Now - startTime;
                 if (delta.TotalSeconds > 10) Assert.Fail();
+                Thread.Sleep(1);
             }
 
 
@@ -514,6 +530,7 @@ namespace Flekosoft.UnitTests.Common.Network.WebSocket
                 {
                     var delta = DateTime.Now - startTime;
                     if (delta.TotalSeconds > 10) Assert.Fail();
+                    Thread.Sleep(1);
                 }
 
                 Assert.AreEqual(c.DestinationIpEndPoint, _dataReceivedEventArgs.LocalEndPoint);
@@ -553,6 +570,7 @@ namespace Flekosoft.UnitTests.Common.Network.WebSocket
                 {
                     var delta = DateTime.Now - startTime;
                     if (delta.TotalSeconds > 10) Assert.Fail();
+                    Thread.Sleep(1);
                 }
 
                 Assert.AreEqual(c.DestinationIpEndPoint, _dataReceivedEventArgs.LocalEndPoint);
@@ -594,6 +612,7 @@ namespace Flekosoft.UnitTests.Common.Network.WebSocket
                 {
                     var delta = DateTime.Now - startTime;
                     if (delta.TotalSeconds > 10) Assert.Fail();
+                    Thread.Sleep(1);
                 }
 
                 Assert.AreEqual(c.DestinationIpEndPoint, _dataReceivedEventArgs.LocalEndPoint);
@@ -616,7 +635,7 @@ namespace Flekosoft.UnitTests.Common.Network.WebSocket
         public void WebSocketServer_Ping_Test()
         {
             var clientsCount = 1;
-            var ipep = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 4444);
+            var ipep = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 4445);
             var epList = new List<TcpServerLocalEndpoint>
             {
                 new TcpServerLocalEndpoint(ipep, clientsCount)
@@ -636,6 +655,7 @@ namespace Flekosoft.UnitTests.Common.Network.WebSocket
             {
                 var delta = DateTime.Now - startTime;
                 if (delta.TotalSeconds > 10) Assert.Fail();
+                Thread.Sleep(1);
             }
             var r = new Random((int)DateTime.Now.Ticks);
             List<byte> key = new List<byte>();
@@ -660,12 +680,14 @@ namespace Flekosoft.UnitTests.Common.Network.WebSocket
             {
                 var delta = DateTime.Now - startTime;
                 if (delta.TotalSeconds > 10) Assert.Fail();
+                Thread.Sleep(1);
             }
             startTime = DateTime.Now;
             while (_handshakeEventArgs == null)
             {
                 var delta = DateTime.Now - startTime;
                 if (delta.TotalSeconds > 10) Assert.Fail();
+                Thread.Sleep(1);
             }
 
 
@@ -681,6 +703,7 @@ namespace Flekosoft.UnitTests.Common.Network.WebSocket
             {
                 var delta = DateTime.Now - startTime;
                 if (delta.TotalSeconds > 10) Assert.Fail();
+                Thread.Sleep(1);
             }
             Assert.AreEqual(2, _clientFrameData.Count);
 
@@ -698,6 +721,7 @@ namespace Flekosoft.UnitTests.Common.Network.WebSocket
             {
                 var delta = DateTime.Now - startTime;
                 if (delta.TotalSeconds > 10) Assert.Fail();
+                Thread.Sleep(1);
             }
 
             fin = (_clientFrameData[0] & 0x80) >> 7;
@@ -723,6 +747,7 @@ namespace Flekosoft.UnitTests.Common.Network.WebSocket
             {
                 var delta = DateTime.Now - startTime;
                 if (delta.TotalSeconds > 10) Assert.Fail();
+                Thread.Sleep(1);
             }
 
             c.Dispose();
@@ -733,7 +758,7 @@ namespace Flekosoft.UnitTests.Common.Network.WebSocket
         public void WebSocketServer_CloseConnection_Test()
         {
             var clientsCount = 1;
-            var ipep = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 4444);
+            var ipep = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 4445);
             var epList = new List<TcpServerLocalEndpoint>
             {
                 new TcpServerLocalEndpoint(ipep, clientsCount)
@@ -753,6 +778,7 @@ namespace Flekosoft.UnitTests.Common.Network.WebSocket
             {
                 var delta = DateTime.Now - startTime;
                 if (delta.TotalSeconds > 10) Assert.Fail();
+                Thread.Sleep(1);
             }
             var r = new Random((int)DateTime.Now.Ticks);
             List<byte> key = new List<byte>();
@@ -776,6 +802,7 @@ namespace Flekosoft.UnitTests.Common.Network.WebSocket
             {
                 var delta = DateTime.Now - startTime;
                 if (delta.TotalSeconds > 10) Assert.Fail();
+                Thread.Sleep(1);
             }
 
             _handshakeTest = false;
@@ -795,6 +822,7 @@ namespace Flekosoft.UnitTests.Common.Network.WebSocket
             {
                 var delta = DateTime.Now - startTime;
                 if (delta.TotalSeconds > 10) Assert.Fail();
+                Thread.Sleep(1);
             }
             Assert.AreEqual(closeReason, _connectionCloseEventArgs?.ConnectionCloseReason);
             Assert.AreEqual(4, _clientFrameData.Count);
@@ -816,7 +844,7 @@ namespace Flekosoft.UnitTests.Common.Network.WebSocket
         public void WebSocketServer_CloseConnection_OnStopServerTest()
         {
             var clientsCount = 1;
-            var ipep = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 4444);
+            var ipep = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 4445);
             var epList = new List<TcpServerLocalEndpoint>
             {
                 new TcpServerLocalEndpoint(ipep, clientsCount)
@@ -836,6 +864,7 @@ namespace Flekosoft.UnitTests.Common.Network.WebSocket
             {
                 var delta = DateTime.Now - startTime;
                 if (delta.TotalSeconds > 10) Assert.Fail();
+                Thread.Sleep(1);
             }
             var r = new Random((int)DateTime.Now.Ticks);
             List<byte> key = new List<byte>();
@@ -859,6 +888,7 @@ namespace Flekosoft.UnitTests.Common.Network.WebSocket
             {
                 var delta = DateTime.Now - startTime;
                 if (delta.TotalSeconds > 10) Assert.Fail();
+                Thread.Sleep(1);
             }
 
             _handshakeTest = false;
@@ -871,6 +901,7 @@ namespace Flekosoft.UnitTests.Common.Network.WebSocket
             {
                 var delta = DateTime.Now - startTime;
                 if (delta.TotalSeconds > 10) Assert.Fail();
+                Thread.Sleep(1);
             }
             Assert.AreEqual(4, _clientFrameData.Count);
 
@@ -891,7 +922,7 @@ namespace Flekosoft.UnitTests.Common.Network.WebSocket
         public void WebSocketServer_CloseConnection_OnDisposeServerTest()
         {
             var clientsCount = 1;
-            var ipep = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 4444);
+            var ipep = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 4445);
             var epList = new List<TcpServerLocalEndpoint>
             {
                 new TcpServerLocalEndpoint(ipep, clientsCount)
@@ -911,6 +942,7 @@ namespace Flekosoft.UnitTests.Common.Network.WebSocket
             {
                 var delta = DateTime.Now - startTime;
                 if (delta.TotalSeconds > 10) Assert.Fail();
+                Thread.Sleep(1);
             }
             var r = new Random((int)DateTime.Now.Ticks);
             List<byte> key = new List<byte>();
@@ -934,6 +966,7 @@ namespace Flekosoft.UnitTests.Common.Network.WebSocket
             {
                 var delta = DateTime.Now - startTime;
                 if (delta.TotalSeconds > 10) Assert.Fail();
+                Thread.Sleep(1);
             }
 
             _handshakeTest = false;
@@ -946,6 +979,7 @@ namespace Flekosoft.UnitTests.Common.Network.WebSocket
             {
                 var delta = DateTime.Now - startTime;
                 if (delta.TotalSeconds > 10) Assert.Fail();
+                Thread.Sleep(1);
             }
             Assert.AreEqual(4, _clientFrameData.Count);
 

@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Xml;
 
 namespace Flekosoft.Common.Serialization.Xml
@@ -6,12 +7,14 @@ namespace Flekosoft.Common.Serialization.Xml
     public abstract class SerializerXml<T> : Serializer<T>, ISerializerXml
     {
         private readonly object _lockObject = new object();
+        private string _rootName;
         private SerializerXml(T serialisableObject, string rootName, string storagePath, string fileName, bool storeToFile) : base(serialisableObject)
         {
+            _rootName = rootName;
             XmlDocument = new XmlDocument();
             XmlDeclaration dec = XmlDocument.CreateXmlDeclaration("1.0", null, null);
             XmlDocument.AppendChild(dec);
-            XmlDocument.AppendChild(XmlDocument.CreateElement(rootName));
+            XmlDocument.AppendChild(XmlDocument.CreateElement(_rootName));
 
             StoreToFile = storeToFile;
 
@@ -58,6 +61,12 @@ namespace Flekosoft.Common.Serialization.Xml
         {
             if (!IsEnabled) return;
             LoadFromFile();
+            if (XmlDocument.ChildNodes.Count == 0)
+            {
+                XmlDeclaration dec = XmlDocument.CreateXmlDeclaration("1.0", null, null);
+                XmlDocument.AppendChild(dec);
+                XmlDocument.AppendChild(XmlDocument.CreateElement(_rootName));
+            }
             base.Deserialize();
         }
 
@@ -95,8 +104,15 @@ namespace Flekosoft.Common.Serialization.Xml
             if (StoreToFile)
             {
                 ClearXmlRoot();
-                if (File.Exists(StoragePath + FileName))
-                    XmlDocument.Load(StoragePath + FileName);
+                try
+                {
+                    if (File.Exists(StoragePath + FileName))
+                        XmlDocument.Load(StoragePath + FileName);
+                }
+                catch (Exception e)
+                {
+                    AppendExceptionLogMessage(e);
+                }
             }
         }
 

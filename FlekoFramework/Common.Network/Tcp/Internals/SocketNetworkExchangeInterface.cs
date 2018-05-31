@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Net;
 using System.Net.Sockets;
+using System.Threading;
 
 namespace Flekosoft.Common.Network.Tcp.Internals
 {
@@ -31,6 +32,7 @@ namespace Flekosoft.Common.Network.Tcp.Internals
                     {
                         throw new NotConnectedException();
                     }
+
                     if (!Socket.Connected)
                     {
                         throw new NotConnectedException();
@@ -48,9 +50,25 @@ namespace Flekosoft.Common.Network.Tcp.Internals
                     return Socket.Receive(data);
                 }
             }
+            catch (ThreadAbortException)
+            {
+               
+            }
             catch (NotConnectedException)
             {
                 IsConnected = false;
+            }
+            catch (SocketException sex)
+            {
+                //Skip ConnectionAborted error
+                if (sex.SocketErrorCode == SocketError.ConnectionAborted)
+                {
+                    IsConnected = false;
+                }
+                else
+                {
+                    OnErrorEvent(sex);
+                }
             }
             catch (Exception ex)
             {
@@ -86,6 +104,22 @@ namespace Flekosoft.Common.Network.Tcp.Internals
             catch (NotConnectedException)
             {
                 IsConnected = false;
+            }
+            catch (ThreadAbortException)
+            {
+
+            }
+            catch (SocketException sex)
+            {
+                //Skip ConnectionAborted error
+                if (sex.SocketErrorCode == SocketError.ConnectionAborted)
+                {
+                    IsConnected = false;
+                }
+                else
+                {
+                    OnErrorEvent(sex);
+                }
             }
             catch (Exception ex)
             {

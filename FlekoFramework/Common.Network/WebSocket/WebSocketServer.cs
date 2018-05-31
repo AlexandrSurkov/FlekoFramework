@@ -24,7 +24,10 @@ namespace Flekosoft.Common.Network.WebSocket
 
         private void WebSocketServer_ConnectedEvent(object sender, ConnectionEventArgs e)
         {
-            if (!_endpointDataParsers.ContainsKey(e.RemoteEndPoint)) _endpointDataParsers.Add(e.RemoteEndPoint, new EndpointDataParser());
+            lock (_endpointDataParsers)
+            {
+                if (!_endpointDataParsers.ContainsKey(e.RemoteEndPoint)) _endpointDataParsers.Add(e.RemoteEndPoint, new EndpointDataParser());
+            }
         }
 
         private void ParseHandshake(NetworkDataEventArgs e)
@@ -250,7 +253,10 @@ namespace Flekosoft.Common.Network.WebSocket
 
         protected override void ProcessDataInternal(NetworkDataEventArgs e)
         {
-            if (!_endpointDataParsers.ContainsKey(e.RemoteEndPoint)) _endpointDataParsers.Add(e.RemoteEndPoint, new EndpointDataParser());
+            lock (_endpointDataParsers)
+            {
+                if (!_endpointDataParsers.ContainsKey(e.RemoteEndPoint)) _endpointDataParsers.Add(e.RemoteEndPoint, new EndpointDataParser());
+            }
 
             if (_endpointDataParsers[e.RemoteEndPoint].FirstConnected) ParseHandshake(e);
             else ParseData(e);

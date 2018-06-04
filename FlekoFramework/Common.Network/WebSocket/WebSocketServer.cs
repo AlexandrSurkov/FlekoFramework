@@ -19,7 +19,10 @@ namespace Flekosoft.Common.Network.WebSocket
 
         private void WebSocketServer_DisconnectedEvent(object sender, ConnectionEventArgs e)
         {
-            if (_endpointDataParsers.ContainsKey(e.RemoteEndPoint)) _endpointDataParsers.Remove(e.RemoteEndPoint);
+            lock (_endpointDataParsers)
+            {
+                if (_endpointDataParsers.ContainsKey(e.RemoteEndPoint)) _endpointDataParsers.Remove(e.RemoteEndPoint);
+            }
         }
 
         private void WebSocketServer_ConnectedEvent(object sender, ConnectionEventArgs e)
@@ -32,7 +35,13 @@ namespace Flekosoft.Common.Network.WebSocket
 
         private void ParseHandshake(NetworkDataEventArgs e)
         {
-            var parser = _endpointDataParsers[e.RemoteEndPoint];
+            EndpointDataParser parser;
+
+            lock (_endpointDataParsers)
+            {
+                parser = _endpointDataParsers[e.RemoteEndPoint];
+            }
+
             parser.NetworkReceivedString += Encoding.UTF8.GetString(e.Data);
 
             if (parser.NetworkReceivedString.Contains("\r\n"))

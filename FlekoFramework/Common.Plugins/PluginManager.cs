@@ -24,6 +24,15 @@ namespace Flekosoft.Common.Plugins
         //#endregion
 
         private readonly List<IPlugin> _plugins = new List<IPlugin>();
+
+        public PluginManager() : base("PluginManager")
+        {
+        }
+
+        public PluginManager(string instanceName) : base(instanceName)
+        {
+        }
+
         public ListCollection<IPluginProvider> PluginProviders { get; } = new ListCollection<IPluginProvider>("Plugin providers collection", true);
 
         /// <summary>

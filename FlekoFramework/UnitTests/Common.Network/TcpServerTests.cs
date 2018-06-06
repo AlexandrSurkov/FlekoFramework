@@ -15,6 +15,9 @@ namespace Flekosoft.UnitTests.Common.Network
         [TestMethod]
         public void CreateStartStopDisposeTest()
         {
+            var epList = new List<TcpServerLocalEndpoint>();
+            epList.Add(new TcpServerLocalEndpoint(new IPEndPoint(IPAddress.Parse("127.0.0.1"), 4321), 1));
+
             var server = new TcpServer();
             server.ErrorEvent += Server_ErrorEvent;
             Assert.IsFalse(server.DataTrace);
@@ -29,7 +32,7 @@ namespace Flekosoft.UnitTests.Common.Network
             Assert.IsFalse(StartedEventColled);
 
             //Check just properties and events
-            server.Start(new List<TcpServerLocalEndpoint>());
+            server.Start(epList);
             Assert.IsFalse(server.DataTrace);
             Assert.IsTrue(server.IsStarted);
             Assert.IsFalse(server.IsDisposed);
@@ -52,7 +55,7 @@ namespace Flekosoft.UnitTests.Common.Network
             server.StoppedEvent += Server_StoppedEvent;
 
             //Start with events
-            server.Start(new List<TcpServerLocalEndpoint>());
+            server.Start(epList);
             Assert.IsFalse(server.DataTrace);
             Assert.IsTrue(server.IsStarted);
             Assert.IsFalse(server.IsDisposed);
@@ -82,8 +85,8 @@ namespace Flekosoft.UnitTests.Common.Network
             server.DataTrace = !server.DataTrace;
             Assert.AreEqual("DataTrace", ServerPropertyChangedEventArgs?.PropertyName);
 
-            server.Start(new List<TcpServerLocalEndpoint>());
-            server.Start(new List<TcpServerLocalEndpoint>());
+            server.Start(epList);
+            server.Start(epList);
             server.Dispose();
             Assert.IsTrue(server.DataTrace);
             Assert.IsFalse(server.IsStarted);

@@ -181,17 +181,32 @@ namespace Flekosoft.Common.Network.Tcp
                         listenSocket.Listen(16);
                         OnStartListeningEvent(new EndPointArgs(address.EndPoint));
                         _listenSockets.Add(new ListenSocket(listenSocket, address));
+                        _connectRequestThreadPaused = false;
+                    }
+                }
+                catch (SocketException sex)
+                {
+                    //Skip ConnectionAborted error
+                    if (sex.SocketErrorCode == SocketError.AddressNotAvailable)
+                    {
+                    }
+                    else
+                    {
+                        OnErrorEvent(sex);
                     }
                 }
                 catch (Exception ex)
                 {
                     OnErrorEvent(ex);
                 }
-                _connectRequestThreadPaused = false;
             }
-            while (IsStarted == false)
+
+            if (_connectRequestThreadPaused == false)
             {
-                Thread.Sleep(1);
+                while (IsStarted == false)
+                {
+                    Thread.Sleep(1);
+                }
             }
         }
 

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Net;
 using System.Net.Sockets;
+using Flekosoft.Common.Network.Internals;
 
 namespace Flekosoft.Common.Network.Tcp.Internals
 {

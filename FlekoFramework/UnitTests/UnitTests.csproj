@@ -72,6 +72,7 @@
     <Compile Include="Common.Network\TcpServerTcpClientPerfomanceTest.cs" />
     <Compile Include="Common.Network\TcpClientTests.cs" />
     <Compile Include="Common.Network\Http\HttpServerTest.cs" />
+    <Compile Include="Common.Network\IgmpClientTest.cs" />
     <Compile Include="Common.Network\WebSocket\WebSocketServerTests.cs" />
     <Compile Include="Common.Video\ResolutionTests.cs" />
     <Compile Include="Common.Video\FrameProcessorTests.cs" />

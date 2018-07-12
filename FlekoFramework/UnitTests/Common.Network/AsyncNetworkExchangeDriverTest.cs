@@ -7,6 +7,7 @@ using Flekosoft.Common.Network;
 using Flekosoft.Common.Network.Tcp.Internals;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Flekosoft.Common;
+using Flekosoft.Common.Network.Internals;
 
 namespace Flekosoft.UnitTests.Common.Network
 {

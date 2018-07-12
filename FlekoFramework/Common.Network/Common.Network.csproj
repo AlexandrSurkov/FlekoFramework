@@ -45,11 +45,14 @@
     <Compile Include="Http\HttpServer.cs" />
     <Compile Include="Http\Definitions.cs" />
     <Compile Include="Http\HttpClient.cs" />
+    <Compile Include="Igmp\Definitions.cs" />
     <Compile Include="Ping.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Tcp\Connection.cs" />
-    <Compile Include="Tcp\Internals\AsyncNetworkExchangeDriver.cs" />
-    <Compile Include="Tcp\Internals\INetworkExchangeInterface.cs" />
+    <Compile Include="Igmp\IgmpClient.cs" />
+    <Compile Include="Internals\AsyncNetworkExchangeDriver.cs" />
+    <Compile Include="Igmp\IgmpNetworkExchangeInterface.cs" />
+    <Compile Include="Internals\INetworkExchangeInterface.cs" />
     <Compile Include="Tcp\Internals\ListenSocket.cs" />
     <Compile Include="Tcp\Internals\SocketAsyncNetworkExchangeDriver.cs" />
     <Compile Include="Tcp\Internals\SocketNetworkExchangeInterface.cs" />

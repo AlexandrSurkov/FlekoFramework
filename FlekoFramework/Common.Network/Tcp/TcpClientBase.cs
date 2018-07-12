@@ -2,6 +2,7 @@
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
+using Flekosoft.Common.Network.Internals;
 using Flekosoft.Common.Network.Tcp.Internals;
 
 namespace Flekosoft.Common.Network.Tcp

@@ -59,7 +59,7 @@ namespace Flekosoft.Common.Math
 
             byte c = 0;
 
-            for (int i = 0; i < offset + length; i++)
+            for (int i = 0; i < length; i++)
             {
                 c = table[c ^ source[i + offset]];
             }

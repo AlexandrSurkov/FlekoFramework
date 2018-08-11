@@ -51,57 +51,25 @@ namespace Flekosoft.Common.Network.Http
 
             var parser = _endpointDataParsers[e.RemoteEndPoint];
 
-            parser.NetworkReceivedString += Encoding.UTF8.GetString(e.Data);
-
-            if (parser.ContentLen != -1)
+            foreach (byte b in e.Data)
             {
-                parser.ContentIndex++;
-                parser.HttpData.AddRange(e.Data);
-            }
+                var barr = new[] { b };
+                parser.NetworkReceivedString += Encoding.UTF8.GetString(barr);
 
-            if (parser.NetworkReceivedString.Contains("\r\n"))
-            {
-                parser.HttpRequest.Add(parser.NetworkReceivedString);
-                parser.NetworkReceivedString = string.Empty;
-            }
-            else if (parser.ContentIndex == parser.ContentLen)
-            {
-                parser.HttpRequest.Add(Encoding.UTF8.GetString(parser.HttpData.ToArray()).Trim());
-                parser.NetworkReceivedString = string.Empty;
-
-                HttpRequestArgs args = new HttpRequestArgs(parser.HttpRequest.ToArray(), HttpRequestMethod.Unknown);
-                if (parser.HttpRequest[0].Contains("GET"))
-                    args = new HttpRequestArgs(parser.HttpRequest.ToArray(), HttpRequestMethod.Get);
-                if (parser.HttpRequest[0].Contains("POST"))
-                    args = new HttpRequestArgs(parser.HttpRequest.ToArray(), HttpRequestMethod.Post);
-                if (parser.HttpRequest[0].Contains("PUT"))
-                    args = new HttpRequestArgs(parser.HttpRequest.ToArray(), HttpRequestMethod.Put);
-                if (parser.HttpRequest[0].Contains("DELETE"))
-                    args = new HttpRequestArgs(parser.HttpRequest.ToArray(), HttpRequestMethod.Delete);
-
-                RequestEvent?.Invoke(this, args);
-                if (!string.IsNullOrEmpty(args.Respond))
-                    Write(Encoding.UTF8.GetBytes(args.Respond), e.LocalEndPoint, e.RemoteEndPoint);
-
-                parser.HttpRequest.Clear();
-                parser.ContentLen = -1;
-                parser.ContentIndex = 0;
-                parser.HttpData.Clear();
-            }
-
-
-            if (parser.ContentLen == -1 && parser.HttpRequest.Count > 0 && parser.HttpRequest[parser.HttpRequest.Count - 1] == "\r\n")
-            {
-                foreach (var reqStr in parser.HttpRequest)
+                if (parser.ContentLen != -1)
                 {
-                    if (reqStr.Contains("Content-Length"))
-                    {
-                        parser.ContentLen = int.Parse(reqStr.Split(' ')[1]);
-                        break;
-                    }
+                    parser.ContentIndex++;
+                    parser.HttpData.AddRange(barr);
                 }
-                if (parser.ContentLen == -1)
+
+                if (parser.NetworkReceivedString.Contains("\r\n"))
                 {
+                    parser.HttpRequest.Add(parser.NetworkReceivedString);
+                    parser.NetworkReceivedString = string.Empty;
+                }
+                else if (parser.ContentIndex == parser.ContentLen)
+                {
+                    parser.HttpRequest.Add(Encoding.UTF8.GetString(parser.HttpData.ToArray()).Trim());
                     parser.NetworkReceivedString = string.Empty;
 
                     HttpRequestArgs args = new HttpRequestArgs(parser.HttpRequest.ToArray(), HttpRequestMethod.Unknown);
@@ -122,6 +90,42 @@ namespace Flekosoft.Common.Network.Http
                     parser.ContentLen = -1;
                     parser.ContentIndex = 0;
                     parser.HttpData.Clear();
+                }
+
+
+                if (parser.ContentLen == -1 && parser.HttpRequest.Count > 0 && parser.HttpRequest[parser.HttpRequest.Count - 1] == "\r\n")
+                {
+                    foreach (var reqStr in parser.HttpRequest)
+                    {
+                        if (reqStr.Contains("Content-Length"))
+                        {
+                            parser.ContentLen = int.Parse(reqStr.Split(' ')[1]);
+                            break;
+                        }
+                    }
+                    if (parser.ContentLen == -1)
+                    {
+                        parser.NetworkReceivedString = string.Empty;
+
+                        HttpRequestArgs args = new HttpRequestArgs(parser.HttpRequest.ToArray(), HttpRequestMethod.Unknown);
+                        if (parser.HttpRequest[0].Contains("GET"))
+                            args = new HttpRequestArgs(parser.HttpRequest.ToArray(), HttpRequestMethod.Get);
+                        if (parser.HttpRequest[0].Contains("POST"))
+                            args = new HttpRequestArgs(parser.HttpRequest.ToArray(), HttpRequestMethod.Post);
+                        if (parser.HttpRequest[0].Contains("PUT"))
+                            args = new HttpRequestArgs(parser.HttpRequest.ToArray(), HttpRequestMethod.Put);
+                        if (parser.HttpRequest[0].Contains("DELETE"))
+                            args = new HttpRequestArgs(parser.HttpRequest.ToArray(), HttpRequestMethod.Delete);
+
+                        RequestEvent?.Invoke(this, args);
+                        if (!string.IsNullOrEmpty(args.Respond))
+                            Write(Encoding.UTF8.GetBytes(args.Respond), e.LocalEndPoint, e.RemoteEndPoint);
+
+                        parser.HttpRequest.Clear();
+                        parser.ContentLen = -1;
+                        parser.ContentIndex = 0;
+                        parser.HttpData.Clear();
+                    }
                 }
             }
         }

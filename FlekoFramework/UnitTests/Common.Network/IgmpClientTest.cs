@@ -168,11 +168,13 @@ namespace Flekosoft.UnitTests.Common.Network
                 client1.SendData(data);
 
                 Thread.Sleep(100);
-                Assert.AreEqual(data.Length, Client2DataReceivedEvent.Count);
+
+                Assert.AreEqual(1, Client2DataReceivedEvent.Count);
+                Assert.AreEqual(data.Length, Client2DataReceivedEvent[0].Data.Length);
                 Assert.AreEqual(0, Client1DataReceivedEvent.Count);
                 for (int j = 0; j < data.Length; j++)
                 {
-                    Assert.AreEqual(data[j], Client2DataReceivedEvent[j].Data[0]);
+                    Assert.AreEqual(data[j], Client2DataReceivedEvent[0].Data[j]);
                 }
             }
 
@@ -201,10 +203,11 @@ namespace Flekosoft.UnitTests.Common.Network
                 client1.SendData(data);
 
                 Thread.Sleep(100);
-                Assert.AreEqual(data.Length, Client1DataReceivedEvent.Count);
+                Assert.AreEqual(1, Client1DataReceivedEvent.Count);
+                Assert.AreEqual(data.Length, Client1DataReceivedEvent[0].Data.Length);
                 for (int j = 0; j < data.Length; j++)
                 {
-                    Assert.AreEqual(data[j], Client1DataReceivedEvent[j].Data[0]);
+                    Assert.AreEqual(data[j], Client1DataReceivedEvent[0].Data[j]);
                 }
             }
 

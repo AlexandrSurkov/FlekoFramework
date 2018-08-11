@@ -71,7 +71,7 @@ namespace Flekosoft.UnitTests.Common.Network.Http
 
         [TestMethod]
         public void MultiClientsTest()
-         {
+        {
 
             var clientsCount = 100;
 
@@ -123,8 +123,15 @@ namespace Flekosoft.UnitTests.Common.Network.Http
         {
             for (int i = 0; i < 10; i++)
             {
-                string url = "http://127.0.0.1:4444/";
-                HttpClient.SendRequest(HttpRequestMethod.Post, url, "data", 1000);
+                try
+                {
+                    string url = "http://127.0.0.1:4444/";
+                    HttpClient.SendRequest(HttpRequestMethod.Post, url, "data", 5000);
+                }
+                catch (Exception e)
+                {
+                    Assert.Fail(e.ToString());
+                }
             }
 
             _finishIndex++;

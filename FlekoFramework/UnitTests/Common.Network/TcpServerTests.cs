@@ -385,12 +385,13 @@ namespace Flekosoft.UnitTests.Common.Network
                 Assert.AreEqual(0, ServerDataReceivedEvent.Count);
                 client.SendData(data);
                 Thread.Sleep(100);
-                Assert.AreEqual(data.Length, ServerDataReceivedEvent.Count);
+                Assert.AreEqual(1, ServerDataReceivedEvent.Count);
+                Assert.AreEqual(data.Length, ServerDataReceivedEvent[0].Data.Length);
                 for (int j = 0; j < data.Length; j++)
                 {
-                    Assert.AreEqual(data[j], ServerDataReceivedEvent[j].Data[0]);
-                    Assert.AreEqual(client.ExchangeInterface.LocalEndPoint, ServerDataReceivedEvent[j].RemoteEndPoint);
-                    Assert.AreEqual(client.ExchangeInterface.RemoteEndPoint, ServerDataReceivedEvent[j].LocalEndPoint);
+                    Assert.AreEqual(data[j], ServerDataReceivedEvent[0].Data[j]);
+                    Assert.AreEqual(client.ExchangeInterface.LocalEndPoint, ServerDataReceivedEvent[0].RemoteEndPoint);
+                    Assert.AreEqual(client.ExchangeInterface.RemoteEndPoint, ServerDataReceivedEvent[0].LocalEndPoint);
                 }
             }
 
@@ -401,11 +402,12 @@ namespace Flekosoft.UnitTests.Common.Network
                 Assert.AreEqual(0, ClientDataReceivedEvent.Count);
                 server.Write(data, client.ExchangeInterface.RemoteEndPoint, client.ExchangeInterface.LocalEndPoint);
                 Thread.Sleep(100);
-                Assert.AreEqual(data.Length, ClientDataReceivedEvent.Count);
+                Assert.AreEqual(1, ServerDataReceivedEvent.Count);
+                Assert.AreEqual(data.Length, ServerDataReceivedEvent[0].Data.Length);
                 for (int j = 0; j < data.Length; j++)
                 {
-                    Assert.AreEqual(data[j], ClientDataReceivedEvent[j].Data[0]);
-                    Assert.AreEqual(ipEp1.EndPoint, ClientDataReceivedEvent[j].RemoteEndPoint);
+                    Assert.AreEqual(data[j], ClientDataReceivedEvent[0].Data[j]);
+                    Assert.AreEqual(ipEp1.EndPoint, ClientDataReceivedEvent[0].RemoteEndPoint);
                 }
             }
 
@@ -462,14 +464,15 @@ namespace Flekosoft.UnitTests.Common.Network
                 Assert.AreEqual(0, ServerReceiveDataTraceEvent.Count);
                 client.SendData(data);
                 Thread.Sleep(100);
-                Assert.AreEqual(data.Length, ServerDataReceivedEvent.Count);
+                Assert.AreEqual(1, ServerDataReceivedEvent.Count);
+                Assert.AreEqual(data.Length, ServerDataReceivedEvent[0].Data.Length);
                 Assert.AreEqual(0, ClientSendDataTraceEvent.Count);
                 Assert.AreEqual(0, ServerReceiveDataTraceEvent.Count);
                 for (int j = 0; j < data.Length; j++)
                 {
-                    Assert.AreEqual(data[j], ServerDataReceivedEvent[j].Data[0]);
-                    Assert.AreEqual(client.ExchangeInterface.LocalEndPoint, ServerDataReceivedEvent[j].RemoteEndPoint);
-                    Assert.AreEqual(client.ExchangeInterface.RemoteEndPoint, ServerDataReceivedEvent[j].LocalEndPoint);
+                    Assert.AreEqual(data[j], ServerDataReceivedEvent[0].Data[j]);
+                    Assert.AreEqual(client.ExchangeInterface.LocalEndPoint, ServerDataReceivedEvent[0].RemoteEndPoint);
+                    Assert.AreEqual(client.ExchangeInterface.RemoteEndPoint, ServerDataReceivedEvent[0].LocalEndPoint);
                 }
             }
 
@@ -484,13 +487,14 @@ namespace Flekosoft.UnitTests.Common.Network
                 Assert.AreEqual(0, ClientReceiveDataTraceEvent.Count);
                 server.Write(data, client.ExchangeInterface.RemoteEndPoint, client.ExchangeInterface.LocalEndPoint);
                 Thread.Sleep(100);
-                Assert.AreEqual(data.Length, ClientDataReceivedEvent.Count);
+                Assert.AreEqual(1, ServerDataReceivedEvent.Count);
+                Assert.AreEqual(data.Length, ServerDataReceivedEvent[0].Data.Length);
                 Assert.AreEqual(0, ServerSendDataTraceEvent.Count);
                 Assert.AreEqual(0, ClientReceiveDataTraceEvent.Count);
                 for (int j = 0; j < data.Length; j++)
                 {
-                    Assert.AreEqual(data[j], ClientDataReceivedEvent[j].Data[0]);
-                    Assert.AreEqual(ipEp1.EndPoint, ClientDataReceivedEvent[j].RemoteEndPoint);
+                    Assert.AreEqual(data[j], ClientDataReceivedEvent[0].Data[j]);
+                    Assert.AreEqual(ipEp1.EndPoint, ClientDataReceivedEvent[0].RemoteEndPoint);
                 }
             }
 
@@ -509,14 +513,15 @@ namespace Flekosoft.UnitTests.Common.Network
                 Assert.AreEqual(0, ServerReceiveDataTraceEvent.Count);
                 client.SendData(data);
                 Thread.Sleep(100);
-                Assert.AreEqual(data.Length, ServerDataReceivedEvent.Count);
+                Assert.AreEqual(1, ServerDataReceivedEvent.Count);
+                Assert.AreEqual(data.Length, ServerDataReceivedEvent[0].Data.Length);
                 Assert.AreEqual(1, ClientSendDataTraceEvent.Count);
                 Assert.AreEqual(1, ServerReceiveDataTraceEvent.Count);
                 for (int j = 0; j < data.Length; j++)
                 {
-                    Assert.AreEqual(data[j], ServerDataReceivedEvent[j].Data[0]);
-                    Assert.AreEqual(client.ExchangeInterface.LocalEndPoint, ServerDataReceivedEvent[j].RemoteEndPoint);
-                    Assert.AreEqual(client.ExchangeInterface.RemoteEndPoint, ServerDataReceivedEvent[j].LocalEndPoint);
+                    Assert.AreEqual(data[j], ServerDataReceivedEvent[0].Data[j]);
+                    Assert.AreEqual(client.ExchangeInterface.LocalEndPoint, ServerDataReceivedEvent[0].RemoteEndPoint);
+                    Assert.AreEqual(client.ExchangeInterface.RemoteEndPoint, ServerDataReceivedEvent[0].LocalEndPoint);
 
                     Assert.AreEqual(data[j], ClientSendDataTraceEvent[0].Data[j]);
                     Assert.AreEqual(data[j], ServerReceiveDataTraceEvent[0].Data[j]);
@@ -541,13 +546,14 @@ namespace Flekosoft.UnitTests.Common.Network
                 Assert.AreEqual(0, ClientReceiveDataTraceEvent.Count);
                 server.Write(data, client.ExchangeInterface.RemoteEndPoint, client.ExchangeInterface.LocalEndPoint);
                 Thread.Sleep(100);
-                Assert.AreEqual(data.Length, ClientDataReceivedEvent.Count);
+                Assert.AreEqual(1, ServerDataReceivedEvent.Count);
+                Assert.AreEqual(data.Length, ServerDataReceivedEvent[0].Data.Length);
                 Assert.AreEqual(1, ServerSendDataTraceEvent.Count);
                 Assert.AreEqual(1, ClientReceiveDataTraceEvent.Count);
                 for (int j = 0; j < data.Length; j++)
                 {
-                    Assert.AreEqual(data[j], ClientDataReceivedEvent[j].Data[0]);
-                    Assert.AreEqual(ipEp1.EndPoint, ClientDataReceivedEvent[j].RemoteEndPoint);
+                    Assert.AreEqual(data[j], ClientDataReceivedEvent[0].Data[j]);
+                    Assert.AreEqual(ipEp1.EndPoint, ClientDataReceivedEvent[0].RemoteEndPoint);
 
                     Assert.AreEqual(data[j], ServerSendDataTraceEvent[0].Data[j]);
                     Assert.AreEqual(data[j], ClientReceiveDataTraceEvent[0].Data[j]);

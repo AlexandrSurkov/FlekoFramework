@@ -132,16 +132,17 @@ namespace Flekosoft.Common.Network.Internals
                                 if (count > 0)
                                 {
                                     if (DataTrace) OnReceiveDataTraceEvent(_readBuffer.ToList().GetRange(0, count).ToArray(), _networkInterface.LocalEndPoint, _networkInterface.RemoteEndPoint);
-                                    for (int i = 0; i < count; i++)
-                                    {
-                                        ProcessByteInternal(new NetworkDataEventArgs(new[] { _readBuffer[i] }, ExchangeInterface.LocalEndPoint, ExchangeInterface.RemoteEndPoint));
+                                    ProcessByteInternal(new NetworkDataEventArgs(_readBuffer.ToList().GetRange(0, count).ToArray(), ExchangeInterface.LocalEndPoint, ExchangeInterface.RemoteEndPoint));
+                                    //for (int i = 0; i < count; i++)
+                                    //{
+                                    //    ProcessByteInternal(new NetworkDataEventArgs(new[] { _readBuffer[i] }, ExchangeInterface.LocalEndPoint, ExchangeInterface.RemoteEndPoint));
 
 
-                                        //_processDataQueue.Enqueue(_readBuffer[i]);
-                                        //var data = new byte[count];
-                                        //Array.Copy(_readBuffer, data, count);
-                                        //OnReceivedDataEvent(new NetworkDataEventArgs(data, _networkInterface?.RemoteEndpoint));
-                                    }
+                                    //    //_processDataQueue.Enqueue(_readBuffer[i]);
+                                    //    //var data = new byte[count];
+                                    //    //Array.Copy(_readBuffer, data, count);
+                                    //    //OnReceivedDataEvent(new NetworkDataEventArgs(data, _networkInterface?.RemoteEndpoint));
+                                    //}
                                     //lock (_hasDataToProcessWhLockObject)
                                     //{
                                     //    if (_processDataQueue.IsEmpty) _hasDataToProcessWh?.Reset();

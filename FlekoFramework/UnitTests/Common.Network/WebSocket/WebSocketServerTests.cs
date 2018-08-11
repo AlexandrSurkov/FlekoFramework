@@ -1010,19 +1010,22 @@ namespace Flekosoft.UnitTests.Common.Network.WebSocket
         {
             if (_handshakeTest)
             {
-                _networkReceivedString += Encoding.UTF8.GetString(e.Data);
-
-                if (_networkReceivedString.Contains("\r\n"))
+                foreach (byte b in e.Data)
                 {
-                    _httpRequest.Add(_networkReceivedString);
-                    _networkReceivedString = string.Empty;
-                }
+                    _networkReceivedString += Encoding.UTF8.GetString(new byte[] { b });
 
-                if (_httpRequest.Count > 0 && _httpRequest[_httpRequest.Count - 1] == "\r\n")
-                {
-                    _networkReceivedString = string.Empty;
-                    _handshakeReceived = true;
+                    if (_networkReceivedString.Contains("\r\n"))
+                    {
+                        _httpRequest.Add(_networkReceivedString);
+                        _networkReceivedString = string.Empty;
+                    }
 
+                    if (_httpRequest.Count > 0 && _httpRequest[_httpRequest.Count - 1] == "\r\n")
+                    {
+                        _networkReceivedString = string.Empty;
+                        _handshakeReceived = true;
+
+                    }
                 }
             }
             else

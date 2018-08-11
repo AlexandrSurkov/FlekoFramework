@@ -42,77 +42,80 @@ namespace Flekosoft.Common.Network.WebSocket
                 parser = _endpointDataParsers[e.RemoteEndPoint];
             }
 
-            parser.NetworkReceivedString += Encoding.UTF8.GetString(e.Data);
-
-            if (parser.NetworkReceivedString.Contains("\r\n"))
+            foreach (byte b in e.Data)
             {
-                parser.HttpRequest.Add(parser.NetworkReceivedString);
-                parser.NetworkReceivedString = string.Empty;
-            }
+                parser.NetworkReceivedString += Encoding.UTF8.GetString(new[] { b });
 
-            if (parser.HttpRequest.Count > 0 && parser.HttpRequest[parser.HttpRequest.Count - 1] == "\r\n")
-            {
-                parser.NetworkReceivedString = string.Empty;
-
-                try
+                if (parser.NetworkReceivedString.Contains("\r\n"))
                 {
+                    parser.HttpRequest.Add(parser.NetworkReceivedString);
+                    parser.NetworkReceivedString = string.Empty;
+                }
 
+                if (parser.HttpRequest.Count > 0 && parser.HttpRequest[parser.HttpRequest.Count - 1] == "\r\n")
+                {
+                    parser.NetworkReceivedString = string.Empty;
 
-                    bool containsUpgrade = false;
-                    foreach (string s in parser.HttpRequest)
+                    try
                     {
-                        if (s == "Upgrade: websocket\r\n")
-                        {
-                            containsUpgrade = true;
-                            break;
-                        }
-                    }
 
-                    if (containsUpgrade)
-                    {
-                        string key = string.Empty;
+
+                        bool containsUpgrade = false;
                         foreach (string s in parser.HttpRequest)
                         {
-                            if (s.Contains("Sec-WebSocket-Key"))
+                            if (s == "Upgrade: websocket\r\n")
                             {
-                                var strings = s.Split(new[] { ": ", "\r\n" }, StringSplitOptions.RemoveEmptyEntries);
-                                key = strings[1];
+                                containsUpgrade = true;
+                                break;
                             }
                         }
 
-                        if (key != string.Empty)
+                        if (containsUpgrade)
                         {
-                            var acceptKey = AcceptKey(key);
+                            string key = string.Empty;
+                            foreach (string s in parser.HttpRequest)
+                            {
+                                if (s.Contains("Sec-WebSocket-Key"))
+                                {
+                                    var strings = s.Split(new[] { ": ", "\r\n" }, StringSplitOptions.RemoveEmptyEntries);
+                                    key = strings[1];
+                                }
+                            }
 
-                            var retStr = "HTTP/1.1 101 Switching Protocols\r\n";
-                            retStr += "Upgrade: websocket\r\n";
-                            retStr += "Connection: Upgrade\r\n";
-                            retStr += $"Sec-WebSocket-Accept: {acceptKey}\r\n\r\n";
-                            Write(Encoding.UTF8.GetBytes(retStr), e.LocalEndPoint, e.RemoteEndPoint);
-                            parser.FirstConnected = false;
-                            parser.IsFirstDataByte = true;
+                            if (key != string.Empty)
+                            {
+                                var acceptKey = AcceptKey(key);
 
-                            HandshakeEvent?.Invoke(this, new ConnectionEventArgs(e.LocalEndPoint, e.RemoteEndPoint));
-                            return;
+                                var retStr = "HTTP/1.1 101 Switching Protocols\r\n";
+                                retStr += "Upgrade: websocket\r\n";
+                                retStr += "Connection: Upgrade\r\n";
+                                retStr += $"Sec-WebSocket-Accept: {acceptKey}\r\n\r\n";
+                                Write(Encoding.UTF8.GetBytes(retStr), e.LocalEndPoint, e.RemoteEndPoint);
+                                parser.FirstConnected = false;
+                                parser.IsFirstDataByte = true;
+
+                                HandshakeEvent?.Invoke(this, new ConnectionEventArgs(e.LocalEndPoint, e.RemoteEndPoint));
+                                return;
+                            }
                         }
+
+                        var errorStr = "HTTP/1.1 400 Bad Request\r\n";
+                        errorStr += "Content-Type: text/plain\r\n";
+                        errorStr += "Content-Length: 0\r\n";
+                        errorStr += "Connection: close\r\n\r\n";
+
+                        Write(Encoding.UTF8.GetBytes(errorStr), e.LocalEndPoint, e.RemoteEndPoint);
+
                     }
+                    catch
+                    {
+                        var errorStr = "HTTP/1.1 400 Bad Request\r\n";
+                        errorStr += "Content-Type: text/plain\r\n";
+                        errorStr += "Content-Length: 0\r\n";
+                        errorStr += "Connection: close\r\n\r\n";
 
-                    var errorStr = "HTTP/1.1 400 Bad Request\r\n";
-                    errorStr += "Content-Type: text/plain\r\n";
-                    errorStr += "Content-Length: 0\r\n";
-                    errorStr += "Connection: close\r\n\r\n";
-
-                    Write(Encoding.UTF8.GetBytes(errorStr), e.LocalEndPoint, e.RemoteEndPoint);
-
-                }
-                catch
-                {
-                    var errorStr = "HTTP/1.1 400 Bad Request\r\n";
-                    errorStr += "Content-Type: text/plain\r\n";
-                    errorStr += "Content-Length: 0\r\n";
-                    errorStr += "Connection: close\r\n\r\n";
-
-                    Write(Encoding.UTF8.GetBytes(errorStr), e.LocalEndPoint, e.RemoteEndPoint);
+                        Write(Encoding.UTF8.GetBytes(errorStr), e.LocalEndPoint, e.RemoteEndPoint);
+                    }
                 }
             }
         }
@@ -152,7 +155,7 @@ namespace Flekosoft.Common.Network.WebSocket
                     parser.MaskingKeyLenght = 0;
                 }
 
-                parser.DataBuffer.AddRange(e.Data);
+                parser.DataBuffer.AddRange(new byte[] { b });
                 parser.IsFirstDataByte = false;
 
                 if (parser.DataBuffer.Count == 2)
@@ -267,7 +270,10 @@ namespace Flekosoft.Common.Network.WebSocket
                 if (!_endpointDataParsers.ContainsKey(e.RemoteEndPoint)) _endpointDataParsers.Add(e.RemoteEndPoint, new EndpointDataParser());
             }
 
-            if (_endpointDataParsers[e.RemoteEndPoint].FirstConnected) ParseHandshake(e);
+            if (_endpointDataParsers[e.RemoteEndPoint].FirstConnected)
+            {
+                ParseHandshake(e);
+            }
             else ParseData(e);
         }
 

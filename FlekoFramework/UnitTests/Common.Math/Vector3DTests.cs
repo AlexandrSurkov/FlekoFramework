@@ -132,11 +132,11 @@ namespace Flekosoft.UnitTests.Common.Math
         {
             var v1 = new Vector3D(1, 0, 3);
             var v2 = new Vector3D(1, 2, 3);
-            var res = v1.GetReverse();
+            var res = Vector3D.Invert(v1);
             Assert.AreEqual(-1, res.X);
             Assert.AreEqual(0, res.Y);
             Assert.AreEqual(-3, res.Z);
-            res = v2.GetReverse();
+            res = Vector3D.Invert(v2);
             Assert.AreEqual(-1, res.X);
             Assert.AreEqual(-2, res.Y);
             Assert.AreEqual(-3, res.Z);
@@ -232,6 +232,80 @@ namespace Flekosoft.UnitTests.Common.Math
             {
                 var angRad = Utils.ToRadian(i);
                 v.RotateAroundOriginZY(angRad);
+                Assert.AreEqual(angRad, v.ZY.Angle, 0.000000001, "i = " + i);
+                v.RotateAroundOriginZY(-angRad);
+
+                var res1 = System.Math.Abs(ang0 - v.ZY.Angle) < 0.000000001;
+                var res2 = System.Math.Abs(ang360 - v.ZY.Angle) < 0.000000001;
+
+                Assert.IsTrue(res2 || res1, "i = " + i);
+            }
+        }
+
+
+
+        [TestMethod]
+        public void RotateAroundOriginQuternionXYTests()
+        {
+            var v = new Vector3D(1, 0, 0);
+
+            var ang0 = Utils.ToRadian(0);
+            var ang360 = Utils.ToRadian(360);
+
+            for (int i = 0; i < 360; i++)
+            {
+                var angRad = Utils.ToRadian(i);
+                var q = new Quaternion();
+                q.SetFromAxisAngleRadian(angRad, Vector3D.ZAxis);
+                v.Rotate(q);
+                Assert.AreEqual(angRad, v.XY.Angle, 0.000000001, "i = " + i);
+                v.RotateAroundOriginXY(-angRad);
+
+                var res1 = System.Math.Abs(ang0 - v.XY.Angle) < 0.000000001;
+                var res2 = System.Math.Abs(ang360 - v.XY.Angle) < 0.000000001;
+
+                Assert.IsTrue(res2 || res1, "i = " + i);
+            }
+        }
+
+        [TestMethod]
+        public void RotateAroundOriginQuternionXZTests()
+        {
+            var v = new Vector3D(1, 0, 0);
+
+            var ang0 = Utils.ToRadian(0);
+            var ang360 = Utils.ToRadian(360);
+
+            for (int i = 0; i < 360; i++)
+            {
+                var angRad = Utils.ToRadian(i);
+                var q = new Quaternion();
+                q.SetFromAxisAngleRadian(angRad, Vector3D.YAxis);
+                v.Rotate(q);
+                Assert.AreEqual(angRad, v.XZ.Angle, 0.000000001, "i = " + i);
+                v.RotateAroundOriginXZ(-angRad);
+
+                var res1 = System.Math.Abs(ang0 - v.XZ.Angle) < 0.000000001;
+                var res2 = System.Math.Abs(ang360 - v.XZ.Angle) < 0.000000001;
+
+                Assert.IsTrue(res2 || res1, "i = " + i);
+            }
+        }
+
+        [TestMethod]
+        public void RotateAroundOriginQuternionZYTests()
+        {
+            var v = new Vector3D(0, 0, 1);
+
+            var ang0 = Utils.ToRadian(0);
+            var ang360 = Utils.ToRadian(360);
+
+            for (int i = 0; i < 360; i++)
+            {
+                var angRad = Utils.ToRadian(i);
+                var q = new Quaternion();
+                q.SetFromAxisAngleRadian(angRad, Vector3D.XAxis);
+                v.Rotate(q);
                 Assert.AreEqual(angRad, v.ZY.Angle, 0.000000001, "i = " + i);
                 v.RotateAroundOriginZY(-angRad);
 

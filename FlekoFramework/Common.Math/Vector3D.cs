@@ -295,7 +295,7 @@ namespace Flekosoft.Common.Math
         /// <param name="factor">коефициент изменения длины вектора</param>
         public void Reflect(Vector3D norm, double factor)
         {
-            var vec = 2.0 * DotProduct(norm) * norm.GetReverse();
+            var vec = 2.0 * DotProduct(norm) * Invert(norm);
             X += vec.X;
             Y += vec.Y;
             Z += vec.Z;
@@ -304,14 +304,24 @@ namespace Flekosoft.Common.Math
             Truncate(len);
         }
 
-        //returns the vector that is the reverse of this vector
         /// <summary>
-        /// Возвращает вектор, обратный данному (направленный в обратную сторону - на 180 градусов)
+        /// Inverts current vector
+        /// </summary>
+        public void Invert()
+        {
+            var v = Invert(this);
+            X = v.X;
+            Y = v.Y;
+            Z = v.Z;
+        }
+
+        /// <summary>
+        /// Returns inverted vector
         /// </summary>
         /// <returns></returns>
-        public Vector3D GetReverse()
+        public static Vector3D Invert(Vector3D value)
         {
-            return new Vector3D(-X, -Y, -Z);
+            return new Vector3D(-value.X, -value.Y, -value.Z);
         }
 
 
@@ -342,6 +352,23 @@ namespace Flekosoft.Common.Math
         public void Rotate(Vector3D axis, double ang)
         {
             Transrormations.Vector3DRotate(this, axis, ang);
+        }
+
+
+        public void Rotate(Quaternion quaternion)
+        {
+            var v = Rotate(this, quaternion);
+            X = v.X;
+            Y = v.Y;
+            Z = v.Z;
+        }
+
+        public static Vector3D Rotate(Vector3D vector, Quaternion quaternion)
+        {
+            var t = Quaternion.Multiply(quaternion, vector);
+            t = Quaternion.Multiply(t, Quaternion.Invert(quaternion));
+
+            return new Vector3D(t.X, t.Y, t.Z);
         }
 
         #endregion

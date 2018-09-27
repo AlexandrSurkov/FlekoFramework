@@ -246,7 +246,7 @@ namespace Flekosoft.Common.Math
         /// <param name="factor">коефициент изменения длины вектора</param>
         public void Reflect(Vector2D norm, double factor)
         {
-            var vec = 2.0 * DotProduct(norm) * norm.GetReverse();
+            var vec = 2.0 * DotProduct(norm) * Invert(norm);
             X += vec.X;
             Y += vec.Y;
             var len = Length();
@@ -254,14 +254,23 @@ namespace Flekosoft.Common.Math
             Truncate(len);
         }
 
-        //returns the vector that is the reverse of this vector
         /// <summary>
-        /// Возвращает вектор, обратный данному (направленный в обратную сторону - на 180 градусов)
+        /// Inverts current vector
+        /// </summary>
+        public void Invert()
+        {
+            var v = Invert(this);
+            X = v.X;
+            Y = v.Y;
+        }
+
+        /// <summary>
+        /// Returns inverted vector
         /// </summary>
         /// <returns></returns>
-        public Vector2D GetReverse()
+        public static Vector2D Invert(Vector2D value)
         {
-            return new Vector2D(-X, -Y);
+            return new Vector2D(-value.X, -value.Y);
         }
 
         public void RotateAroundOrigin(double ang)

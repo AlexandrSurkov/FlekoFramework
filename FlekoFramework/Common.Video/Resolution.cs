@@ -4,11 +4,6 @@ namespace Flekosoft.Common.Video
 {
     public class Resolution
     {
-        public Resolution()
-        {
-            Height = 0;
-            Width = 0;
-        }
 
         public Resolution(int width, int height)
         {

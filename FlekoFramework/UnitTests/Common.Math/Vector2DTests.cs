@@ -151,10 +151,10 @@ namespace Flekosoft.UnitTests.Common.Math
         {
             var v1 = new Vector2D(1, 0);
             var v2 = new Vector2D(1, 2);
-            var res = v1.GetReverse();
+            var res = Vector2D.Invert(v1);
             Assert.AreEqual(-1, res.X);
             Assert.AreEqual(0, res.Y);
-            res = v2.GetReverse();
+            res = Vector2D.Invert(v2);
             Assert.AreEqual(-1, res.X);
             Assert.AreEqual(-2, res.Y);
         }

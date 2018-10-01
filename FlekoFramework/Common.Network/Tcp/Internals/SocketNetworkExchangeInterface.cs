@@ -157,6 +157,8 @@ namespace Flekosoft.Common.Network.Tcp.Internals
         {
             if (disposing)
             {
+                IsConnected = false;
+
                 Socket.Shutdown(SocketShutdown.Both);
                 Socket.Close();
                 Socket.Dispose();

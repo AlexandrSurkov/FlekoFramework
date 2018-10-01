@@ -228,6 +228,14 @@ namespace Flekosoft.Common.Network.Tcp
             //return _listenSockets[0].ConnectedSockets[0].SendData(data);
         }
 
+        public bool DisconnectClient(IPEndPoint localEndPoint, IPEndPoint remoteEndPoint)
+        {
+            var driver = FindDriver(localEndPoint, remoteEndPoint);
+            if (driver == null) return false;
+            driver.ExchangeInterface.Dispose();
+            return true;
+        }
+
         void ClearSocketLists()
         {
             lock (_listenSocketsSyncObject)

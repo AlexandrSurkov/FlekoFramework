@@ -414,6 +414,39 @@ namespace Flekosoft.UnitTests.Common.Network
             server.Dispose();
         }
 
+        [TestMethod]
+        public void DisconnectClient_Tests()
+        {
+            var server = new TcpServer();
+            server.ErrorEvent += Server_ErrorEvent;
+
+            server.ConnectedEvent += Server_ConnectedEvent;
+            server.DisconnectedEvent += Server_DisconnectedEvent;
+
+            var epList = new List<TcpServerLocalEndpoint>();
+            var ipEp1 = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 7777);
+            var ipEp2 = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 8888);
+            var ipEp3 = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 9999);
+
+            epList.Add(new TcpServerLocalEndpoint(ipEp1, 1));
+            epList.Add(new TcpServerLocalEndpoint(ipEp2, 1));
+            epList.Add(new TcpServerLocalEndpoint(ipEp3, 1));
+
+            server.Start(epList);
+
+            var client = new TcpClient();
+            client.ConnectedEvent += Client_ConnectedEvent;
+            client.DisconnectedEvent += Client_DisconnectedEvent;
+
+            DisconnectClientTest(client, server, ipEp1);
+            DisconnectClientTest(client, server, ipEp2);
+            DisconnectClientTest(client, server, ipEp3);
+
+            server.Dispose();
+
+            client.Dispose();
+        }
+
         public List<NetworkDataEventArgs> ClientDataReceivedEvent { get; } = new List<NetworkDataEventArgs>();
         private void Client_DataReceivedEvent(object sender, NetworkDataEventArgs e)
         {
@@ -707,6 +740,50 @@ namespace Flekosoft.UnitTests.Common.Network
             Assert.IsNull(ServerConnectedEventArgs);
             Assert.IsNull(ServerDisconnectedEventArgs);
             client.Stop();
+            waitStart = DateTime.Now;
+            while (!Equals(ServerDisconnectedEventArgs?.RemoteEndPoint, clientLocalEp))
+            {
+                var delta = DateTime.Now - waitStart;
+                if (delta.TotalSeconds > 5) Assert.Fail("Wait Timeout");
+            }
+
+            Assert.IsNull(ServerConnectedEventArgs);
+            Assert.IsNotNull(ServerDisconnectedEventArgs);
+            Assert.AreEqual(endPoint, ServerDisconnectedEventArgs.LocalEndPoint);
+            Assert.AreEqual(remoteIp, ServerDisconnectedEventArgs.RemoteEndPoint);
+        }
+
+        void DisconnectClientTest(TcpClient client, TcpServer server, IPEndPoint endPoint)
+        {
+            ServerConnectedEventArgs = null;
+            //ServerDisconnectedEventArgs = null;
+            ClientConnectedEventEventArgs = null;
+            Assert.IsNull(ServerConnectedEventArgs);
+            //Assert.IsNull(ServerDisconnectedEventArgs);
+            Assert.IsNull(ClientConnectedEventEventArgs);
+            client.Start(endPoint);
+            var waitStart = DateTime.Now;
+            while (ServerConnectedEventArgs == null)
+            {
+                var delta = DateTime.Now - waitStart;
+                if (delta.TotalSeconds > 5) Assert.Fail("Wait Timeout");
+            }
+            Assert.IsNotNull(ClientConnectedEventEventArgs);
+            Assert.IsNotNull(ServerConnectedEventArgs);
+            //Assert.IsNull(ServerDisconnectedEventArgs);
+            Assert.AreEqual(endPoint, ServerConnectedEventArgs.LocalEndPoint);
+            Assert.AreEqual(endPoint, ClientConnectedEventEventArgs.RemoteEndPoint);
+
+            var clientLocalEp = ClientConnectedEventEventArgs.LocalEndPoint;
+
+            var remoteIp = ServerConnectedEventArgs.RemoteEndPoint;
+            var localIp = ServerConnectedEventArgs.LocalEndPoint;
+
+            ServerConnectedEventArgs = null;
+            ServerDisconnectedEventArgs = null;
+            Assert.IsNull(ServerConnectedEventArgs);
+            Assert.IsNull(ServerDisconnectedEventArgs);
+            server.DisconnectClient((IPEndPoint)localIp, (IPEndPoint)remoteIp);
             waitStart = DateTime.Now;
             while (!Equals(ServerDisconnectedEventArgs?.RemoteEndPoint, clientLocalEp))
             {

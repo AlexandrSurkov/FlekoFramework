@@ -61,14 +61,15 @@ namespace Flekosoft.Common.Network.Tcp.Internals
             }
             catch (SocketException sex)
             {
-                //Skip ConnectionAborted error
-                if (sex.SocketErrorCode == SocketError.ConnectionAborted)
+                switch (sex.SocketErrorCode)
                 {
-                    IsConnected = false;
-                }
-                else
-                {
-                    OnErrorEvent(sex);
+                    case SocketError.ConnectionAborted:
+                    case SocketError.ConnectionReset:
+                    case SocketError.ConnectionRefused:
+                        break;
+                     default:
+                         OnErrorEvent(sex);
+                        break;
                 }
             }
             catch (Exception ex)
@@ -112,14 +113,15 @@ namespace Flekosoft.Common.Network.Tcp.Internals
             }
             catch (SocketException sex)
             {
-                //Skip ConnectionAborted error
-                if (sex.SocketErrorCode == SocketError.ConnectionAborted)
+                switch (sex.SocketErrorCode)
                 {
-                    IsConnected = false;
-                }
-                else
-                {
-                    OnErrorEvent(sex);
+                    case SocketError.ConnectionAborted:
+                    case SocketError.ConnectionReset:
+                    case SocketError.ConnectionRefused:
+                        break;
+                    default:
+                        OnErrorEvent(sex);
+                        break;
                 }
             }
             catch (Exception ex)

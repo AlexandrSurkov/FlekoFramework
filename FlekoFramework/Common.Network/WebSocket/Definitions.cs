@@ -114,16 +114,14 @@ namespace Flekosoft.Common.Network.WebSocket
         ReservedTlsHandshake = 1015,
     }
 
-    public class DataReceivedEventArgs : ConnectionEventArgs
+    public class DataReceivedEventArgs : NetworkDataEventArgs
     {
-        public DataReceivedEventArgs(EndPoint localEndPoint, EndPoint remoteEndPoint, WebSocketOpcode opcode, byte[] data) : base(localEndPoint, remoteEndPoint)
+        public DataReceivedEventArgs(EndPoint localEndPoint, EndPoint remoteEndPoint, WebSocketOpcode opcode, byte[] data) : base(data, (IPEndPoint) localEndPoint, (IPEndPoint) remoteEndPoint)
         {
             Opcode = opcode;
-            Data = data;
         }
 
         public WebSocketOpcode Opcode { get; }
-        public byte[] Data { get; }
     }
 
     public class ConnectionCloseEventArgs : EventArgs

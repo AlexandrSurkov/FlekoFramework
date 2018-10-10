@@ -78,6 +78,8 @@
     <Compile Include="Serialization\ISerializabe.cs" />
     <Compile Include="Serialization\ISerializer.cs" />
     <Compile Include="Serialization\CollectionSerializationFactory.cs" />
+    <Compile Include="Serialization\Marshaling\EndianAttribute.cs" />
+    <Compile Include="Serialization\Marshaling\MarshalSerializer.cs" />
     <Compile Include="Serialization\SerializationFactory.cs" />
     <Compile Include="Serialization\Serializer.cs" />
   </ItemGroup>

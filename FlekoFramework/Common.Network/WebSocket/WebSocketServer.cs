@@ -1,25 +1,119 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Net;
-using System.Security.Cryptography;
 using System.Text;
+using System.Threading;
 using Flekosoft.Common.Network.Tcp;
 
 namespace Flekosoft.Common.Network.WebSocket
 {
     public class WebSocketServer : TcpServerBase
     {
+        private readonly Thread _pollCheckThread;
+
+        private int _pollFailLimit;
+        private int _pollInterval;
+
         private readonly Dictionary<EndPoint, EndpointDataParser> _endpointDataParsers = new Dictionary<EndPoint, EndpointDataParser>();
+
+        private readonly object _lockObject = new object();
 
         public WebSocketServer()
         {
+            PollFailLimit = 3;
+            PollIntervalMs = 3000;
+
+            _pollCheckThread = new Thread(PollCheckThreadFunc);
+            _pollCheckThread.Start();
+
             ConnectedEvent += WebSocketServer_ConnectedEvent;
             DisconnectedEvent += WebSocketServer_DisconnectedEvent;
         }
 
+        #region Thread
+        private void PollCheckThreadFunc()
+        {
+           // var removeList = new List<EndpointDataParser>();
+            while (true)
+            {
+                try
+                {
+                    Thread.Sleep(PollIntervalMs);
+                    lock (_lockObject)
+                    {
+                        foreach (EndpointDataParser client in _endpointDataParsers.Values)
+                        {
+                            if (client.PollReceived) client.PollFailCount = 0;
+                            else
+                            {
+                                client.PollFailCount++;
+                                if (client.PollFailCount >= PollFailLimit)
+                                {
+                                    //Disconnect client
+                                    DisconnectClient(client.LocalEndPoint, client.RemoteEndPoint);
+
+                                    //if (!DisconnectClient(client.LocalEndPoint, client.RemoteEndPoint))
+                                    //{
+                                    //    removeList.Add(client);
+                                    //}
+                                }
+                            }
+
+                            //foreach (EndpointDataParser dataParser in removeList)
+                            //{
+                            //    if (_endpointDataParsers.ContainsKey(dataParser.RemoteEndPoint)) _endpointDataParsers.Remove(dataParser.RemoteEndPoint);
+                            //}
+
+                            client.PollReceived = false;
+                        }
+                    }
+                }
+                catch (ThreadAbortException)
+                {
+                    break;
+                }
+                catch (Exception ex)
+                {
+                    OnErrorEvent(ex);
+                }
+            }
+        }
+        #endregion
+
+        /// <summary>
+        /// Count of failed polls to disconnect from server
+        /// </summary>
+        public int PollFailLimit
+        {
+            get => _pollFailLimit;
+            set
+            {
+                if (_pollFailLimit != value)
+                {
+                    _pollFailLimit = value;
+                    OnPropertyChanged(nameof(PollFailLimit));
+                }
+            }
+        }
+        /// <summary>
+        /// Poll check interval in milliseconds
+        /// </summary>
+        public int PollIntervalMs
+        {
+            get => _pollInterval;
+            set
+            {
+                if (_pollInterval != value)
+                {
+                    _pollInterval = value;
+                    OnPropertyChanged(nameof(PollIntervalMs));
+                }
+            }
+        }
+
         private void WebSocketServer_DisconnectedEvent(object sender, ConnectionEventArgs e)
         {
-            lock (_endpointDataParsers)
+            lock (_lockObject)
             {
                 if (_endpointDataParsers.ContainsKey(e.RemoteEndPoint)) _endpointDataParsers.Remove(e.RemoteEndPoint);
             }
@@ -27,21 +121,14 @@ namespace Flekosoft.Common.Network.WebSocket
 
         private void WebSocketServer_ConnectedEvent(object sender, ConnectionEventArgs e)
         {
-            lock (_endpointDataParsers)
+            lock (_lockObject)
             {
-                if (!_endpointDataParsers.ContainsKey(e.RemoteEndPoint)) _endpointDataParsers.Add(e.RemoteEndPoint, new EndpointDataParser());
+                if (!_endpointDataParsers.ContainsKey(e.RemoteEndPoint)) _endpointDataParsers.Add(e.RemoteEndPoint, new EndpointDataParser((IPEndPoint)e.RemoteEndPoint, (IPEndPoint)e.LocalEndPoint));
             }
         }
 
-        private void ParseHandshake(NetworkDataEventArgs e)
+        private void ParseHandshake(EndpointDataParser parser, NetworkDataEventArgs e)
         {
-            EndpointDataParser parser;
-
-            lock (_endpointDataParsers)
-            {
-                parser = _endpointDataParsers[e.RemoteEndPoint];
-            }
-
             foreach (byte b in e.Data)
             {
                 parser.NetworkReceivedString += Encoding.UTF8.GetString(new[] { b });
@@ -84,7 +171,7 @@ namespace Flekosoft.Common.Network.WebSocket
 
                             if (key != string.Empty)
                             {
-                                var acceptKey = AcceptKey(key);
+                                var acceptKey = AcceptKeyGenerator.AcceptKey(key);
 
                                 var retStr = "HTTP/1.1 101 Switching Protocols\r\n";
                                 retStr += "Upgrade: websocket\r\n";
@@ -120,20 +207,11 @@ namespace Flekosoft.Common.Network.WebSocket
             }
         }
 
-        private static string guid = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
-        private string AcceptKey(string key)
+       
+
+
+        private void ParseData(EndpointDataParser parser, NetworkDataEventArgs e)
         {
-            string longKey = key + guid;
-            SHA1 sha1 = SHA1.Create();
-            byte[] hashBytes = sha1.ComputeHash(Encoding.ASCII.GetBytes(longKey));
-            return Convert.ToBase64String(hashBytes);
-        }
-
-
-        private void ParseData(NetworkDataEventArgs e)
-        {
-            var parser = _endpointDataParsers[e.RemoteEndPoint];
-
             foreach (byte b in e.Data)
             {
                 if (parser.IsFirstDataByte)
@@ -155,7 +233,7 @@ namespace Flekosoft.Common.Network.WebSocket
                     parser.MaskingKeyLenght = 0;
                 }
 
-                parser.DataBuffer.AddRange(new byte[] { b });
+                parser.DataBuffer.AddRange(new[] { b });
                 parser.IsFirstDataByte = false;
 
                 if (parser.DataBuffer.Count == 2)
@@ -220,21 +298,21 @@ namespace Flekosoft.Common.Network.WebSocket
                             parser.DataBuffer[i] = (byte)(parser.DataBuffer[i] ^ parser.MaskingKey[j % 4]);
                         }
                     }
-                    ParseFrame(e);
+                    ParseFrame(parser, e);
                     parser.IsFirstDataByte = true;
                 }
             }
         }
 
-        private void ParseFrame(NetworkDataEventArgs e)
+        private void ParseFrame(EndpointDataParser parser, NetworkDataEventArgs e)
         {
             var data = new List<byte>();
-            var parser = _endpointDataParsers[e.RemoteEndPoint];
             var payloadStartIndex = 2 + parser.PayloadLenLenght + parser.MaskingKeyLenght;
             switch ((WebSocketOpcode)parser.Opcode)
             {
                 case WebSocketOpcode.Ping:
                     //Ping frame. Sent Pong Frame.
+                    parser.PollReceived = true;
                     data.AddRange(parser.DataBuffer);
                     data[0] = (byte)(data[0] & 0xF0);
                     data[0] = (byte)(data[0] | (byte)WebSocketOpcode.Pong);
@@ -265,16 +343,17 @@ namespace Flekosoft.Common.Network.WebSocket
 
         protected override void ProcessDataInternal(NetworkDataEventArgs e)
         {
-            lock (_endpointDataParsers)
+            lock (_lockObject)
             {
-                if (!_endpointDataParsers.ContainsKey(e.RemoteEndPoint)) _endpointDataParsers.Add(e.RemoteEndPoint, new EndpointDataParser());
-            }
+                if(!_endpointDataParsers.ContainsKey(e.RemoteEndPoint)) return;
 
-            if (_endpointDataParsers[e.RemoteEndPoint].FirstConnected)
-            {
-                ParseHandshake(e);
+                var parser = _endpointDataParsers[e.RemoteEndPoint];
+                if (parser.FirstConnected)
+                {
+                    ParseHandshake(parser, e);
+                }
+                else ParseData(parser, e);
             }
-            else ParseData(e);
         }
 
         public void SendData(WebSocketOpcode opcode, byte[] data, IPEndPoint localEndPoint, IPEndPoint remoteEndPoint, bool isFinalFrame)
@@ -330,33 +409,13 @@ namespace Flekosoft.Common.Network.WebSocket
         {
             if (disposing)
             {
+                _pollCheckThread.Abort();
+
                 HandshakeEvent = null;
                 DataReceivedEvent = null;
                 ConnectionCloseEvent = null;
             }
             base.Dispose(disposing);
         }
-    }
-
-    class EndpointDataParser
-    {
-        public string NetworkReceivedString = string.Empty;
-        public readonly List<string> HttpRequest = new List<string>();
-        public bool FirstConnected = true;
-        public List<byte> DataBuffer = new List<byte>();
-        public bool IsFirstDataByte = true;
-
-
-        public int Fin;
-        public int Opcode;
-        public int Mask;
-        public byte[] MaskingKey = new byte[4];
-        public int MaskingKeyLenght;
-        public int PayloadLen1;
-        public int PayloadLen;
-        public int PayloadLenLenght;
-        public bool PayloadLenReceived;
-        public bool HeaderReceived;
-        public bool FrameReceived;
     }
 }

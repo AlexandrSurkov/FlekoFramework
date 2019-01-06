@@ -1,5 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Net;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace Flekosoft.Common.Network.WebSocket
 {
@@ -132,5 +135,53 @@ namespace Flekosoft.Common.Network.WebSocket
         }
 
         public ConnectionCloseReason ConnectionCloseReason { get; }
+    }
+
+    static class AcceptKeyGenerator
+    {
+        private static string guid = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
+        internal static string AcceptKey(string key)
+        {
+            string longKey = key + guid;
+            SHA1 sha1 = SHA1.Create();
+            byte[] hashBytes = sha1.ComputeHash(Encoding.ASCII.GetBytes(longKey));
+            return Convert.ToBase64String(hashBytes);
+        }
+    }
+
+    class EndpointDataParser
+    {
+        public IPEndPoint RemoteEndPoint { get; }
+        public IPEndPoint LocalEndPoint { get; }
+
+        public string NetworkReceivedString = string.Empty;
+        public readonly List<string> HttpRequest = new List<string>();
+        public bool FirstConnected = true;
+        public List<byte> DataBuffer = new List<byte>();
+        public bool IsFirstDataByte = true;
+
+        public string SentKey = String.Empty;
+
+
+        public int Fin;
+        public int Opcode;
+        public int Mask;
+        public byte[] MaskingKey = new byte[4];
+        public int MaskingKeyLenght;
+        public int PayloadLen1;
+        public int PayloadLen;
+        public int PayloadLenLenght;
+        public bool PayloadLenReceived;
+        public bool HeaderReceived;
+        public bool FrameReceived;
+
+        public EndpointDataParser(IPEndPoint remoteEndPoint, IPEndPoint localEndPoint)
+        {
+            RemoteEndPoint = remoteEndPoint;
+            LocalEndPoint = localEndPoint;
+        }
+
+        internal bool PollReceived { get; set; }
+        internal int PollFailCount { get; set; }
     }
 }

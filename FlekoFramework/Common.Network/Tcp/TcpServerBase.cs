@@ -131,6 +131,16 @@ namespace Flekosoft.Common.Network.Tcp
                         }
                         else
                         {
+                            foreach (ListenSocket ls in _listenSockets)
+                            {
+                                foreach (SocketAsyncNetworkExchangeDriver driver in ls.ConnectedSockets)
+                                {
+                                    OnDisconnectedEvent(
+                                        new ConnectionEventArgs(driver.ExchangeInterface.LocalEndPoint,
+                                            driver.ExchangeInterface.RemoteEndPoint));
+                                }
+                            }
+
                             ClearSocketLists();
                             IsStarted = false;
                         }

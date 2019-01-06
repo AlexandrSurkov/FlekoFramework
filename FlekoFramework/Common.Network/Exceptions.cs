@@ -35,6 +35,45 @@ namespace Flekosoft.Common.Network
         }
     }
 
+
+    [Serializable]
+    public class HandshakeException : NetworkException
+    {
+        //
+        // For guidelines regarding the creation of new exception types, see
+        //    http://msdn.microsoft.com/library/default.asp?url=/library/en-us/cpgenref/html/cpconerrorraisinghandlingguidelines.asp
+        // and
+        //    http://msdn.microsoft.com/library/default.asp?url=/library/en-us/dncscol/html/csharp07192001.asp
+        //
+
+        public HandshakeException()
+        {
+        }
+
+        // ReSharper disable UnusedMember.Global
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
+        public HandshakeException(string message)
+            // ReSharper restore UnusedMember.Global
+            : base(message)
+        {
+        }
+
+        // ReSharper disable UnusedMember.Global
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
+        public HandshakeException(string message, Exception inner)
+            // ReSharper restore UnusedMember.Global
+            : base(message, inner)
+        {
+        }
+
+        protected HandshakeException(
+            SerializationInfo info,
+            StreamingContext context)
+            : base(info, context)
+        {
+        }
+    }
+
     [Serializable]
     public class NotConnectedException : NetworkException
     {

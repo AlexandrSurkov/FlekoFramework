@@ -205,9 +205,12 @@ namespace Flekosoft.Common.Network.Tcp
 
                 IsConnected = true;
                 _pingFailCount = 0;
-                OnConnectedEvent(_exchangeInterface.LocalEndPoint, _exchangeInterface.RemoteEndPoint);
 
                 StartExchange(_exchangeInterface);
+
+                OnConnectedEvent(_exchangeInterface.LocalEndPoint, _exchangeInterface.RemoteEndPoint);
+
+                
                 return true;
             }
             catch (SocketException se)

@@ -763,7 +763,8 @@ namespace Flekosoft.UnitTests.Common.Network
             Assert.IsNull(ClientConnectedEventEventArgs);
             client.Start(endPoint);
             var waitStart = DateTime.Now;
-            while (ServerConnectedEventArgs == null || ClientConnectedEventEventArgs == null)
+            //while (ServerConnectedEventArgs == null || ClientConnectedEventEventArgs == null)
+            while ((ServerConnectedEventArgs == null || ClientConnectedEventEventArgs == null))
             {
                 var delta = DateTime.Now - waitStart;
                 if (delta.TotalSeconds > 5) Assert.Fail("Wait Timeout");

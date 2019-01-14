@@ -324,6 +324,8 @@ namespace Flekosoft.Common.Network.Internals
                                 var len = data.Length;
                                 while (written < data.Length)
                                 {
+                                    if (_networkInterface?.IsConnected == false) return false;
+
                                     written = (int)_networkInterface?.Write(data, index, len, Timeout.Infinite);
                                     index += written;
                                     len -= written;

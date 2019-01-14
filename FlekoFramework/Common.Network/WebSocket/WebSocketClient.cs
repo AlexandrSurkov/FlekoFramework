@@ -49,6 +49,40 @@ namespace Flekosoft.Common.Network.WebSocket
             _parser.FirstConnected = true;
         }
 
+        public void SendData(WebSocketOpcode opcode, byte[] data, bool isFinalFrame)
+        {
+            var buffer = new List<byte>();
+            long len = data.LongLength;
+            var b1 = (byte)(0x7F & (byte)opcode);
+            if (isFinalFrame) b1 = (byte)(b1 | 0x80);
+            buffer.Add(b1);
+            if (len < 126)
+            {
+                var b2 = (byte)(0x7F & data.Length);
+                buffer.Add(b2);
+            }
+            else if (len < 0xFFFF)
+            {
+                buffer.Add(0x7E);
+                buffer.Add((byte)((len & 0xFF00) >> 8));
+                buffer.Add((byte)((len & 0x00FF) >> 0));
+            }
+            else if (len < 0x7FFFFFFFFFFFFFFF)
+            {
+                buffer.Add(0x7F);
+                buffer.Add((byte)((len & 0x7F00000000000000) >> 7 * 8));
+                buffer.Add((byte)((len & 0x00FF000000000000) >> 6 * 8));
+                buffer.Add((byte)((len & 0x0000FF0000000000) >> 5 * 8));
+                buffer.Add((byte)((len & 0x000000FF00000000) >> 4 * 8));
+                buffer.Add((byte)((len & 0x00000000FF000000) >> 3 * 8));
+                buffer.Add((byte)((len & 0x0000000000FF0000) >> 2 * 8));
+                buffer.Add((byte)((len & 0x000000000000FF00) >> 1 * 8));
+                buffer.Add((byte)((len & 0x00000000000000FF) >> 0 * 8));
+            }
+            buffer.AddRange(data);
+
+            Write(buffer.ToArray());
+        }
 
 
         protected override void ProcessByteInternal(NetworkDataEventArgs e)

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Net;
@@ -10,12 +11,13 @@ namespace Flekosoft.Common.Network.Tcp
 {
     public abstract class TcpServerBase : PropertyChangedErrorNotifyDisposableBase
     {
-        private readonly List<ListenSocket> _listenSockets = new List<ListenSocket>();
+        //private readonly List<ListenSocket> _listenSockets = new List<ListenSocket>();
+        private readonly ConcurrentBag<ListenSocket> _listenSockets = new ConcurrentBag<ListenSocket>();
         private bool _isStarted;
         private bool _connectRequestThreadPaused = true;
 
         private readonly Thread _waitConnectionThread;
-        private readonly object _listenSocketsSyncObject = new object();
+        //private readonly object _listenSocketsSyncObject = new object();
         private bool _dataTrace;
 
 
@@ -60,7 +62,7 @@ namespace Flekosoft.Common.Network.Tcp
             {
                 if (_dataTrace == value) return;
                 _dataTrace = value;
-                lock (_listenSocketsSyncObject)
+                //lock (_listenSocketsSyncObject)
                 {
                     // ReSharper disable LoopCanBeConvertedToQuery
                     foreach (var listenSocket in _listenSockets)
@@ -87,7 +89,7 @@ namespace Flekosoft.Common.Network.Tcp
             {
                 try
                 {
-                    lock (_listenSocketsSyncObject)
+                    //lock (_listenSocketsSyncObject)
                     {
                         if (!_connectRequestThreadPaused)
                         {
@@ -173,7 +175,7 @@ namespace Flekosoft.Common.Network.Tcp
 
             Endpoints = new List<TcpServerLocalEndpoint>(endpoints).AsReadOnly();
 
-            lock (_listenSocketsSyncObject)
+            //lock (_listenSocketsSyncObject)
             {
                 try
                 {
@@ -248,19 +250,26 @@ namespace Flekosoft.Common.Network.Tcp
 
         void ClearSocketLists()
         {
-            lock (_listenSocketsSyncObject)
+            //lock (_listenSocketsSyncObject)
             {
-                foreach (ListenSocket ls in _listenSockets)
+                //foreach (ListenSocket ls in _listenSockets)
+                //{
+                //    ls?.Dispose();
+                //}
+                ListenSocket item;
+                while (!_listenSockets.IsEmpty)
                 {
-                    ls?.Dispose();
+                    _listenSockets.TryTake(out item);
+                    item.Dispose();
                 }
-                _listenSockets.Clear();
+
+                //_listenSockets.Clear();
             }
         }
 
         private SocketAsyncNetworkExchangeDriver FindDriver(IPEndPoint localEndPoint, IPEndPoint remoteEndPoint)
         {
-            lock (_listenSocketsSyncObject)
+            //lock (_listenSocketsSyncObject)
             {
                 foreach (ListenSocket listenSocket in _listenSockets)
                 {
@@ -284,7 +293,7 @@ namespace Flekosoft.Common.Network.Tcp
         public ReadOnlyCollection<Connection> GetConnections()
         {
             var result = new List<Connection>();
-            lock (_listenSocketsSyncObject)
+            //lock (_listenSocketsSyncObject)
             {
                 foreach (ListenSocket listenSocket in _listenSockets)
                 {
@@ -306,7 +315,7 @@ namespace Flekosoft.Common.Network.Tcp
         {
             try
             {
-                lock (_listenSocketsSyncObject)
+                //lock (_listenSocketsSyncObject)
                 {
                     var listenSocket = (ListenSocket)ar.AsyncState;
 

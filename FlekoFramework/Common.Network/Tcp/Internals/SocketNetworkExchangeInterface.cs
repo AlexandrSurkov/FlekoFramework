@@ -53,7 +53,7 @@ namespace Flekosoft.Common.Network.Tcp.Internals
             }
             catch (ThreadAbortException)
             {
-               
+
             }
             catch (NotConnectedException)
             {
@@ -66,15 +66,19 @@ namespace Flekosoft.Common.Network.Tcp.Internals
                     case SocketError.ConnectionAborted:
                     case SocketError.ConnectionReset:
                     case SocketError.ConnectionRefused:
+                    case SocketError.Interrupted:
                         break;
-                     default:
-                         OnErrorEvent(sex);
+                    default:
+                        OnErrorEvent(sex);
                         break;
                 }
             }
             catch (Exception ex)
             {
-                OnErrorEvent(ex);
+                if (ex.InnerException != null && ex.InnerException.GetType() != typeof(ThreadAbortException))
+                {
+                    OnErrorEvent(ex);
+                }
             }
             return 0;
         }
@@ -118,6 +122,7 @@ namespace Flekosoft.Common.Network.Tcp.Internals
                     case SocketError.ConnectionAborted:
                     case SocketError.ConnectionReset:
                     case SocketError.ConnectionRefused:
+                    case SocketError.Interrupted:
                         break;
                     default:
                         OnErrorEvent(sex);
@@ -126,7 +131,10 @@ namespace Flekosoft.Common.Network.Tcp.Internals
             }
             catch (Exception ex)
             {
-                OnErrorEvent(ex);
+                if (ex.InnerException != null && ex.InnerException.GetType() != typeof(ThreadAbortException))
+                {
+                    OnErrorEvent(ex);
+                }
             }
             return 0;
         }

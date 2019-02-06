@@ -32,21 +32,28 @@ namespace Flekosoft.Common.Network.WebSocket
 
         private void WebSocketClient_ConnectedEvent(object sender, ConnectionEventArgs e)
         {
-            _parser = new EndpointDataParser((IPEndPoint) e.RemoteEndPoint, (IPEndPoint) e.LocalEndPoint);
+            try
+            {
+                _parser = new EndpointDataParser((IPEndPoint)e.RemoteEndPoint, (IPEndPoint)e.LocalEndPoint);
+                _parser.FirstConnected = true;
 
-            var rnd = new Random(DateTime.Now.Millisecond);
-            var rndBytes = new byte[16];
-            rnd.NextBytes(rndBytes);
-            _parser.SentKey = Convert.ToBase64String(rndBytes);
+                var rnd = new Random(DateTime.Now.Millisecond);
+                var rndBytes = new byte[16];
+                rnd.NextBytes(rndBytes);
+                _parser.SentKey = Convert.ToBase64String(rndBytes);
 
-            var retStr = $"GET {_path} HTTP/1.1\r\n";
-            retStr += "Upgrade: websocket\r\n";
-            retStr += "Connection: Upgrade\r\n";
-            retStr += $"Sec-WebSocket-Key: {_parser.SentKey}\r\n";
-            retStr += $"Sec-WebSocket-Version: 13\r\n\r\n";
-
-            Write(Encoding.UTF8.GetBytes(retStr));
-            _parser.FirstConnected = true;
+                var retStr = $"GET {_path} HTTP/1.1\r\n";
+                retStr += "Upgrade: websocket\r\n";
+                retStr += "Connection: Upgrade\r\n";
+                retStr += $"Sec-WebSocket-Key: {_parser.SentKey}\r\n";
+                retStr += $"Sec-WebSocket-Version: 13\r\n\r\n";
+                Write(Encoding.UTF8.GetBytes(retStr));
+                
+            }
+            catch (Exception exception)
+            {
+                OnErrorEvent(exception);
+            }
         }
 
         public void SendData(WebSocketOpcode opcode, byte[] data, bool isFinalFrame)
@@ -174,7 +181,7 @@ namespace Flekosoft.Common.Network.WebSocket
             }
         }
 
-        private void ParseData( NetworkDataEventArgs e)
+        private void ParseData(NetworkDataEventArgs e)
         {
             foreach (byte b in e.Data)
             {
@@ -322,7 +329,7 @@ namespace Flekosoft.Common.Network.WebSocket
 
         protected override bool Poll()
         {
-            if (_parser != null)
+            if (_parser?.FirstConnected == false)
             {
                 _parser.PollReceived = false;
                 SendPing();

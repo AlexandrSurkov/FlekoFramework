@@ -118,12 +118,8 @@ namespace Flekosoft.Common.Network.Tcp
                                         continue;
                                     }
 
-                                    //if (ls.ConnectedSockets.Count < ls.TcpServerLocalEndpoint.MaxClients)
-                                    //{
                                     ls.AcceptBeginned = true; //STRONG in this order! First is Accept begin = true. Second is  Begin Accept !!!
                                     ls.Socket.BeginAccept(AcceptCallback, ls);
-
-                                    //}
                                 }
                                 catch (ThreadAbortException)
                                 {

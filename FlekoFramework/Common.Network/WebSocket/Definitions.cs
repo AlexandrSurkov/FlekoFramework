@@ -181,7 +181,7 @@ namespace Flekosoft.Common.Network.WebSocket
             LocalEndPoint = localEndPoint;
         }
 
-        internal bool PollReceived { get; set; }
-        internal int PollFailCount { get; set; }
+        internal bool PollReceived { get; set; } = false;
+        internal int PollFailCount { get; set; } = 0;
     }
 }

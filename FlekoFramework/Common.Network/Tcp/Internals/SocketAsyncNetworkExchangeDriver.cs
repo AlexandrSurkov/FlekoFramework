@@ -1,6 +1,6 @@
-﻿using System;
+﻿using Flekosoft.Common.Network.Internals;
+using System;
 using System.Net;
-using Flekosoft.Common.Network.Internals;
 
 namespace Flekosoft.Common.Network.Tcp.Internals
 {

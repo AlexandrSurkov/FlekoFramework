@@ -33,7 +33,7 @@ namespace Flekosoft.Common.Network.WebSocket
         #region Thread
         private void PollCheckThreadFunc()
         {
-           // var removeList = new List<EndpointDataParser>();
+            // var removeList = new List<EndpointDataParser>();
             while (true)
             {
                 try
@@ -43,28 +43,31 @@ namespace Flekosoft.Common.Network.WebSocket
                     {
                         foreach (EndpointDataParser client in _endpointDataParsers.Values)
                         {
-                            if (client.PollReceived) client.PollFailCount = 0;
-                            else
+                            if (client.FirstConnected == false)
                             {
-                                client.PollFailCount++;
-                                if (client.PollFailCount >= PollFailLimit)
+                                if (client.PollReceived) client.PollFailCount = 0;
+                                else
                                 {
-                                    //Disconnect client
-                                    DisconnectClient(client.LocalEndPoint, client.RemoteEndPoint);
+                                    client.PollFailCount++;
+                                    if (client.PollFailCount >= PollFailLimit)
+                                    {
+                                        //Disconnect client
+                                        DisconnectClient(client.LocalEndPoint, client.RemoteEndPoint);
 
-                                    //if (!DisconnectClient(client.LocalEndPoint, client.RemoteEndPoint))
-                                    //{
-                                    //    removeList.Add(client);
-                                    //}
+                                        //if (!DisconnectClient(client.LocalEndPoint, client.RemoteEndPoint))
+                                        //{
+                                        //    removeList.Add(client);
+                                        //}
+                                    }
                                 }
+
+                                //foreach (EndpointDataParser dataParser in removeList)
+                                //{
+                                //    if (_endpointDataParsers.ContainsKey(dataParser.RemoteEndPoint)) _endpointDataParsers.Remove(dataParser.RemoteEndPoint);
+                                //}
+
+                                client.PollReceived = false;
                             }
-
-                            //foreach (EndpointDataParser dataParser in removeList)
-                            //{
-                            //    if (_endpointDataParsers.ContainsKey(dataParser.RemoteEndPoint)) _endpointDataParsers.Remove(dataParser.RemoteEndPoint);
-                            //}
-
-                            client.PollReceived = false;
                         }
                     }
                 }
@@ -123,7 +126,15 @@ namespace Flekosoft.Common.Network.WebSocket
         {
             lock (_lockObject)
             {
-                if (!_endpointDataParsers.ContainsKey(e.RemoteEndPoint)) _endpointDataParsers.Add(e.RemoteEndPoint, new EndpointDataParser((IPEndPoint)e.RemoteEndPoint, (IPEndPoint)e.LocalEndPoint));
+                if (!_endpointDataParsers.ContainsKey(e.RemoteEndPoint))
+                {
+                    _endpointDataParsers.Add(e.RemoteEndPoint, new EndpointDataParser((IPEndPoint)e.RemoteEndPoint, (IPEndPoint)e.LocalEndPoint));
+                }
+                else
+                {
+                    _endpointDataParsers.Remove(e.RemoteEndPoint);
+                    _endpointDataParsers.Add(e.RemoteEndPoint, new EndpointDataParser((IPEndPoint)e.RemoteEndPoint, (IPEndPoint)e.LocalEndPoint));
+                }
             }
         }
 
@@ -145,8 +156,6 @@ namespace Flekosoft.Common.Network.WebSocket
 
                     try
                     {
-
-
                         bool containsUpgrade = false;
                         foreach (string s in parser.HttpRequest)
                         {
@@ -207,7 +216,7 @@ namespace Flekosoft.Common.Network.WebSocket
             }
         }
 
-       
+
 
 
         private void ParseData(EndpointDataParser parser, NetworkDataEventArgs e)
@@ -345,7 +354,7 @@ namespace Flekosoft.Common.Network.WebSocket
         {
             lock (_lockObject)
             {
-                if(!_endpointDataParsers.ContainsKey(e.RemoteEndPoint)) return;
+                if (!_endpointDataParsers.ContainsKey(e.RemoteEndPoint)) return;
 
                 var parser = _endpointDataParsers[e.RemoteEndPoint];
                 if (parser.FirstConnected)

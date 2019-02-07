@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 
 namespace Flekosoft.Common.Logging
 {
@@ -17,13 +18,15 @@ namespace Flekosoft.Common.Logging
             {
                 Directory.CreateDirectory(dir);
             }
+
+            var path = dir + Path.DirectorySeparatorChar + Path.GetFileNameWithoutExtension(_logFilePath) + "_" + DateTime.Now.ToString("dd_MM_yyyy") + Path.GetExtension(_logFilePath);
             // ReSharper restore AssignNullToNotNullAttribute
 
-            if (!File.Exists(_logFilePath))
+            if (!File.Exists(path))
             {
-                File.Create(_logFilePath).Close();
+                File.Create(path).Close();
             }
-            using (var outfile = new StreamWriter(_logFilePath, true))
+            using (var outfile = new StreamWriter(path, true))
             {
                 foreach (string logString in logRecord.LogStrings)
                 {

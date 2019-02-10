@@ -11,6 +11,8 @@ namespace Flekosoft.Common.Network.Tcp.Internals
         private readonly object _readSyncObject = new object();
         private readonly object _writeSyncObject = new object();
         private bool _isConnected;
+        private readonly object _disposeLock = new object();
+        private bool _isSocketDisposed = false;
 
         public SocketNetworkExchangeInterface(Socket socket)
         {
@@ -168,10 +170,16 @@ namespace Flekosoft.Common.Network.Tcp.Internals
             if (disposing)
             {
                 IsConnected = false;
-
-                Socket.Shutdown(SocketShutdown.Both);
-                Socket.Close();
-                Socket.Dispose();
+                lock (_disposeLock)
+                {
+                    if (!_isSocketDisposed)
+                    {
+                        Socket.Shutdown(SocketShutdown.Both);
+                        Socket.Close();
+                        Socket.Dispose();
+                        _isSocketDisposed = true;
+                    }
+                }
 
                 DisconnectedEvent = null;
             }

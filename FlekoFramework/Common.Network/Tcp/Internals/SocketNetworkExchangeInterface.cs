@@ -31,6 +31,8 @@ namespace Flekosoft.Common.Network.Tcp.Internals
             {
                 lock (_readSyncObject) //Can't read at the same time from different threads
                 {
+                    if (_isSocketDisposed) return 0;
+
                     if (Socket == null)
                     {
                         throw new NotConnectedException();
@@ -69,14 +71,21 @@ namespace Flekosoft.Common.Network.Tcp.Internals
                     case SocketError.ConnectionReset:
                     case SocketError.ConnectionRefused:
                     case SocketError.Interrupted:
+                    case SocketError.TimedOut:
+                        IsConnected = false;
                         break;
                     default:
                         OnErrorEvent(sex);
                         break;
                 }
             }
+            catch (ObjectDisposedException)
+            {
+
+            }
             catch (Exception ex)
             {
+                var type = ex.GetType();
                 if (ex.InnerException != null && ex.InnerException.GetType() != typeof(ThreadAbortException))
                 {
                     OnErrorEvent(ex);
@@ -91,6 +100,7 @@ namespace Flekosoft.Common.Network.Tcp.Internals
             {
                 lock (_writeSyncObject) //Can't write at the same time from different threads
                 {
+                    if (_isSocketDisposed) return 0;
                     if (Socket == null) throw new NotConnectedException();
                     if (!Socket.Connected) throw new NotConnectedException();
 
@@ -102,10 +112,22 @@ namespace Flekosoft.Common.Network.Tcp.Internals
                     if (err != SocketError.Success)
                     {
                         Exception ex;
-                        if (err == SocketError.ConnectionAborted) ex = new NotConnectedException();
-                        else ex = new NetworkWriteException(err.ToString());
+                        switch (err)
+                        {
+                            case SocketError.ConnectionAborted:
+                            case SocketError.ConnectionReset:
+                            case SocketError.ConnectionRefused:
+                            case SocketError.Interrupted:
+                            case SocketError.TimedOut:
+                                ex = new NotConnectedException();
+                                break;
+                            default:
+                                ex = new NetworkWriteException(err.ToString());
+                                break;
+                        }
                         throw ex;
                     }
+
                     return sendedBytes;
                 }
             }
@@ -125,14 +147,21 @@ namespace Flekosoft.Common.Network.Tcp.Internals
                     case SocketError.ConnectionReset:
                     case SocketError.ConnectionRefused:
                     case SocketError.Interrupted:
+                    case SocketError.TimedOut:
+                        IsConnected = false;
                         break;
                     default:
                         OnErrorEvent(sex);
                         break;
                 }
             }
+            catch (ObjectDisposedException)
+            {
+
+            }
             catch (Exception ex)
             {
+                var type = ex.GetType();
                 if (ex.InnerException != null && ex.InnerException.GetType() != typeof(ThreadAbortException))
                 {
                     OnErrorEvent(ex);
@@ -174,9 +203,16 @@ namespace Flekosoft.Common.Network.Tcp.Internals
                 {
                     if (!_isSocketDisposed)
                     {
-                        Socket.Shutdown(SocketShutdown.Both);
-                        Socket.Close();
-                        Socket.Dispose();
+                        try
+                        {
+                            Socket.Shutdown(SocketShutdown.Both);
+                            Socket.Close();
+                            Socket.Dispose();
+                        }
+                        catch (ObjectDisposedException)
+                        {
+
+                        }
                         _isSocketDisposed = true;
                     }
                 }

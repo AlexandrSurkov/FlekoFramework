@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Net;
 using System.Text;
 using System.Threading;
+using Flekosoft.Common.Logging;
 using Flekosoft.Common.Network.Tcp;
 
 namespace Flekosoft.Common.Network.WebSocket
@@ -216,9 +217,6 @@ namespace Flekosoft.Common.Network.WebSocket
             }
         }
 
-
-
-
         private void ParseData(EndpointDataParser parser, NetworkDataEventArgs e)
         {
             foreach (byte b in e.Data)
@@ -315,6 +313,8 @@ namespace Flekosoft.Common.Network.WebSocket
 
         private void ParseFrame(EndpointDataParser parser, NetworkDataEventArgs e)
         {
+            //AppendDebugLogMessage($"{this}: {e.RemoteEndPoint} New Frame Received");
+            var startDateTime = DateTime.Now;
             var data = new List<byte>();
             var payloadStartIndex = 2 + parser.PayloadLenLenght + parser.MaskingKeyLenght;
             switch ((WebSocketOpcode)parser.Opcode)
@@ -338,6 +338,9 @@ namespace Flekosoft.Common.Network.WebSocket
                     DataReceivedEvent?.Invoke(this, new DataReceivedEventArgs(e.LocalEndPoint, e.RemoteEndPoint, (WebSocketOpcode)parser.Opcode, parser.DataBuffer.GetRange(payloadStartIndex, parser.PayloadLen).ToArray()));
                     break;
             }
+            var endDateTime = DateTime.Now;
+            var delta = endDateTime - startDateTime;
+            //AppendDebugLogMessage($"{this}: {e.RemoteEndPoint} Frame {(WebSocketOpcode)parser.Opcode} Parsed. Time spent {delta}");
         }
 
         private void SendClose(ConnectionCloseReason connectionCloseReason, IPEndPoint localEndPoint, IPEndPoint remoteEndPoint)
@@ -352,17 +355,19 @@ namespace Flekosoft.Common.Network.WebSocket
 
         protected override void ProcessDataInternal(NetworkDataEventArgs e)
         {
+            EndpointDataParser parser = null;
             lock (_lockObject)
             {
                 if (!_endpointDataParsers.ContainsKey(e.RemoteEndPoint)) return;
-
-                var parser = _endpointDataParsers[e.RemoteEndPoint];
-                if (parser.FirstConnected)
-                {
-                    ParseHandshake(parser, e);
-                }
-                else ParseData(parser, e);
+                parser = _endpointDataParsers[e.RemoteEndPoint];
             }
+
+            if (parser.FirstConnected)
+            {
+                ParseHandshake(parser, e);
+            }
+            else ParseData(parser, e);
+
         }
 
         public void SendData(WebSocketOpcode opcode, byte[] data, IPEndPoint localEndPoint, IPEndPoint remoteEndPoint, bool isFinalFrame)

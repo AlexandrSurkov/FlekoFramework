@@ -68,7 +68,7 @@ namespace Flekosoft.Common.Network.Tcp
                     foreach (var listenSocket in _listenSockets)
                     // ReSharper restore LoopCanBeConvertedToQuery
                     {
-                        foreach (var driver in listenSocket.ConnectedSockets)
+                        foreach (var driver in listenSocket.ConnectedSockets.AsReadOnly())
                         {
                             driver.DataTrace = _dataTrace;
                         }
@@ -100,7 +100,8 @@ namespace Flekosoft.Common.Network.Tcp
                             {
                                 try
                                 {
-                                    foreach (SocketAsyncNetworkExchangeDriver driver in ls.ConnectedSockets)
+                                    var cs = ls.ConnectedSockets.AsReadOnly();
+                                    foreach (SocketAsyncNetworkExchangeDriver driver in cs)
                                     {
                                         if (!driver.ExchangeInterface.IsConnected) removeList.Add(driver);
                                     }
@@ -113,12 +114,12 @@ namespace Flekosoft.Common.Network.Tcp
                                                 driver.ExchangeInterface.RemoteEndPoint));
                                     }
 
-                                    if (ls.AcceptBeginned)
+                                    if (ls.AcceptBegin)
                                     {
                                         continue;
                                     }
 
-                                    ls.AcceptBeginned = true; //STRONG in this order! First is Accept begin = true. Second is  Begin Accept !!!
+                                    ls.AcceptBegin = true; //STRONG in this order! First is Accept begin = true. Second is  Begin Accept !!!
                                     ls.Socket.BeginAccept(AcceptCallback, ls);
                                 }
                                 catch (ThreadAbortException)
@@ -131,7 +132,8 @@ namespace Flekosoft.Common.Network.Tcp
                         {
                             foreach (ListenSocket ls in _listenSockets)
                             {
-                                foreach (SocketAsyncNetworkExchangeDriver driver in ls.ConnectedSockets)
+                                var cs = ls.ConnectedSockets.AsReadOnly();
+                                foreach (SocketAsyncNetworkExchangeDriver driver in cs)
                                 {
                                     OnDisconnectedEvent(
                                         new ConnectionEventArgs(driver.ExchangeInterface.LocalEndPoint,
@@ -269,7 +271,8 @@ namespace Flekosoft.Common.Network.Tcp
             {
                 foreach (ListenSocket listenSocket in _listenSockets)
                 {
-                    foreach (SocketAsyncNetworkExchangeDriver driver in listenSocket.ConnectedSockets)
+                    var cs = listenSocket.ConnectedSockets.AsReadOnly();
+                    foreach (SocketAsyncNetworkExchangeDriver driver in cs)
                     {
                         if (driver.ExchangeInterface.LocalEndPoint.Equals(localEndPoint) &&
                         driver.ExchangeInterface.RemoteEndPoint.Equals(remoteEndPoint))
@@ -293,7 +296,8 @@ namespace Flekosoft.Common.Network.Tcp
             {
                 foreach (ListenSocket listenSocket in _listenSockets)
                 {
-                    foreach (SocketAsyncNetworkExchangeDriver driver in listenSocket.ConnectedSockets)
+                    var cs = listenSocket.ConnectedSockets.AsReadOnly();
+                    foreach (SocketAsyncNetworkExchangeDriver driver in cs)
                     {
                         result.Add(new Connection(driver.ExchangeInterface.LocalEndPoint, driver.ExchangeInterface.RemoteEndPoint));
                     }
@@ -344,7 +348,7 @@ namespace Flekosoft.Common.Network.Tcp
                             }
                         }
 
-                        listenSocket.AcceptBeginned = false;
+                        listenSocket.AcceptBegin = false;
                     }
                 }
             }

@@ -150,6 +150,8 @@ namespace Flekosoft.UnitTests.Common.Network
             ConnectionTest(client, ipEp1);
             ConnectionTest(client, ipEp2);
             ConnectionTest(client, ipEp3);
+            
+            while (server.GetConnections().Count != 0) { };
 
             ServerConnectedEventArgs = null;
             ServerDisconnectedEventArgs = null;

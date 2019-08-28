@@ -1,7 +1,8 @@
 ﻿using System;
-using System.Collections.ObjectModel;
 using System.Net.Sockets;
 using System.Threading;
+using Flekosoft.Common.Collection;
+using Flekosoft.Common.Logging;
 
 namespace Flekosoft.Common.Network.Tcp.Internals
 {
@@ -15,14 +16,14 @@ namespace Flekosoft.Common.Network.Tcp.Internals
             _socket = socket;
             TcpServerLocalEndpoint = tcpServerLocalEndpoint;
             _acceptedE = new ManualResetEvent(false);
-            AcceptBeginned = false;
+            AcceptBegin = false;
         }
 
-        public bool AcceptBeginned { get; set; }
+        public bool AcceptBegin { get; set; }
 
         public TcpServerLocalEndpoint TcpServerLocalEndpoint { get; }
 
-        public ObservableCollection<SocketAsyncNetworkExchangeDriver> ConnectedSockets { get; } = new ObservableCollection<SocketAsyncNetworkExchangeDriver>();
+        public ListCollection<SocketAsyncNetworkExchangeDriver> ConnectedSockets { get; } = new ListCollection<SocketAsyncNetworkExchangeDriver>(nameof(ConnectedSockets), true) { LogLevel = LogRecordLevel.Off };
 
         public Socket Socket
         {
@@ -65,11 +66,11 @@ namespace Flekosoft.Common.Network.Tcp.Internals
                         _socket.Close();
                         _socket = null;
 
-                        foreach (var connection in ConnectedSockets)
-                        // ReSharper restore LoopCanBeConvertedToQuery
-                        {
-                            connection?.Dispose();
-                        }
+                        //foreach (var connection in ConnectedSockets)
+                        //// ReSharper restore LoopCanBeConvertedToQuery
+                        //{
+                        //    connection?.Dispose();
+                        //}
                         ConnectedSockets.Clear();
                     }
                 }

@@ -245,7 +245,7 @@ namespace Flekosoft.UnitTests.Common.Math
 
 
         [TestMethod]
-        public void RotateAroundOriginQuternionXYTests()
+        public void RotateAroundOriginQuaternionXYTests()
         {
             var v = new Vector3D(1, 0, 0);
 
@@ -269,7 +269,7 @@ namespace Flekosoft.UnitTests.Common.Math
         }
 
         [TestMethod]
-        public void RotateAroundOriginQuternionXZTests()
+        public void RotateAroundOriginQuaternionXZTests()
         {
             var v = new Vector3D(1, 0, 0);
 
@@ -280,7 +280,9 @@ namespace Flekosoft.UnitTests.Common.Math
             {
                 var angRad = Utils.ToRadian(i);
                 var q = new Quaternion();
-                q.SetFromAxisAngleRadian(angRad, Vector3D.YAxis);
+                var acx = Vector3D.YAxis;
+                acx.Invert();
+                q.SetFromAxisAngleRadian(angRad, acx);
                 v.Rotate(q);
                 Assert.AreEqual(angRad, v.XZ.Angle, 0.000000001, "i = " + i);
                 v.RotateAroundOriginXZ(-angRad);
@@ -293,7 +295,7 @@ namespace Flekosoft.UnitTests.Common.Math
         }
 
         [TestMethod]
-        public void RotateAroundOriginQuternionZYTests()
+        public void RotateAroundOriginQuaternionZYTests()
         {
             var v = new Vector3D(0, 0, 1);
 
@@ -304,7 +306,9 @@ namespace Flekosoft.UnitTests.Common.Math
             {
                 var angRad = Utils.ToRadian(i);
                 var q = new Quaternion();
-                q.SetFromAxisAngleRadian(angRad, Vector3D.XAxis);
+                var acx = Vector3D.XAxis;
+                acx.Invert();
+                q.SetFromAxisAngleRadian(angRad, acx);
                 v.Rotate(q);
                 Assert.AreEqual(angRad, v.ZY.Angle, 0.000000001, "i = " + i);
                 v.RotateAroundOriginZY(-angRad);

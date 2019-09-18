@@ -1,0 +1,17 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <Product>FlekoFramework</Product>
+    <Authors>Alexandr Surkov</Authors>
+    <Copyright>Copyright © Alexandr Surkov 2017-2019</Copyright>
+    <RepositoryUrl>https://github.com/AlexandrSurkov/FlekoFramework</RepositoryUrl>
+    <RepositoryType>Git</RepositoryType>
+    <NeutralLanguage>en</NeutralLanguage>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Company />
+    <Description>The main library of the FlekoFramework. Contains Collections, Finite state machine, Logging, Messaging, Observable pattern, Serialization and other useful code.</Description>
+  </PropertyGroup>
+
+</Project>

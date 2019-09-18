@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="..\packages\MSTest.TestAdapter.1.3.0-beta2\build\net45\MSTest.TestAdapter.props" Condition="Exists('..\packages\MSTest.TestAdapter.1.3.0-beta2\build\net45\MSTest.TestAdapter.props')" />
+  <Import Project="..\packages\MSTest.TestAdapter.2.0.0\build\net45\MSTest.TestAdapter.props" Condition="Exists('..\packages\MSTest.TestAdapter.2.0.0\build\net45\MSTest.TestAdapter.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -9,7 +9,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Flekosoft.UnitTests</RootNamespace>
     <AssemblyName>Flekosoft.UnitTests</AssemblyName>
-    <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{3AC096D0-A1C2-E12C-1390-A8335801FDAB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">15.0</VisualStudioVersion>
@@ -46,10 +46,10 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.VisualStudio.TestPlatform.TestFramework, Version=14.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>..\packages\MSTest.TestFramework.1.3.0-beta2\lib\net45\Microsoft.VisualStudio.TestPlatform.TestFramework.dll</HintPath>
+      <HintPath>..\packages\MSTest.TestFramework.2.0.0\lib\net45\Microsoft.VisualStudio.TestPlatform.TestFramework.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.VisualStudio.TestPlatform.TestFramework.Extensions, Version=14.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>..\packages\MSTest.TestFramework.1.3.0-beta2\lib\net45\Microsoft.VisualStudio.TestPlatform.TestFramework.Extensions.dll</HintPath>
+      <HintPath>..\packages\MSTest.TestFramework.2.0.0\lib\net45\Microsoft.VisualStudio.TestPlatform.TestFramework.Extensions.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -102,46 +102,47 @@
     <Compile Include="Serialization\SerializationFactoryTests.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Common.Logging.Windows\Common.Logging.Windows.csproj">
-      <Project>{3c2060d8-6036-491b-8e6f-f75f05f1e450}</Project>
-      <Name>Common.Logging.Windows</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Common.Math\Common.Math.csproj">
-      <Project>{D105322A-19A9-4677-A6C6-3B0638EF1AA6}</Project>
-      <Name>Common.Math</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Common.Network\Common.Network.csproj">
-      <Project>{41D3FED6-A0E5-481B-A84F-8E6E409466ED}</Project>
-      <Name>Common.Network</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Common.Plugins\Common.Plugins.csproj">
-      <Project>{285B4569-4570-4CB7-AF27-358538194C70}</Project>
-      <Name>Common.Plugins</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Common.Serialization.Xml\Common.Serialization.Xml.csproj">
-      <Project>{C5E158BC-AB08-4A68-9B27-643DE27C10E7}</Project>
-      <Name>Common.Serialization.Xml</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Common.Video\Common.Video.csproj">
-      <Project>{4DE7BC71-64DC-46CD-A326-580D1EC78BF6}</Project>
-      <Name>Common.Video</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Common\Common.csproj">
-      <Project>{c1c745ec-463e-49dc-a457-ee232a4d59e2}</Project>
-      <Name>Common</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Flekosoft.Common.Logging.Windows\Flekosoft.Common.Logging.Windows.csproj">
+      <Project>{063f9db9-1305-4ae4-9327-43ac3acf0fbb}</Project>
+      <Name>Flekosoft.Common.Logging.Windows</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Flekosoft.Common.Math\Flekosoft.Common.Math.csproj">
+      <Project>{06ca1aed-5ad7-42cb-ae40-89685cbfd124}</Project>
+      <Name>Flekosoft.Common.Math</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Flekosoft.Common.Network\Flekosoft.Common.Network.csproj">
+      <Project>{76075dd5-fb4d-4cf4-b426-012d4e46f07b}</Project>
+      <Name>Flekosoft.Common.Network</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Flekosoft.Common.Plugins\Flekosoft.Common.Plugins.csproj">
+      <Project>{29fb2cbf-c382-476c-9618-bf3ca05e1825}</Project>
+      <Name>Flekosoft.Common.Plugins</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Flekosoft.Common.Serialization.Xml\Flekosoft.Common.Serialization.Xml.csproj">
+      <Project>{38905da0-e080-460c-9fbb-038589d6fa59}</Project>
+      <Name>Flekosoft.Common.Serialization.Xml</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Flekosoft.Common.Video\Flekosoft.Common.Video.csproj">
+      <Project>{b1d4c137-8614-4a0c-9cda-0e1d6933fb93}</Project>
+      <Name>Flekosoft.Common.Video</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Flekosoft.Common\Flekosoft.Common.csproj">
+      <Project>{013086db-fb38-4e4e-9901-70a2319ce3cb}</Project>
+      <Name>Flekosoft.Common</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets" Condition="Exists('$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets')" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
-    <Error Condition="!Exists('..\packages\MSTest.TestAdapter.1.3.0-beta2\build\net45\MSTest.TestAdapter.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\MSTest.TestAdapter.1.3.0-beta2\build\net45\MSTest.TestAdapter.props'))" />
-    <Error Condition="!Exists('..\packages\MSTest.TestAdapter.1.3.0-beta2\build\net45\MSTest.TestAdapter.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\MSTest.TestAdapter.1.3.0-beta2\build\net45\MSTest.TestAdapter.targets'))" />
+    <Error Condition="!Exists('..\packages\MSTest.TestAdapter.2.0.0\build\net45\MSTest.TestAdapter.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\MSTest.TestAdapter.2.0.0\build\net45\MSTest.TestAdapter.props'))" />
+    <Error Condition="!Exists('..\packages\MSTest.TestAdapter.2.0.0\build\net45\MSTest.TestAdapter.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\MSTest.TestAdapter.2.0.0\build\net45\MSTest.TestAdapter.targets'))" />
   </Target>
-  <Import Project="..\packages\MSTest.TestAdapter.1.3.0-beta2\build\net45\MSTest.TestAdapter.targets" Condition="Exists('..\packages\MSTest.TestAdapter.1.3.0-beta2\build\net45\MSTest.TestAdapter.targets')" />
+  <Import Project="..\packages\MSTest.TestAdapter.2.0.0\build\net45\MSTest.TestAdapter.targets" Condition="Exists('..\packages\MSTest.TestAdapter.2.0.0\build\net45\MSTest.TestAdapter.targets')" />
 </Project>

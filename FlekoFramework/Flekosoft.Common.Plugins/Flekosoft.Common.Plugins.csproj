@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <Product>FlekoFramework</Product>
+    <Authors>Alexandr Surkov</Authors>
+    <Copyright>Copyright © Alexandr Surkov 2017-2019</Copyright>
+    <RepositoryUrl>https://github.com/AlexandrSurkov/FlekoFramework</RepositoryUrl>
+    <RepositoryType>Git</RepositoryType>
+    <NeutralLanguage>en</NeutralLanguage>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Company />
+    <Description>Pugins Framework. Contains Plugin Manager and base plugin classes</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Flekosoft.Common\Flekosoft.Common.csproj" />
+  </ItemGroup>
+
+</Project>

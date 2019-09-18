@@ -31,3 +31,22 @@
 /FlekoFramework/FlekoFramework.sln.DotSettings.user
 
 /FlekoFramework/.vs/FlekoFramework/v16
+/FlekoFramework/Flekosoft.Common/obj
+/FlekoFramework/Flekosoft.Common/bin/Debug
+/FlekoFramework/Flekosoft.Common/bin/Release
+/FlekoFramework/Flekosoft.Common.Accounts/bin
+/FlekoFramework/Flekosoft.Common.Accounts/obj
+/FlekoFramework/Flekosoft.Common.Logging.Windows/bin
+/FlekoFramework/Flekosoft.Common.Logging.Windows/obj
+/FlekoFramework/Flekosoft.Common.Math/obj
+/FlekoFramework/Flekosoft.Common.Math/bin
+/FlekoFramework/Flekosoft.Common.Network/obj
+/FlekoFramework/Flekosoft.Common.Network/bin
+/FlekoFramework/Flekosoft.Common.Plugins/obj
+/FlekoFramework/Flekosoft.Common.Plugins/bin
+/FlekoFramework/Flekosoft.Common.Plugins.Windows/obj
+/FlekoFramework/Flekosoft.Common.Plugins.Windows/bin
+/FlekoFramework/Flekosoft.Common.Serialization.Xml/obj
+/FlekoFramework/Flekosoft.Common.Serialization.Xml/bin
+/FlekoFramework/Flekosoft.Common.Video/obj
+/FlekoFramework/Flekosoft.Common.Video/bin

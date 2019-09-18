@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <Product>FlekoFramework</Product>
+    <Authors>Alexandr Surkov</Authors>
+    <Copyright>Copyright © Alexandr Surkov 2017-2019</Copyright>
+    <RepositoryUrl>https://github.com/AlexandrSurkov/FlekoFramework</RepositoryUrl>
+    <RepositoryType>Git</RepositoryType>
+    <NeutralLanguage>en</NeutralLanguage>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Company />
+    <Description>Network Framework. Contains basic TCP server and TCP client, Simple WebSocket, HTTP, IGMP clients and servers and some useful helpers</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Flekosoft.Common\Flekosoft.Common.csproj" />
+  </ItemGroup>
+
+</Project>

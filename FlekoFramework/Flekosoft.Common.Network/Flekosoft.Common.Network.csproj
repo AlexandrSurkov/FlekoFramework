@@ -12,6 +12,7 @@
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <Company />
     <Description>Network Framework. Contains basic TCP server and TCP client, Simple WebSocket, HTTP, IGMP clients and servers and some useful helpers</Description>
+    <PackageProjectUrl>https://github.com/AlexandrSurkov/FlekoFramework</PackageProjectUrl>
   </PropertyGroup>
 
   <ItemGroup>

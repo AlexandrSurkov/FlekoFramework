@@ -12,6 +12,7 @@
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <Company />
     <Description>Pugins Framework. Contains Plugin Manager and base plugin classes</Description>
+    <PackageProjectUrl>https://github.com/AlexandrSurkov/FlekoFramework</PackageProjectUrl>
   </PropertyGroup>
 
   <ItemGroup>

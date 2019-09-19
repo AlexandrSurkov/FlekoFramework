@@ -12,6 +12,7 @@
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <Company />
     <Description>Video Framework</Description>
+    <PackageProjectUrl>https://github.com/AlexandrSurkov/FlekoFramework</PackageProjectUrl>
   </PropertyGroup>
 
   <ItemGroup>

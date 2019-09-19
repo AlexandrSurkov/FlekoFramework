@@ -5,8 +5,8 @@ using System.Collections.Generic;
 namespace Flekosoft.Common.Messaging
 {
     /// <summary>
-    /// Диспетчер сообщений.
-    /// Singleton класс, глобально доступный всем.
+    /// Message dispatcher.
+    /// Uses singleton pattern so has general visibility
     /// </summary>
     public class MessageDispatcher: LoggingSerializableBase
     {
@@ -19,19 +19,19 @@ namespace Flekosoft.Common.Messaging
         private readonly List<IMessageHandler> _handlers = new List<IMessageHandler>();
 
         /// <summary>
-        /// Отправить сообщение
+        /// Dispatch message
         /// </summary>
-        /// <param name="message">Сообщение для отправки</param>
+        /// <param name="message">Message for dispatch</param>
         public void DispatchMessage(Message message)
         {
             DispatchMessage(message, 0);
         }
 
         /// <summary>
-        /// Отправить сообщение с задержкой
+        /// Dispatch message with delay
         /// </summary>
-        /// <param name="message">Сообщение для отправки</param>
-        /// <param name="delayMs">Задержка, мс</param>
+        /// <param name="message">Message for dispatch</param>
+        /// <param name="delayMs">Delay in ms</param>
         public void DispatchMessage(Message message, int delayMs)
         {
             if (delayMs <= 0)
@@ -49,14 +49,13 @@ namespace Flekosoft.Common.Messaging
         }
 
         /// <summary>
-        /// Проверяет и отправляет отложенные сообщения
+        /// Checks and sends delayed messages
         /// </summary>
         public void DispatchDelayedMessages()
         {
             var now = DateTime.Now;
-            DelayedMessage mw;
 
-            var peeked = _messages.TryPeek(out mw);
+            var peeked = _messages.TryPeek(out var mw);
 
             while (peeked && mw.DispatchTime <= now)
             {
@@ -72,7 +71,7 @@ namespace Flekosoft.Common.Messaging
 
 
         /// <summary>
-        /// Отправляет сообщение получателям
+        /// Sends a message to recipients
         /// </summary>
         /// <param name="message"></param>
         void ProcessMessage(Message message)
@@ -102,7 +101,7 @@ namespace Flekosoft.Common.Messaging
         }
 
         /// <summary>
-        /// Регистрирует получателя сообщений
+        /// Registers the message recipient
         /// </summary>
         /// <param name="handler"></param>
         public void RegisterHandler(IMessageHandler handler)
@@ -110,16 +109,16 @@ namespace Flekosoft.Common.Messaging
             if (!_handlers.Contains(handler))
             {
                 _handlers.Add(handler);
-                AppendDebugLogMessage("MessageDispatcher.\tHandler registred: " + handler);
+                AppendDebugLogMessage("MessageDispatcher.\tHandler registered: " + handler);
             }
             else
             {
-                AppendDebugLogMessage("MessageDispatcher.\tHandler has allready registred: " + handler);
+                AppendDebugLogMessage("MessageDispatcher.\tHandler has already registered: " + handler);
             }
         }
 
         /// <summary>
-        /// Удаляет получателя сообщений
+        /// Deletes the message recipient
         /// </summary>
         /// <param name="handler"></param>
         public void RemoveHandler(IMessageHandler handler)
@@ -131,7 +130,7 @@ namespace Flekosoft.Common.Messaging
             }
             else
             {
-                AppendDebugLogMessage("MessageDispatcher.\tHandler is not registred: " + handler);
+                AppendDebugLogMessage("MessageDispatcher.\tHandler is not registered: " + handler);
             }
         }
     }

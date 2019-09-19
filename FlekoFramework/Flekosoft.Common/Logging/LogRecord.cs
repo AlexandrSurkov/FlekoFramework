@@ -54,7 +54,7 @@ namespace Flekosoft.Common.Logging
         {
             unchecked
             {
-                return (Color.GetHashCode() * 397) ^ (DateTime.GetHashCode() * 398) ^ (RecordType.GetHashCode() * 399) ^ LogStrings.GetHashCode();
+                return (Color.GetHashCode() * 397) ^ (DateTime.GetHashCode() * 398) ^ (RecordType.GetHashCode() * 399);
             }
         }
 

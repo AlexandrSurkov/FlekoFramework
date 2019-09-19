@@ -17,7 +17,7 @@ namespace Flekosoft.UnitTests.Serialization.Xml
 
         public override void InternalSerialize()
         {
-            foreach (SerializerTestItem item in SerialisableObject.AsReadOnly())
+            foreach (SerializerTestItem item in SerializableObject.AsReadOnly())
             {
                 var node = XmlDocument.CreateElement(nameof(SerializerTestItem));
                 node.InnerText = item.Prop.ToString(CultureInfo.InvariantCulture);
@@ -33,7 +33,7 @@ namespace Flekosoft.UnitTests.Serialization.Xml
                 {
                     if (int.TryParse(node.InnerText, out var value))
                     {
-                        SerialisableObject.Add(new SerializerTestItem { Prop = value });
+                        SerializableObject.Add(new SerializerTestItem { Prop = value });
                     }
                 }
             }

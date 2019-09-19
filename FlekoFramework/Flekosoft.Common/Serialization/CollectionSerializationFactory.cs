@@ -25,19 +25,19 @@ namespace Flekosoft.Common.Serialization
             switch (e.Action)
             {
                 case NotifyCollectionChangedAction.Add:
-                    foreach (ISerializabe item in e.NewItems)
+                    foreach (ISerializable item in e.NewItems)
                     {
                         var serializer = GetSerializer(item);
                         if (serializer != null) item.Serializers.Add(serializer);
                     }
                     break;
                 default:
-                    RemoveUnusedSerizlizers();
+                    RemoveUnusedSerializers();
                     break;
             }
         }
 
-        private void RemoveUnusedSerizlizers()
+        private void RemoveUnusedSerializers()
         {
             var removeList = new List<ISerializer>();
             foreach (ISerializer serializer in Serializers)
@@ -54,11 +54,11 @@ namespace Flekosoft.Common.Serialization
             }
         }
 
-        private CollectionSerializer<TC> GetCollectionSerializer(ISerializabe serialisableObject)
+        private CollectionSerializer<TC> GetCollectionSerializer(ISerializable serializableObject)
         {
             try
             {
-                var serializer = InternalGetCollectionSerializer(serialisableObject);
+                var serializer = InternalGetCollectionSerializer(serializableObject);
                 Serializers.Add(serializer);
                 return serializer;
             }
@@ -69,6 +69,6 @@ namespace Flekosoft.Common.Serialization
             }
         }
 
-        protected abstract CollectionSerializer<TC> InternalGetCollectionSerializer(ISerializabe serialisableObject);
+        protected abstract CollectionSerializer<TC> InternalGetCollectionSerializer(ISerializable serializableObject);
     }
 }

@@ -73,7 +73,7 @@ namespace Flekosoft.UnitTests.Serialization
         public override void InternalSerialize()
         {
             SerializerCalled = true;
-            foreach (SerializerTestItem item in SerialisableObject)
+            foreach (SerializerTestItem item in SerializableObject)
             {
                 _list.Add(item.Prop);
             }
@@ -84,7 +84,7 @@ namespace Flekosoft.UnitTests.Serialization
             DeserializerCalled = true;
             foreach (int i in _list)
             {
-                SerialisableObject.Add(new SerializerTestItem() { Prop = i });
+                SerializableObject.Add(new SerializerTestItem() { Prop = i });
             }
         }
     }

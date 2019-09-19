@@ -5,30 +5,30 @@ namespace Flekosoft.Common.FiniteStateMachine
     /// <summary>
     ///Finite-state machine
     /// </summary>
-    /// <typeparam name="T">Тип, для которого реализуется конечный автомат</typeparam>
-    public class StateMashine<T> : PropertyChangedErrorNotifyDisposableBase, IMessageHandler
+    /// <typeparam name="T">The type for which the state machine is implemented</typeparam>
+    public class StateMachine<T> : PropertyChangedErrorNotifyDisposableBase, IMessageHandler
     {
         /// <summary>
-        /// Родитель данного экземпляра
+        /// Owner. The type for which the state machine is implemented
         /// </summary>
         private readonly T _owner;
 
         /// <summary>
-        /// Текущее состояние родителя
+        /// Owner's current state
         /// </summary>
         private State<T> _currentState;
 
         /// <summary>
-        /// Предыдущее состояние
+        /// Owner's previous state
         /// </summary>
         private State<T> _previousState;
 
         /// <summary>
-        /// Глобальное состояние. Вызывается каждяй раз при обновлении
+        /// Owner's Global state. It is called every time when updating.
         /// </summary>
         private State<T> _globalState;
 
-        public StateMashine(T owner)
+        public StateMachine(T owner)
         {
             _owner = owner;
             _currentState = null;
@@ -39,36 +39,28 @@ namespace Flekosoft.Common.FiniteStateMachine
         #region properties
 
         /// <summary>
-        /// Текущее состояние родителя
+        /// Owner's current state
         /// </summary>
-        public State<T> CurrentState
-        {
-            get { return _currentState; }
-        }
+        public State<T> CurrentState => _currentState;
 
         /// <summary>
-        /// Предыдущее состояние
+        /// Owner's previous state
         /// </summary>
-        public State<T> PreviousState
-        {
-            get { return _previousState; }
-        }
+        public State<T> PreviousState => _previousState;
 
         /// <summary>
-        /// Глобальное состояние. Вызывается каждяй раз при обновлении
+        /// Owner's Global state. It is called every time when updating.
         /// </summary>
-        public State<T> GlobalState
-        {
-            get { return _globalState; }
-        }
+        public State<T> GlobalState => _globalState;
 
         #endregion
 
         #region Methods
 
         /// <summary>
-        /// Обновление состояния
+        /// State update
         /// </summary>
+        /// <param name="timeDeltaMs">Time in ms passed from last update</param>
         public void Update(double timeDeltaMs)
         {
             _globalState?.Execute(_owner, timeDeltaMs);
@@ -76,21 +68,21 @@ namespace Flekosoft.Common.FiniteStateMachine
         }
 
         /// <summary>
-        /// Обработчик сообщения. См. Common.Messaging
+        /// The handler of the received message.
         /// </summary>
-        /// <param name="message">Полученное сообщение</param>
+        /// <param name="message">A message has arrived. See <see cref="Common.Messaging"/></param>
         /// <returns></returns>
         public bool HandleMessage(Message message)
         {
             bool globalRes = false;
             bool currentRes = false;
-            //Отправляем сообщение глобальному состоянию
+            //Send a message to the global state
             if (_globalState != null)
             {
                 globalRes = _globalState.OnMessage(_owner, message);
             }
 
-            //Если глобальное состояние не обработало сообщение, то отправляем текущему.
+            //If the global state has not processed the message, then send it to the current one.
             if (!globalRes)
             {
                 if (_currentState != null)
@@ -102,9 +94,9 @@ namespace Flekosoft.Common.FiniteStateMachine
         }
 
         /// <summary>
-        /// Переход в новое состояние
+        /// Transition to a new state
         /// </summary>
-        /// <param name="newState">новое состояние</param>
+        /// <param name="newState">New state</param>
         public void SetState(State<T> newState)
         {
             if (_currentState != null && _currentState.Equals(newState)) return;
@@ -120,19 +112,19 @@ namespace Flekosoft.Common.FiniteStateMachine
 
             if (_previousState == null)
             {
-                AppendDebugLogMessage(_owner + " StateMashine.\tState changed to " + _currentState);
+                AppendDebugLogMessage(_owner + " StateMachine.\tState changed to " + _currentState);
             }
             else
             {
-                AppendDebugLogMessage(_owner + " StateMashine.\tState changed from: " + _previousState + " to " +
+                AppendDebugLogMessage(_owner + " StateMachine.\tState changed from: " + _previousState + " to " +
                                             _currentState);
             }
         }
 
         /// <summary>
-        /// Установка нового глобального состояния
+        /// Setting a new global state
         /// </summary>
-        /// <param name="newGlobalState">новое состояние</param>
+        /// <param name="newGlobalState">New global state</param>
         public void SetGlobalState(State<T> newGlobalState)
         {
             if(_globalState != null && _globalState.Equals(newGlobalState)) return;
@@ -147,7 +139,7 @@ namespace Flekosoft.Common.FiniteStateMachine
         }
 
         /// <summary>
-        /// Вернуться к предыдущему состоянию
+        /// Return to previous state
         /// </summary>
         public void RevertToPreviousState()
         {
@@ -155,26 +147,15 @@ namespace Flekosoft.Common.FiniteStateMachine
         }
 
         /// <summary>
-        /// Находится ли объект в указанном состоянии
+        /// Is the object in the specified state
         /// </summary>
-        /// <param name="state">Состояние для проверки</param>
+        /// <param name="state">State to check</param>
         /// <returns></returns>
         public bool IsInState(State<T> state)
         {
             if (_currentState.Equals(state)) return true;
             return false;
         }
-
-#if DEBUG
-        /// <summary>
-        /// only ever used during debugging to grab the name of the current state
-        /// </summary>
-        /// <returns></returns>
-        public string GetNameOfCurrentState()
-        {
-            return _currentState.ToString();
-        }
-#endif
 
         #endregion
     }

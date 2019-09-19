@@ -5,12 +5,12 @@ namespace Flekosoft.Common.Serialization
 {
     public abstract class CollectionSerializer<T> : Serializer<T>
     {
-        protected CollectionSerializer(T serialisableObject) : base(serialisableObject)
+        protected CollectionSerializer(T serializableObject) : base(serializableObject)
         {
-            _collection = serialisableObject as CollectionBase;
-            if (_collection == null) throw new ArgumentException("serialisableObject must be nested from CollectionBase");
+            _collection = serializableObject as CollectionBase;
+            if (_collection == null) throw new ArgumentException("serializableObject must be nested from CollectionBase");
 
-            _collection.CollectionChanged += SerialisableObject_CollectionChanged;
+            _collection.CollectionChanged += SerializableObject_CollectionChanged;
         }
 
         private readonly CollectionBase _collection;
@@ -21,7 +21,7 @@ namespace Flekosoft.Common.Serialization
             return false;
         }
 
-        private void SerialisableObject_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        private void SerializableObject_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
         {
             if (IsDisposed) return;
             Serialize();
@@ -30,9 +30,9 @@ namespace Flekosoft.Common.Serialization
         public override void Deserialize()
         {
             if (IsDisposed) return;
-            _collection.CollectionChanged -= SerialisableObject_CollectionChanged;
+            _collection.CollectionChanged -= SerializableObject_CollectionChanged;
             InternalDeserialize();
-            _collection.CollectionChanged += SerialisableObject_CollectionChanged;
+            _collection.CollectionChanged += SerializableObject_CollectionChanged;
         }
     }
 }

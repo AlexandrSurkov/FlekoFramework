@@ -10,13 +10,13 @@ namespace Flekosoft.UnitTests.Serialization
             AddCollection(c);
         }
 
-        protected override Serializer<SerializerTestItem> GetInternalSerializer(ISerializabe serialisableObject)
+        protected override Serializer<SerializerTestItem> GetInternalSerializer(ISerializable serialisableObject)
         {
             if (serialisableObject is SerializerTestItem) return new TestItemSerializer((SerializerTestItem)serialisableObject);
             return null;
         }
 
-        protected override CollectionSerializer<SerializerTestCollection> InternalGetCollectionSerializer(ISerializabe serialisableObject)
+        protected override CollectionSerializer<SerializerTestCollection> InternalGetCollectionSerializer(ISerializable serialisableObject)
         {
             if (serialisableObject is SerializerTestCollection) return new TestCollectionSerializer((SerializerTestCollection)serialisableObject);
             return null;

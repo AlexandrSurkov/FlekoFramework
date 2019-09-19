@@ -9,15 +9,15 @@ namespace Flekosoft.UnitTests.Common.FiniteStateMachine
     [TestClass]
     public class StateMashineTests : MessageHandler
     {
-        private readonly StateMashine<StateMashineTests> _stateMashine;
+        private readonly StateMachine<StateMashineTests> _stateMashine;
         private readonly TestState1 _state1 = new TestState1();
         private readonly TestState2 _state2 = new TestState2();
         private readonly GlobalState _globalState = new GlobalState();
 
         public StateMashineTests()
         {
-            _stateMashine = new StateMashine<StateMashineTests>(this);
-            Logger.Instance.LogerOutputs.Add(Logger.ConsoleOutput);
+            _stateMashine = new StateMachine<StateMashineTests>(this);
+            Logger.Instance.LoggerOutputs.Add(Logger.ConsoleOutput);
             _stateMashine.Dispose();
         }
 

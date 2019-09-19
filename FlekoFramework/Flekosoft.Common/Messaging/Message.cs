@@ -3,9 +3,9 @@
     public abstract class Message
     {
         /// <summary>
-        /// Сообщение, отправляемое сразу и всем подписчикам
+        /// Message for all subscribers
         /// </summary>
-        /// <param name="sender">Отправитель сообщения</param>
+        /// <param name="sender">Message sender</param>
         protected Message(object sender)
         {
             Sender = sender;
@@ -14,10 +14,10 @@
         }
 
         /// <summary>
-        /// Сообщение, отправляемое сразу
+        /// Message for separate subscriber
         /// </summary>
-        /// <param name="sender">Отправитель сообщения</param>
-        /// <param name="receiver">Получатель сообщения</param>
+        /// <param name="sender">Message sender</param>
+        /// <param name="receiver">Message receiver</param>
         protected Message(object sender, object receiver)
         {
             Sender = sender;
@@ -25,12 +25,12 @@
         }
 
         /// <summary>
-        /// Отправитель сообщения
+        /// Message sender
         /// </summary>
         public object Sender { get; }
 
         /// <summary>
-        /// Получатель сообщения
+        /// Message receiver
         /// </summary>
         public object Receiver { get; }
 

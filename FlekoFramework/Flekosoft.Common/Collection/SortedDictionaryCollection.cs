@@ -70,7 +70,7 @@ namespace Flekosoft.Common.Collection
             {
                 if (pair.Value.Equals(value)) return pair.Key;
             }
-            return default(TK);
+            return default;
         }
 
         protected override ReadOnlyCollection<TV> InternalAsReadOnly()

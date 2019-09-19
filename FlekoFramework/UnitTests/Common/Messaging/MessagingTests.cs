@@ -24,7 +24,7 @@ namespace Flekosoft.UnitTests.Common.Messaging
         [TestMethod]
         public void MessageDispatcherTests()
         {
-            Logger.Instance.LogerOutputs.Add(Logger.ConsoleOutput);
+            Logger.Instance.LoggerOutputs.Add(Logger.ConsoleOutput);
 
             var handler = new Handler { Handled = false };
 

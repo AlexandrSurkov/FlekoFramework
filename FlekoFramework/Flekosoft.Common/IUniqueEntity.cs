@@ -4,7 +4,7 @@ using Flekosoft.Common.Serialization;
 
 namespace Flekosoft.Common
 {
-    public interface IUniqueEntity : INotifyPropertyChanged, IDisposable, ISerializabe
+    public interface IUniqueEntity : INotifyPropertyChanged, IDisposable, ISerializable
     {
         Guid Guid { get; }
     }

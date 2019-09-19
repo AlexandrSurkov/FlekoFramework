@@ -23,7 +23,7 @@ namespace Flekosoft.UnitTests.Common.Observable
         {
             foreach (var observer in _observersList)
             {
-                observer.OnObservableNotification(new ObservervableNotification(this, type, eventArgs));
+                observer.OnObservableNotification(new ObservableNotification(this, type, eventArgs));
             }
         }
     }
@@ -31,7 +31,7 @@ namespace Flekosoft.UnitTests.Common.Observable
     [TestClass]
     public class ObservableTests : IObserver
     {
-        private ObservervableNotification _lastNotification;
+        private ObservableNotification _lastNotification;
 
         [TestMethod]
         public void NotificationTest()
@@ -55,9 +55,9 @@ namespace Flekosoft.UnitTests.Common.Observable
 
         }
 
-        public void OnObservableNotification(ObservervableNotification notification)
+        public void OnObservableNotification(ObservableNotification notification)
         {
-            _lastNotification = new ObservervableNotification(notification.Sender, notification.Type, notification.EventArgs);
+            _lastNotification = new ObservableNotification(notification.Sender, notification.Type, notification.EventArgs);
         }
     }
 }

@@ -14,13 +14,13 @@ namespace Flekosoft.Common.Logging
 
         public static LoggerOutput ConsoleOutput = new LoggerConsoleOutput();
 
-        public ListCollection<LoggerOutput> LogerOutputs { get; } = new ListCollection<LoggerOutput>("Logger outputs collection", true);
+        public ListCollection<LoggerOutput> LoggerOutputs { get; } = new ListCollection<LoggerOutput>("Logger outputs collection", true);
 
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
         public void AppendLog(LogRecord logRecord)
         {
-            foreach (LoggerOutput loggerOutput in LogerOutputs)
+            foreach (LoggerOutput loggerOutput in LoggerOutputs)
             {
 
                 loggerOutput.AppendLogRecord(new LogRecord(logRecord));
@@ -33,8 +33,8 @@ namespace Flekosoft.Common.Logging
         {
             List<string> strings = new List<string>();
             FillExceptionStrings(strings, ex);
-            var logrec = new LogRecord(DateTime.Now, strings, LogRecordLevel.Error, ConsoleColor.Red);
-            AppendLog(logrec);
+            var logRec = new LogRecord(DateTime.Now, strings, LogRecordLevel.Error, ConsoleColor.Red);
+            AppendLog(logRec);
         }
 
         void FillExceptionStrings(List<string> strings, Exception ex)
@@ -52,14 +52,13 @@ namespace Flekosoft.Common.Logging
         }
         public void AppendDebug(ICollection<string> strings)
         {
-            var logrec = new LogRecord(DateTime.Now, strings, LogRecordLevel.Debug, ConsoleColor.Blue);
-            AppendLog(logrec);
+            var logRec = new LogRecord(DateTime.Now, strings, LogRecordLevel.Debug, ConsoleColor.Blue);
+            AppendLog(logRec);
         }
         public void AppendDebug(string str)
         {
-            var strs = new List<string>();
-            strs.Add(str);
-            AppendDebug(strs);
+            var stringList = new List<string> {str};
+            AppendDebug(stringList);
         }
 
         public event EventHandler<LogEventArgs> LogEvent;
@@ -74,7 +73,7 @@ namespace Flekosoft.Common.Logging
         {
             if (disposing)
             {
-                foreach (LoggerOutput loggerOutput in LogerOutputs)
+                foreach (LoggerOutput loggerOutput in LoggerOutputs)
                 {
                     loggerOutput.Dispose();
                 }

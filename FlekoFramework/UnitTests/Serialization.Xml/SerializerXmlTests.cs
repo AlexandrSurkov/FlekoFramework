@@ -18,8 +18,8 @@ namespace Flekosoft.UnitTests.Serialization.Xml
 
         public override void InternalSerialize()
         {
-            var node = XmlDocument.CreateElement(nameof(SerialisableObject.Prop));
-            node.InnerText = SerialisableObject.Prop.ToString(CultureInfo.InvariantCulture);
+            var node = XmlDocument.CreateElement(nameof(SerializableObject.Prop));
+            node.InnerText = SerializableObject.Prop.ToString(CultureInfo.InvariantCulture);
             XmlRoot.AppendChild(node);
         }
 
@@ -27,9 +27,9 @@ namespace Flekosoft.UnitTests.Serialization.Xml
         {
             foreach (XmlElement node in XmlRoot.ChildNodes)
             {
-                if (node.Name == nameof(SerialisableObject.Prop))
+                if (node.Name == nameof(SerializableObject.Prop))
                 {
-                    if (int.TryParse(node.InnerText, out var value)) SerialisableObject.Prop = value;
+                    if (int.TryParse(node.InnerText, out var value)) SerializableObject.Prop = value;
                 }
             }
         }

@@ -32,8 +32,7 @@
 
 /FlekoFramework/.vs/FlekoFramework/v16
 /FlekoFramework/Flekosoft.Common/obj
-/FlekoFramework/Flekosoft.Common/bin/Debug
-/FlekoFramework/Flekosoft.Common/bin/Release
+/FlekoFramework/Flekosoft.Common/bin
 /FlekoFramework/Flekosoft.Common.Accounts/bin
 /FlekoFramework/Flekosoft.Common.Accounts/obj
 /FlekoFramework/Flekosoft.Common.Logging.Windows/bin

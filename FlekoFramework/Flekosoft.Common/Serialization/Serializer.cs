@@ -20,15 +20,15 @@ namespace Flekosoft.Common.Serialization
             }
         }
 
-        protected Serializer(T serialisableObject)
+        protected Serializer(T serializableObject)
         {
-            if (!(serialisableObject is ISerializabe)) throw new ArgumentException("serialisableObject must implement ISerializabe");
-            SerialisableObject = serialisableObject;
+            if (!(serializableObject is ISerializable)) throw new ArgumentException("serializableObject must implement ISerializable");
+            SerializableObject = serializableObject;
 
-            _propertyChangedObject = serialisableObject as PropertyChangedErrorNotifyDisposableBase;
+            _propertyChangedObject = serializableObject as PropertyChangedErrorNotifyDisposableBase;
             if (_propertyChangedObject != null)
             {
-                _propertyChangedObject.PropertyChanged += SerialisableObject_PropertyChanged;
+                _propertyChangedObject.PropertyChanged += SerializableObject_PropertyChanged;
             }
         }
 
@@ -37,7 +37,7 @@ namespace Flekosoft.Common.Serialization
             return true;
         }
 
-        private void SerialisableObject_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        private void SerializableObject_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
             if (IsDisposed) return;
             if (CheckPropertyChanged(sender, e)) Serialize();
@@ -57,18 +57,18 @@ namespace Flekosoft.Common.Serialization
         {
             if (IsDisposed) return;
             if (!IsEnabled) return;
-            if (_propertyChangedObject != null) _propertyChangedObject.PropertyChanged -= SerialisableObject_PropertyChanged;
+            if (_propertyChangedObject != null) _propertyChangedObject.PropertyChanged -= SerializableObject_PropertyChanged;
             InternalDeserialize();
             if (_propertyChangedObject != null)
             {
-                _propertyChangedObject.PropertyChanged += SerialisableObject_PropertyChanged;
+                _propertyChangedObject.PropertyChanged += SerializableObject_PropertyChanged;
                 AppendDebugLogMessage(!string.IsNullOrEmpty(_propertyChangedObject.InstanceName)
                     ? $"{_propertyChangedObject.InstanceName}: Deserialized"
                     : $"{_propertyChangedObject}: Deserialized");
             }
         }
 
-        protected T SerialisableObject { get; }
+        protected T SerializableObject { get; }
 
         public abstract void InternalSerialize();
         public abstract void InternalDeserialize();

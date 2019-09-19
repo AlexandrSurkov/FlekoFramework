@@ -5,11 +5,11 @@ namespace Flekosoft.Common.Serialization
     public abstract class SerializationFactory<TV> : ErrorNotifyDisposableBase
     {
 
-        protected Serializer<TV> GetSerializer(ISerializabe serialisableObject)
+        protected Serializer<TV> GetSerializer(ISerializable serializableObject)
         {
             try
             {
-                var serializer = GetInternalSerializer(serialisableObject);
+                var serializer = GetInternalSerializer(serializableObject);
                 Serializers.Add(serializer);
                 return serializer;
             }
@@ -20,7 +20,7 @@ namespace Flekosoft.Common.Serialization
             }
         }
 
-        protected abstract Serializer<TV> GetInternalSerializer(ISerializabe serialisableObject);
+        protected abstract Serializer<TV> GetInternalSerializer(ISerializable serializableObject);
 
         protected override void Dispose(bool disposing)
         {

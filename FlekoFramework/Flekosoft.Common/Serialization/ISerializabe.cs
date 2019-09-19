@@ -2,7 +2,7 @@
 
 namespace Flekosoft.Common.Serialization
 {
-    public interface ISerializabe
+    public interface ISerializable
     {
         List<ISerializer> Serializers { get; }
     }

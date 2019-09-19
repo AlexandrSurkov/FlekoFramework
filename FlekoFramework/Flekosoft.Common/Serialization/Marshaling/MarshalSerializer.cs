@@ -75,7 +75,7 @@ namespace Flekosoft.Common.Serialization.Marshaling
 
             int rawSize = Marshal.SizeOf(typeof(T));
             if (rawSize > rawData.Length)
-                return default(T);
+                return default;
 
             object retObj;
 

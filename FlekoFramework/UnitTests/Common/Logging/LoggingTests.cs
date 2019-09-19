@@ -32,13 +32,13 @@ namespace Flekosoft.UnitTests.Common.Logging
         {
             lock (_syncObject)
             {
-                Logger.Instance.LogerOutputs.Clear();
+                Logger.Instance.LoggerOutputs.Clear();
 
                 _writer.LogRecord = null;
 
                 TestLogRecord(LogRecordLevel.All, LogRecordLevel.Debug, true);
 
-                Logger.Instance.LogerOutputs.Add(_writer);
+                Logger.Instance.LoggerOutputs.Add(_writer);
 
                 TestLogRecord(LogRecordLevel.All, LogRecordLevel.Debug, false);
                 TestLogRecord(LogRecordLevel.All, LogRecordLevel.Info, false);
@@ -71,7 +71,7 @@ namespace Flekosoft.UnitTests.Common.Logging
                 TestLogRecord(LogRecordLevel.Off, LogRecordLevel.Error, true);
                 TestLogRecord(LogRecordLevel.Off, LogRecordLevel.Fatal, true);
 
-                Logger.Instance.LogerOutputs.Clear();
+                Logger.Instance.LoggerOutputs.Clear();
             }
         }
 

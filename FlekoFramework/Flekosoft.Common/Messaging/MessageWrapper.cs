@@ -3,24 +3,19 @@
 namespace Flekosoft.Common.Messaging
 {
     /// <summary>
-    /// Хранилище отложенных сообщений
+    /// Delayed message storage
     /// </summary>
     class DelayedMessage
     {
-        private readonly Message _message;
-
         public DelayedMessage(Message message, DateTime dispatchTime)
         {
-            _message = message;
+            Message = message;
             DispatchTime = dispatchTime;
         }
 
         public DateTime DispatchTime { get; }
 
-        public Message Message
-        {
-            get { return _message; }
-        }
+        public Message Message { get; }
 
         public override string ToString()
         {

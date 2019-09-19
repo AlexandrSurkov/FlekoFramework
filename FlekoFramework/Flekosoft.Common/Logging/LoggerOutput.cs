@@ -29,17 +29,16 @@ namespace Flekosoft.Common.Logging
             LogLevel = LogRecordLevel.All;
 
 
-            _outputThread = new Thread(MainThread)
-            {
-                CurrentCulture = _cultureInfo,
-                CurrentUICulture = _uiCultureInfo
-            };
+            _outputThread = new Thread(MainThread);
             _outputThread.Start();
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
         protected virtual void MainThread(object o)
         {
+            _outputThread.CurrentCulture = _cultureInfo;
+            _outputThread.CurrentUICulture = _uiCultureInfo;
+
             while (true)
             {
                 try

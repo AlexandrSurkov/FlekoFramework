@@ -2,9 +2,9 @@
 
 namespace Flekosoft.Common.Observable
 {
-    public class ObservervableNotification
+    public class ObservableNotification
     {
-        public ObservervableNotification(Object sender, int type, EventArgs eventArgs)
+        public ObservableNotification(Object sender, int type, EventArgs eventArgs)
         {
             Type = type;
             Sender = sender;

@@ -80,7 +80,7 @@ namespace Flekosoft.Common.Collection
             bool res;
             if (InternalContainsKey(key))
             {
-                var logStr = $"{InstanceName}: Key \"{key}\" allready exist";
+                var logStr = $"{InstanceName}: Key \"{key}\" already exist";
                 if (IsUpdateMode) _updateLogList.Add(logStr);
                 else AppendLogMessage(new LogRecord(DateTime.Now, new List<string> { logStr }, LogRecordLevel.Info));
                 return false;

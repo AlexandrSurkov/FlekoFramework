@@ -2,6 +2,6 @@
 {
     public interface IObserver
     {
-        void OnObservableNotification(ObservervableNotification notification);
+        void OnObservableNotification(ObservableNotification notification);
     }
 }

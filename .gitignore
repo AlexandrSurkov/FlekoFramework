@@ -51,3 +51,7 @@
 /FlekoFramework/Flekosoft.Common.Video/bin
 /FlekoFramework/Flekosoft.Common.Logging.Windows/Flekosoft.Common.Logging.Windows.csproj.user
 /FlekoFramework/Flekosoft.Common.Plugins.Windows/Flekosoft.Common.Plugins.Windows.csproj.user
+/FlekoFramework/Flekosoft.Common.Logging.Windows/Flekosoft.Common.Logging.Windows.1.0.0.nupkg
+/FlekoFramework/Flekosoft.Common.Plugins.Windows/Flekosoft.Common.Plugins.Windows.1.0.0.nupkg
+/FlekoFramework/Flekosoft.Common.Plugins.Windows/nuget.exe
+/FlekoFramework/Flekosoft.Common.Logging.Windows/nuget.exe

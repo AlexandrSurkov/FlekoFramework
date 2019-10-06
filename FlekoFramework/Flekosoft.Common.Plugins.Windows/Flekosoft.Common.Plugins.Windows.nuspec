@@ -6,9 +6,8 @@
     <title>$title$</title>
     <authors>$author$</authors>
     <owners>$author$</owners>
-    <licenseUrl>https://licenses.nuget.org/MIT</licenseUrl>
+    <license type="expression">MIT</license>
     <projectUrl>https://github.com/AlexandrSurkov/FlekoFramework</projectUrl>
-    <iconUrl></iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>$description$</description>
     <releaseNotes></releaseNotes>

@@ -27,7 +27,7 @@ namespace Flekosoft.Common.Logging
             }
             OnLogEvent(logRecord);
         }
-
+        
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
         public void AppendException(Exception ex)
         {

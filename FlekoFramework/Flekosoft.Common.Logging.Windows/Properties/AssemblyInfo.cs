@@ -7,7 +7,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTitle("Flekosoft.Common.Logging.Windows")]
 [assembly: AssemblyDescription("Windows Controls for logging output")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
+[assembly: AssemblyCompany("Alexandr Surkov")]
 [assembly: AssemblyProduct("FlekoFramework")]
 [assembly: AssemblyCopyright("Copyright © Alexandr Surkov 2017-2019")]
 [assembly: AssemblyTrademark("")]

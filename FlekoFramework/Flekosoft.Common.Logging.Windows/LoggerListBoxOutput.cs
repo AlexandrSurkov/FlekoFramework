@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Linq;
 
 namespace Flekosoft.Common.Logging.Windows
 {
@@ -56,7 +57,7 @@ namespace Flekosoft.Common.Logging.Windows
 
         public string Filter
         {
-            get { return _filter; }
+            get => _filter;
             set
             {
                 if (_filter != value)
@@ -73,6 +74,7 @@ namespace Flekosoft.Common.Logging.Windows
         //// ReSharper restore InconsistentNaming
         //// ReSharper disable InconsistentNaming
         //private const int WM_USER = 0x400;
+        // ReSharper disable once CommentTypo
         //private const int EM_HIDESELECTION = WM_USER + 63;
         //// ReSharper restore InconsistentNaming
 
@@ -150,7 +152,7 @@ namespace Flekosoft.Common.Logging.Windows
             if (clear)
             {
                 _logBox.Items.Clear();
-                _logBox.Items.AddRange(_appendStringsList.ToArray());
+                _logBox.Items.AddRange(_appendStringsList.ToArray<object>());
             }
             else
             {
@@ -159,7 +161,7 @@ namespace Flekosoft.Common.Logging.Windows
 
                 //if (newItemsCount < oldItemsCount) _logBox.Items.AddRange(_appendStringsList.ToArray());
                 //else _logBox.Items.AddRange(_appendStringsList.GetRange(oldItemsCount, newItemsCount - oldItemsCount).ToArray());
-                _logBox.Items.AddRange(_appendStringsList.GetRange(oldItemsCount, newItemsCount - oldItemsCount).ToArray());
+                _logBox.Items.AddRange(_appendStringsList.GetRange(oldItemsCount, newItemsCount - oldItemsCount).ToArray<object>());
             }
 
             _logBox.TopIndex = _logBox.Items.Count - 1;
@@ -174,7 +176,7 @@ namespace Flekosoft.Common.Logging.Windows
         {
             if (_logBox.InvokeRequired)
             {
-                _logBox.BeginInvoke(_appendTextDelegate, new object[] { logRecord });
+                _logBox.BeginInvoke(_appendTextDelegate, logRecord);
             }
             else
             {

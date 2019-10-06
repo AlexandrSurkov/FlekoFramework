@@ -1,5 +1,4 @@
 ﻿using System.Reflection;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 // General Information about an assembly is controlled through the following
@@ -8,7 +7,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTitle("Flekosoft.Common.Plugins.Windows")]
 [assembly: AssemblyDescription("Windows Controls that can be included in Plugins")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
+[assembly: AssemblyCompany("Alexandr Surkov")]
 [assembly: AssemblyProduct("FlekoFramework")]
 [assembly: AssemblyCopyright("Copyright © Alexandr Surkov 2017-2019")]
 [assembly: AssemblyTrademark("")]

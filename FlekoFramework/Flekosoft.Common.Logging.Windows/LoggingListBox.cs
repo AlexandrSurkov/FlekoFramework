@@ -16,6 +16,7 @@ namespace Flekosoft.Common.Logging.Windows
 
         protected override void OnNotifyMessage(Message m)
         {
+            // ReSharper disable once CommentTypo
             //Filter out the WM_ERASEBKGND message
             if (m.Msg != 0x14)
             {

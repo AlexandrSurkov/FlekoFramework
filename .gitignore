@@ -3,7 +3,7 @@
 ################################################################################
 
 /.vs
-/FlekoFramework/.vs/FlekoFramework/v15
+/FlekoFramework/.vs
 /FlekoFramework/Common/bin
 /FlekoFramework/Common/obj
 /FlekoFramework/Common.Accounts/bin
@@ -30,7 +30,7 @@
 /FlekoFramework/UnitTests/obj
 /FlekoFramework/FlekoFramework.sln.DotSettings.user
 
-/FlekoFramework/.vs/FlekoFramework/v16
+/FlekoFramework/.vs
 /FlekoFramework/Flekosoft.Common/obj
 /FlekoFramework/Flekosoft.Common/bin
 /FlekoFramework/Flekosoft.Common.Accounts/bin
@@ -49,3 +49,5 @@
 /FlekoFramework/Flekosoft.Common.Serialization.Xml/bin
 /FlekoFramework/Flekosoft.Common.Video/obj
 /FlekoFramework/Flekosoft.Common.Video/bin
+/FlekoFramework/Flekosoft.Common.Logging.Windows/Flekosoft.Common.Logging.Windows.csproj.user
+/FlekoFramework/Flekosoft.Common.Plugins.Windows/Flekosoft.Common.Plugins.Windows.csproj.user

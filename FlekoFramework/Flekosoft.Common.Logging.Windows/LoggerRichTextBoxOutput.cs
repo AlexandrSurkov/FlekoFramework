@@ -25,7 +25,7 @@ namespace Flekosoft.Common.Logging.Windows
         {
             if (_logBox.InvokeRequired)
             {
-                _logBox.BeginInvoke(_appendTextDelegate, new object[] { logRecord });
+                _logBox.BeginInvoke(_appendTextDelegate, logRecord);
             }
             else
             {

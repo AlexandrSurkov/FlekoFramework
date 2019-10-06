@@ -39,7 +39,7 @@ namespace Flekosoft.Common.Logging.Windows
                 {
                     Thread.Sleep(100);
                     {
-                        _listView.Dispatcher.Invoke(new Action(delegate { UpdateListBox(false); }));
+                        _listView.Dispatcher?.Invoke(delegate { UpdateListBox(false); });
                     }
                 }
                 catch (ThreadAbortException)
@@ -55,11 +55,11 @@ namespace Flekosoft.Common.Logging.Windows
 
         private void LoggerListBoxOutput_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            if (!_listView.Dispatcher.CheckAccess()) // CheckAccess returns true if you're on the dispatcher thread
+            if (_listView.Dispatcher != null && !_listView.Dispatcher.CheckAccess()) // CheckAccess returns true if you're on the dispatcher thread
             {
                 if (e.PropertyName == nameof(LogLevel))
                 {
-                    _listView.Dispatcher.Invoke(new Action(delegate { UpdateListBox(true); }));
+                    _listView.Dispatcher.Invoke(delegate { UpdateListBox(true); });
                 }
             }
             else
@@ -199,7 +199,7 @@ namespace Flekosoft.Common.Logging.Windows
 
         protected override void AppendLogRecordInternal(LogRecord logRecord)
         {
-            if (!_listView.Dispatcher.CheckAccess())
+            if (_listView.Dispatcher != null && !_listView.Dispatcher.CheckAccess())
             {
                 _listView.Dispatcher.BeginInvoke(_appendTextDelegate, logRecord);
             }

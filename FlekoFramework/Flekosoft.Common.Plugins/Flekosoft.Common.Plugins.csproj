@@ -13,6 +13,7 @@
     <Company />
     <Description>Pugins Framework. Contains Plugin Manager and base plugin classes</Description>
     <PackageProjectUrl>https://github.com/AlexandrSurkov/FlekoFramework</PackageProjectUrl>
+    <Version>1.0.1</Version>
   </PropertyGroup>
 
   <ItemGroup>

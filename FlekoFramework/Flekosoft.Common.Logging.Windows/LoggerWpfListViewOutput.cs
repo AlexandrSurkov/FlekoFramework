@@ -20,27 +20,38 @@ namespace Flekosoft.Common.Logging.Windows
 
         private readonly Thread _updateThread;
 
+        // Define the cancellation token.
+        readonly CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
+        readonly EventWaitHandle _threadFinishedWaitHandle = new EventWaitHandle(false, EventResetMode.ManualReset);
+
 
         public LoggerWpfListViewOutput(ListView listView) : base("Logger WpfListBox output")
         {
             _listView = listView;
             _appendTextDelegate = AppendText;
             _updateThread = new Thread(UpdateThread);
-            _updateThread.Start();
+            _updateThread.Start(_cancellationTokenSource.Token);
             PropertyChanged += LoggerListBoxOutput_PropertyChanged;
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
         void UpdateThread(object o)
         {
+            var cancellationToken = (CancellationToken)o;
+
             while (true)
             {
                 try
                 {
                     Thread.Sleep(100);
-                    {
+                    //{
                         _listView.Dispatcher?.Invoke(delegate { UpdateListBox(false); });
-                    }
+                        cancellationToken.ThrowIfCancellationRequested();
+                    //}
+                }
+                catch (OperationCanceledException)
+                {
+                    break;
                 }
                 catch (ThreadAbortException)
                 {
@@ -51,6 +62,7 @@ namespace Flekosoft.Common.Logging.Windows
                     OnErrorEvent(ex);
                 }
             }
+            _threadFinishedWaitHandle.Set();
         }
 
         private void LoggerListBoxOutput_PropertyChanged(object sender, PropertyChangedEventArgs e)
@@ -217,9 +229,13 @@ namespace Flekosoft.Common.Logging.Windows
                 {
                     if (_updateThread.IsAlive)
                     {
-                        _updateThread.Abort();
+                        //_updateThread.Abort();
+                        _cancellationTokenSource.Cancel();
+                        _threadFinishedWaitHandle.WaitOne(Timeout.Infinite);
                     }
                 }
+                _cancellationTokenSource.Dispose();
+                _threadFinishedWaitHandle?.Dispose();
             }
             base.Dispose(disposing);
         }

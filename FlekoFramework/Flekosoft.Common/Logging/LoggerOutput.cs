@@ -16,8 +16,12 @@ namespace Flekosoft.Common.Logging
 
         private readonly ConcurrentQueue<LogRecord> _logRecords = new ConcurrentQueue<LogRecord>();
         readonly EventWaitHandle _queueWaitHandle = new EventWaitHandle(false, EventResetMode.ManualReset);
+        readonly EventWaitHandle _threadFinishedWaitHandle = new EventWaitHandle(false, EventResetMode.ManualReset);
         private LogRecordLevel _logLevel;
         private DateTimeFormat _dateTimeFormat;
+
+        // Define the cancellation token.
+        readonly CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
 
         protected LoggerOutput(string instanceName) : base(instanceName)
         {
@@ -30,7 +34,7 @@ namespace Flekosoft.Common.Logging
 
 
             _outputThread = new Thread(MainThread);
-            _outputThread.Start();
+            _outputThread.Start(_cancellationTokenSource.Token);
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
@@ -39,12 +43,14 @@ namespace Flekosoft.Common.Logging
             _outputThread.CurrentCulture = _cultureInfo;
             _outputThread.CurrentUICulture = _uiCultureInfo;
 
+            var cancellationToken = (CancellationToken) o;
+
             while (true)
             {
                 try
                 {
                     if (_queueWaitHandle.SafeWaitHandle.IsClosed) continue;
-                    if (_queueWaitHandle.WaitOne(Timeout.Infinite))
+                    if (_queueWaitHandle.WaitOne(TimeSpan.FromSeconds(1)))
                     {
                         if (_logRecords.TryDequeue(out var record))
                         {
@@ -62,6 +68,11 @@ namespace Flekosoft.Common.Logging
                             else
                             if (!_queueWaitHandle.SafeWaitHandle.IsClosed) _queueWaitHandle.Set();
                     }
+                    cancellationToken.ThrowIfCancellationRequested();
+                }
+                catch (OperationCanceledException)
+                {
+                    break;
                 }
                 catch (ThreadAbortException)
                 {
@@ -72,6 +83,7 @@ namespace Flekosoft.Common.Logging
                     OnErrorEvent(ex);
                 }
             }
+            _threadFinishedWaitHandle.Set();
         }
 
         public new LogRecordLevel LogLevel
@@ -150,11 +162,14 @@ namespace Flekosoft.Common.Logging
                 {
                     if (_outputThread.IsAlive)
                     {
-                        _outputThread.Abort();
+                        //_outputThread.Abort();
+                        _cancellationTokenSource.Cancel();
+                        _threadFinishedWaitHandle.WaitOne(Timeout.Infinite);
                     }
                 }
-
+                _cancellationTokenSource.Dispose();
                 _queueWaitHandle?.Dispose();
+                _threadFinishedWaitHandle?.Dispose();
             }
             base.Dispose(disposing);
         }

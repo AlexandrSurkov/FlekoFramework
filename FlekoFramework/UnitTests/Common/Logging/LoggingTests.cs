@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Threading;
 using Flekosoft.Common.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -71,7 +70,9 @@ namespace Flekosoft.UnitTests.Common.Logging
                 TestLogRecord(LogRecordLevel.Off, LogRecordLevel.Error, true);
                 TestLogRecord(LogRecordLevel.Off, LogRecordLevel.Fatal, true);
 
+                Assert.IsFalse(_writer.IsDisposed);
                 Logger.Instance.LoggerOutputs.Clear();
+                Assert.IsTrue(_writer.IsDisposed);
             }
         }
 

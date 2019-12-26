@@ -22,7 +22,6 @@ namespace Flekosoft.Common.Logging
         {
             foreach (LoggerOutput loggerOutput in LoggerOutputs)
             {
-
                 loggerOutput.AppendLogRecord(new LogRecord(logRecord));
             }
             OnLogEvent(logRecord);

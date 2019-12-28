@@ -36,6 +36,10 @@ namespace Flekosoft.Common.Network.Internals
         private readonly object _writeSyncObject = new object();
         private bool _dataTrace;
 
+        // Define the cancellation token.
+        readonly CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
+        readonly EventWaitHandle _threadFinishedWaitHandle = new EventWaitHandle(false, EventResetMode.ManualReset);
+
         /// <summary>
         /// 
         /// </summary>
@@ -49,7 +53,7 @@ namespace Flekosoft.Common.Network.Internals
             //_sendDataThread = new Thread(WriteDataThreadFunc);
             //_sendDataThread.Start();
             _readDataThread = new Thread(ReadDataThreadFunc);
-            _readDataThread.Start();
+            _readDataThread.Start(_cancellationTokenSource.Token);
             //_processDataThread = new Thread(ProcessDataThreadFunc);
             //_processDataThread.Start();
         }
@@ -116,8 +120,9 @@ namespace Flekosoft.Common.Network.Internals
 
         #region Threads
 
-        private void ReadDataThreadFunc()
+        private void ReadDataThreadFunc(object o)
         {
+            var cancellationToken = (CancellationToken)o;
             while (true)
             {
                 try
@@ -128,7 +133,7 @@ namespace Flekosoft.Common.Network.Internals
                         {
                             lock (_readBufferSyncObject)
                             {
-                                int count = _networkInterface.Read(_readBuffer, Timeout.Infinite);
+                                int count = _networkInterface.Read(_readBuffer,1000);//Timeout.Infinite);
                                 if (count > 0)
                                 {
                                     if (DataTrace) OnReceiveDataTraceEvent(_readBuffer.ToList().GetRange(0, count).ToArray(), _networkInterface.LocalEndPoint, _networkInterface.RemoteEndPoint);
@@ -149,10 +154,19 @@ namespace Flekosoft.Common.Network.Internals
                                     //    else _hasDataToProcessWh?.Set();
                                     //}
                                 }
+                                cancellationToken.ThrowIfCancellationRequested();
                             }
                         }
-                        else Thread.Sleep(1);
+                        else
+                        {
+                            Thread.Sleep(1);
+                            cancellationToken.ThrowIfCancellationRequested();
+                        }
                     }
+                }
+                catch (OperationCanceledException)
+                {
+                    break;
                 }
                 catch (ThreadAbortException)
                 {
@@ -168,6 +182,7 @@ namespace Flekosoft.Common.Network.Internals
                     //}
                 }
             }
+            _threadFinishedWaitHandle.Set();
         }
 
         //private void ProcessDataThreadFunc()

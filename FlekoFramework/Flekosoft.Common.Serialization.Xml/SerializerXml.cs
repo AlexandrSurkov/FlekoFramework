@@ -7,8 +7,8 @@ namespace Flekosoft.Common.Serialization.Xml
     public abstract class SerializerXml<T> : Serializer<T>, ISerializerXml
     {
         private readonly object _lockObject = new object();
-        private string _rootName;
-        private SerializerXml(T serialisableObject, string rootName, string storagePath, string fileName, bool storeToFile) : base(serialisableObject)
+        private readonly string _rootName;
+        private SerializerXml(T serializableObject, string rootName, string storagePath, string fileName, bool storeToFile) : base(serializableObject)
         {
             _rootName = rootName;
             XmlDocument = new XmlDocument();
@@ -33,12 +33,12 @@ namespace Flekosoft.Common.Serialization.Xml
             }
         }
 
-        protected SerializerXml(T serialisableObject, string rootName) : this(serialisableObject, rootName, string.Empty, string.Empty, false)
+        protected SerializerXml(T serializableObject, string rootName) : this(serializableObject, rootName, string.Empty, string.Empty, false)
         {
 
         }
 
-        protected SerializerXml(T serialisableObject, string rootName, string storagePath, string fileName) : this(serialisableObject, rootName, storagePath, fileName, true)
+        protected SerializerXml(T serializableObject, string rootName, string storagePath, string fileName) : this(serializableObject, rootName, storagePath, fileName, true)
         {
 
         }
@@ -120,7 +120,7 @@ namespace Flekosoft.Common.Serialization.Xml
         {
             if (!File.Exists(StoragePath + FileName))
             {
-                //AppendLogMessage(new LogRecord(DateTime.Now, new List<string> { $"Faled to deserialize {SerialisableObject.ToString()}: File doesn't exist" }, LogRecordLevel.Info));
+                //AppendLogMessage(new LogRecord(DateTime.Now, new List<string> { $"Failed to deserialize {SerializableObject.ToString()}: File doesn't exist" }, LogRecordLevel.Info));
                 return false;
             }
             return true;

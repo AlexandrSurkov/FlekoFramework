@@ -5,7 +5,7 @@ namespace Flekosoft.Common.Serialization.Xml
 {
     public abstract class CollectionSerializerXml<T> : CollectionSerializer<T>, ISerializerXml
     {
-        private CollectionSerializerXml(T serialisableObject, string rootName, string storagePath, string fileName, bool storeToFile) : base(serialisableObject)
+        private CollectionSerializerXml(T serializableObject, string rootName, string storagePath, string fileName, bool storeToFile) : base(serializableObject)
         {
             XmlDocument = new XmlDocument();
             XmlDeclaration dec = XmlDocument.CreateXmlDeclaration("1.0", null, null);
@@ -29,12 +29,12 @@ namespace Flekosoft.Common.Serialization.Xml
             }
         }
 
-        protected CollectionSerializerXml(T serialisableObject, string rootName) : this(serialisableObject, rootName, string.Empty, string.Empty, false)
+        protected CollectionSerializerXml(T serializableObject, string rootName) : this(serializableObject, rootName, string.Empty, string.Empty, false)
         {
 
         }
 
-        protected CollectionSerializerXml(T serialisableObject, string rootName, string storagePath, string fileName) : this(serialisableObject, rootName, storagePath, fileName, true)
+        protected CollectionSerializerXml(T serializableObject, string rootName, string storagePath, string fileName) : this(serializableObject, rootName, storagePath, fileName, true)
         {
 
         }
@@ -93,7 +93,7 @@ namespace Flekosoft.Common.Serialization.Xml
         {
             if (!File.Exists(StoragePath + FileName))
             {
-                //AppendLogMessage(new LogRecord(DateTime.Now, new List<string> { $"Faled to deserialize {SerialisableObject.ToString()}: File doesn't exist" }, LogRecordLevel.Info));
+                //AppendLogMessage(new LogRecord(DateTime.Now, new List<string> { $"Failed to deserialize {SerializableObject.ToString()}: File doesn't exist" }, LogRecordLevel.Info));
                 return false;
             }
             return true;

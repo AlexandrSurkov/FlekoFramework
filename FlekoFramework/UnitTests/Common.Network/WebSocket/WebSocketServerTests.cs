@@ -428,7 +428,7 @@ namespace Flekosoft.UnitTests.Common.Network.WebSocket
             while (_disconnectionEventArgs == null)
             {
                 var delta = DateTime.Now - startTime;
-                if (delta.TotalSeconds > 10) Assert.Fail();
+                if (delta.TotalSeconds > 1000) Assert.Fail();
                 Thread.Sleep(1);
             }
 

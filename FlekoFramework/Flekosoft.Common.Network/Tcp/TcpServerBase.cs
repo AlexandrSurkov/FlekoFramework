@@ -20,11 +20,15 @@ namespace Flekosoft.Common.Network.Tcp
         //private readonly object _listenSocketsSyncObject = new object();
         private bool _dataTrace;
 
+        // Define the cancellation token.
+        readonly CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
+        readonly EventWaitHandle _threadFinishedWaitHandle = new EventWaitHandle(false, EventResetMode.ManualReset);
+
 
         protected TcpServerBase()
         {
             _waitConnectionThread = new Thread(ConnectRequestsThreadProc);
-            _waitConnectionThread.Start();
+            _waitConnectionThread.Start(_cancellationTokenSource.Token);
         }
 
         #region properties
@@ -85,10 +89,13 @@ namespace Flekosoft.Common.Network.Tcp
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
         private void ConnectRequestsThreadProc(object o)
         {
+            var cancellationToken = (CancellationToken)o;
+
             while (true)
             {
                 try
                 {
+                    cancellationToken.ThrowIfCancellationRequested();
                     //lock (_listenSocketsSyncObject)
                     {
                         if (!_connectRequestThreadPaused)
@@ -147,15 +154,20 @@ namespace Flekosoft.Common.Network.Tcp
                     }
                     Thread.Sleep(1);
                 }
+                catch (OperationCanceledException)
+                {
+                    break;
+                }
                 catch (ThreadAbortException)
                 {
-                    return;
+                    break;
                 }
                 catch (Exception ex)
                 {
                     OnErrorEvent(ex);
                 }
             }
+            _threadFinishedWaitHandle.Set();
         }
 
         #endregion
@@ -438,9 +450,15 @@ namespace Flekosoft.Common.Network.Tcp
                 {
                     if (_waitConnectionThread.IsAlive)
                     {
-                        _waitConnectionThread.Abort();
+                        _cancellationTokenSource.Cancel();
+                        _threadFinishedWaitHandle.WaitOne(Timeout.Infinite);
+                        //_waitConnectionThread.Abort();
                     }
                 }
+
+                _cancellationTokenSource.Dispose();
+                _threadFinishedWaitHandle?.Dispose();
+
                 ClearSocketLists();
 
                 StoppedEvent = null;

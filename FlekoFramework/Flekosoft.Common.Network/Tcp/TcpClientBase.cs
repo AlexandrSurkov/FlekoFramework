@@ -24,6 +24,10 @@ namespace Flekosoft.Common.Network.Tcp
         private int _pollInterval;
         private int _connectInterval;
 
+        // Define the cancellation token.
+        readonly CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
+        readonly EventWaitHandle _threadFinishedWaitHandle = new EventWaitHandle(false, EventResetMode.ManualReset);
+
         protected TcpClientBase()
         {
             PollFailLimit = 3;
@@ -32,7 +36,7 @@ namespace Flekosoft.Common.Network.Tcp
             ReadBufferSize = 1024;
 
             _connectThread = new Thread(ConnectThreadFunc);
-            _connectThread.Start();
+            _connectThread.Start(_cancellationTokenSource.Token);
         }
 
         #region Properties
@@ -132,12 +136,15 @@ namespace Flekosoft.Common.Network.Tcp
 
         #region Threads
 
-        private void ConnectThreadFunc()
+        private void ConnectThreadFunc(object o)
         {
+            var cancellationToken = (CancellationToken)o;
+
             while (true)
             {
                 try
                 {
+                    cancellationToken.ThrowIfCancellationRequested();
                     Thread.Sleep(1);
                     if (!IsStarted)
                     {
@@ -179,6 +186,10 @@ namespace Flekosoft.Common.Network.Tcp
                         else _pingFailCount = 0;
                     }
                 }
+                catch (OperationCanceledException)
+                {
+                    break;
+                }
                 catch (ThreadAbortException)
                 {
                     break;
@@ -188,6 +199,7 @@ namespace Flekosoft.Common.Network.Tcp
                     OnErrorEvent(ex);
                 }
             }
+            _threadFinishedWaitHandle.Set();
         }
         #endregion
 
@@ -316,9 +328,15 @@ namespace Flekosoft.Common.Network.Tcp
                 {
                     if (_connectThread.IsAlive)
                     {
-                        _connectThread.Abort();
+                        _cancellationTokenSource.Cancel();
+                        _threadFinishedWaitHandle.WaitOne(Timeout.Infinite);
+
+                        //_connectThread.Abort();
                     }
                 }
+
+                _cancellationTokenSource.Dispose();
+                _threadFinishedWaitHandle?.Dispose();
 
                 //if (_readFromStreamThread != null)
                 //{

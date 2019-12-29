@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Threading;
+#if DEBUG
 using Flekosoft.Common.Logging;
+using System.Collections.Generic;
+#endif
 
 namespace Flekosoft.Common.Video
 {
@@ -12,10 +14,14 @@ namespace Flekosoft.Common.Video
         readonly EventWaitHandle _newFrameWh = new EventWaitHandle(false, EventResetMode.ManualReset);
         private readonly Thread _processThread;
 
+        // Define the cancellation token.
+        readonly CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
+        readonly EventWaitHandle _threadFinishedWaitHandle = new EventWaitHandle(false, EventResetMode.ManualReset);
+
         protected FrameProcessor()
         {
             _processThread = new Thread(ProcessFrameThreadFunc);
-            _processThread.Start();
+            _processThread.Start(_cancellationTokenSource.Token);
 #if DEBUG
             Logger.Instance.AppendLog(new LogRecord(DateTime.Now, new List<string> { $"FrameProcessor {this}: Created" }, LogRecordLevel.Debug));
 #endif
@@ -35,13 +41,15 @@ namespace Flekosoft.Common.Video
 
         protected abstract void ProcessFrameInternal(VideoFrame frame);
 
-        private void ProcessFrameThreadFunc()
+        private void ProcessFrameThreadFunc(object o)
         {
+            var cancellationToken = (CancellationToken)o;
             while (true)
             {
                 try
                 {
-                    if (_newFrameWh.WaitOne(Timeout.Infinite))
+                    cancellationToken.ThrowIfCancellationRequested();
+                    if (_newFrameWh.WaitOne(TimeSpan.FromSeconds(1)))
                     {
                         VideoFrame frame;
                         if (_frameQueue.TryDequeue(out frame))
@@ -55,6 +63,10 @@ namespace Flekosoft.Common.Video
                         else _newFrameWh.Set();
                     }
                 }
+                catch (OperationCanceledException)
+                {
+                    break;
+                }
                 catch (ThreadAbortException)
                 {
                     break;
@@ -64,6 +76,7 @@ namespace Flekosoft.Common.Video
                     OnErrorEvent(ex);
                 }
             }
+            _threadFinishedWaitHandle.Set();
         }
 
         protected override void Dispose(bool disposing)
@@ -74,9 +87,14 @@ namespace Flekosoft.Common.Video
                 {
                     if (_processThread.IsAlive)
                     {
-                        _processThread.Abort();
+                        _cancellationTokenSource.Cancel();
+                        _threadFinishedWaitHandle.WaitOne(Timeout.Infinite);
+                        //_processThread.Abort();
                     }
                 }
+                _cancellationTokenSource.Dispose();
+                _threadFinishedWaitHandle?.Dispose();
+
                 _newFrameWh?.Dispose();
             }
             base.Dispose(disposing);

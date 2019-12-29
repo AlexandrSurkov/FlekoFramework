@@ -441,9 +441,14 @@ namespace Flekosoft.Common.Network.Internals
                 {
                     if (_readDataThread.IsAlive)
                     {
-                        _readDataThread.Abort();
+                        //_readDataThread.Abort();
+                        _cancellationTokenSource.Cancel();
+                        _threadFinishedWaitHandle.WaitOne(Timeout.Infinite);
                     }
                 }
+
+                _cancellationTokenSource.Dispose();
+                _threadFinishedWaitHandle?.Dispose();
 
                 //if (_processDataThread != null)
                 //{

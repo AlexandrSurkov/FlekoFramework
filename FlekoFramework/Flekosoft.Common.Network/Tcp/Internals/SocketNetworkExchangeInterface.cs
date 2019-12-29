@@ -44,7 +44,8 @@ namespace Flekosoft.Common.Network.Tcp.Internals
                     }
 
                     var part1 = Socket.Poll(1000, SelectMode.SelectRead);
-                    var part2 = (Socket.Available == 0);
+                    var dataAvailable = Socket.Available;
+                    var part2 = (dataAvailable == 0);
                     if ((part1 & part2) || !Socket.Connected)
                     {
                         throw new NotConnectedException();
@@ -52,7 +53,10 @@ namespace Flekosoft.Common.Network.Tcp.Internals
 
                     Socket.ReceiveTimeout = timeout;
 
-                    return Socket.Receive(data);
+                    if (dataAvailable > 0)
+                        return Socket.Receive(data);
+                    else
+                        return 0;
                 }
             }
             catch (ThreadAbortException)

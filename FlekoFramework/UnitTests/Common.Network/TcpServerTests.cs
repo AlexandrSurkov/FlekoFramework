@@ -478,12 +478,20 @@ namespace Flekosoft.UnitTests.Common.Network
             server.Start(epList);
 
             var client = new TcpClient();
+            client.ConnectedEvent += Client_ConnectedEvent;
+            client.DisconnectedEvent += Client_DisconnectedEvent;
             client.DataReceivedEvent += Client_DataReceivedEvent;
             client.ReceiveDataTraceEvent += Client_ReceiveDataTraceEvent;
             client.SendDataTraceEvent += Client_SendDataTraceEvent;
 
+            ClientConnectedEventEventArgs = null;
             client.Start(ipEp1.EndPoint);
-            Thread.Sleep(200);
+            var waitStart = DateTime.Now;
+            while (ClientConnectedEventEventArgs == null)
+            {
+                var delta = DateTime.Now - waitStart;
+                if (delta.TotalSeconds > 5) Assert.Fail("ClientConnectedEventEventArgs Timeout");
+            }
 
             client.DataTrace = false;
             server.DataTrace = false;

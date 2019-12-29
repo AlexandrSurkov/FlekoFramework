@@ -337,7 +337,7 @@ namespace Flekosoft.UnitTests.Common.Network
             Assert.AreEqual(senderData[0], SenderDataEventArgs.Data[0]);
             Assert.AreEqual(senderData[1], SenderDataEventArgs.Data[1]);
             Assert.AreEqual(senderData[2], SenderDataEventArgs.Data[2]);
-            Thread.Sleep(100);
+            Thread.Sleep(200);
             Assert.IsNotNull(ReceiverDataEventArgs);
             Assert.AreEqual(senderData[0], ReceiverDataEventArgs.Data[0]);
             Assert.AreEqual(senderData[1], ReceiverDataEventArgs.Data[1]);

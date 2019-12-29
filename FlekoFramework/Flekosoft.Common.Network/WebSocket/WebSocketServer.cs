@@ -19,26 +19,32 @@ namespace Flekosoft.Common.Network.WebSocket
 
         private readonly object _lockObject = new object();
 
+        // Define the cancellation token.
+        readonly CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
+        readonly EventWaitHandle _threadFinishedWaitHandle = new EventWaitHandle(false, EventResetMode.ManualReset);
+
         public WebSocketServer()
         {
             PollFailLimit = 3;
             PollIntervalMs = 3000;
 
             _pollCheckThread = new Thread(PollCheckThreadFunc);
-            _pollCheckThread.Start();
+            _pollCheckThread.Start(_cancellationTokenSource.Token);
 
             ConnectedEvent += WebSocketServer_ConnectedEvent;
             DisconnectedEvent += WebSocketServer_DisconnectedEvent;
         }
 
         #region Thread
-        private void PollCheckThreadFunc()
+        private void PollCheckThreadFunc(object o)
         {
+            var cancellationToken = (CancellationToken)o;
             // var removeList = new List<EndpointDataParser>();
             while (true)
             {
                 try
                 {
+                    cancellationToken.ThrowIfCancellationRequested();
                     Thread.Sleep(PollIntervalMs);
                     lock (_lockObject)
                     {
@@ -72,6 +78,10 @@ namespace Flekosoft.Common.Network.WebSocket
                         }
                     }
                 }
+                catch (OperationCanceledException)
+                {
+                    break;
+                }
                 catch (ThreadAbortException)
                 {
                     break;
@@ -81,6 +91,7 @@ namespace Flekosoft.Common.Network.WebSocket
                     OnErrorEvent(ex);
                 }
             }
+            _threadFinishedWaitHandle.Set();
         }
         #endregion
 
@@ -423,7 +434,18 @@ namespace Flekosoft.Common.Network.WebSocket
         {
             if (disposing)
             {
-                _pollCheckThread.Abort();
+                if (_pollCheckThread != null)
+                {
+                    if (_pollCheckThread.IsAlive)
+                    {
+                        _cancellationTokenSource.Cancel();
+                        _threadFinishedWaitHandle.WaitOne(Timeout.Infinite);
+                        //_pollCheckThread.Abort();
+                    }
+                }
+
+                _cancellationTokenSource.Dispose();
+                _threadFinishedWaitHandle?.Dispose();
 
                 HandshakeEvent = null;
                 DataReceivedEvent = null;

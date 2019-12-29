@@ -44,10 +44,12 @@ namespace Flekosoft.Common.Logging.Windows
                 try
                 {
                     Thread.Sleep(100);
-                    //{
-                        _listView.Dispatcher?.Invoke(delegate { UpdateListBox(false); });
-                        cancellationToken.ThrowIfCancellationRequested();
-                    //}
+                    if (!IsDisposed)
+                    {
+                        if (!IsDisposing)
+                            _listView.Dispatcher?.Invoke(delegate { UpdateListBox(false); });
+                    }
+                    cancellationToken.ThrowIfCancellationRequested();
                 }
                 catch (OperationCanceledException)
                 {

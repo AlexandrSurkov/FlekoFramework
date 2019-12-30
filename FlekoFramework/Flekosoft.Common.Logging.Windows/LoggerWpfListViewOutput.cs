@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Threading;
 using System.Windows.Controls;
+using System.Windows.Threading;
 
 namespace Flekosoft.Common.Logging.Windows
 {
@@ -47,7 +48,12 @@ namespace Flekosoft.Common.Logging.Windows
                     if (!IsDisposed)
                     {
                         if (!IsDisposing)
-                            _listView.Dispatcher?.Invoke(delegate { UpdateListBox(false); });
+                        {
+                            if (_listView.Dispatcher != null && !_listView.Dispatcher.CheckAccess()) // CheckAccess returns true if you're on the dispatcher thread
+                            {
+                                _listView.Dispatcher?.Invoke(delegate { UpdateListBox(false); }, DispatcherPriority.Normal, cancellationToken);
+                            }
+                        }
                     }
                     cancellationToken.ThrowIfCancellationRequested();
                 }

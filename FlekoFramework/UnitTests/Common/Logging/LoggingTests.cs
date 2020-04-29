@@ -26,6 +26,90 @@ namespace Flekosoft.UnitTests.Common.Logging
         readonly Writer _writer = new Writer();
 
         private readonly object _syncObject = new object();
+
+        [TestMethod]
+        public void LoggingPrefixTest()
+        {
+            lock (_syncObject)
+            {
+                Logger.Instance.LoggerOutputs.Clear();
+
+                _writer.LogRecord = null;
+                Logger.Instance.LoggerOutputs.Add(_writer);
+
+                _writer.DateTimeFormat = DateTimeFormat.Long;
+                _writer.PrefixFormat = PrefixFormat.DateTimeAndType;
+
+                var dt = DateTime.Now;
+                var s = new List<string> { "12345"};
+                var c = ConsoleColor.Red;
+
+                var logRecord = new LogRecord(dt, new List<string>(s), LogRecordLevel.Debug, c);
+
+                _writer.DateTimeFormat = DateTimeFormat.Long;
+                _writer.PrefixFormat = PrefixFormat.DateTimeAndType;
+                Logger.Instance.AppendLog(logRecord);
+                Thread.Sleep(10);  //Wait until async threads did their work
+                Assert.IsNotNull(_writer.LogRecord);
+
+                var strArr = _writer.LogRecord.LogStrings[0].Split('\t');
+                Assert.AreEqual(3, strArr.Length);
+                Assert.AreEqual($"{logRecord.DateTime.ToString("yy/MM/dd hh:mm:ss.fffffff")}", strArr[0]);
+                Assert.AreEqual("DEBUG", strArr[1]);
+                Assert.AreEqual(s[0], strArr[2]);
+
+                _writer.DateTimeFormat = DateTimeFormat.Short;
+                _writer.PrefixFormat = PrefixFormat.DateTimeAndType;
+                Logger.Instance.AppendLog(logRecord);
+                Thread.Sleep(10);  //Wait until async threads did their work
+                Assert.IsNotNull(_writer.LogRecord);
+
+                strArr = _writer.LogRecord.LogStrings[0].Split('\t');
+                Assert.AreEqual(3, strArr.Length);
+                Assert.AreEqual($"{logRecord.DateTime.ToString("yy/MM/dd hh:mm:ss")}", strArr[0]);
+                Assert.AreEqual("DEBUG", strArr[1]);
+                Assert.AreEqual(s[0], strArr[2]);
+
+
+                _writer.DateTimeFormat = DateTimeFormat.Short;
+                _writer.PrefixFormat = PrefixFormat.DateTime;
+                Logger.Instance.AppendLog(logRecord);
+                Thread.Sleep(10);  //Wait until async threads did their work
+                Assert.IsNotNull(_writer.LogRecord);
+
+                strArr = _writer.LogRecord.LogStrings[0].Split('\t');
+                Assert.AreEqual(2, strArr.Length);
+                Assert.AreEqual($"{logRecord.DateTime.ToString("yy/MM/dd hh:mm:ss")}", strArr[0]);
+                Assert.AreEqual(s[0], strArr[1]);
+
+                _writer.DateTimeFormat = DateTimeFormat.Short;
+                _writer.PrefixFormat = PrefixFormat.Type;
+                Logger.Instance.AppendLog(logRecord);
+                Thread.Sleep(10);  //Wait until async threads did their work
+                Assert.IsNotNull(_writer.LogRecord);
+
+                strArr = _writer.LogRecord.LogStrings[0].Split('\t');
+                Assert.AreEqual(2, strArr.Length);
+                Assert.AreEqual($"DEBUG", strArr[0]);
+                Assert.AreEqual(s[0], strArr[1]);
+
+
+
+                _writer.PrefixFormat = PrefixFormat.None;
+                Logger.Instance.AppendLog(logRecord);
+                Thread.Sleep(10);  //Wait until async threads did their work
+                Assert.IsNotNull(_writer.LogRecord);
+
+                strArr = _writer.LogRecord.LogStrings[0].Split('\t');
+                Assert.AreEqual(1, strArr.Length);
+                Assert.AreEqual(s[0], strArr[0]);
+
+                Assert.IsFalse(_writer.IsDisposed);
+                Logger.Instance.LoggerOutputs.Clear();
+                Assert.IsTrue(_writer.IsDisposed);
+            }
+        }
+
         [TestMethod]
         public void LoggingTest()
         {

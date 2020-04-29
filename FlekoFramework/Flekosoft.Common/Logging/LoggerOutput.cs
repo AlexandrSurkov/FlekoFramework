@@ -19,6 +19,7 @@ namespace Flekosoft.Common.Logging
         readonly EventWaitHandle _threadFinishedWaitHandle = new EventWaitHandle(false, EventResetMode.ManualReset);
         private LogRecordLevel _logLevel;
         private DateTimeFormat _dateTimeFormat;
+        private PrefixFormat _prefixFormat;
 
         // Define the cancellation token.
         readonly CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
@@ -30,6 +31,7 @@ namespace Flekosoft.Common.Logging
 
 
             DateTimeFormat = DateTimeFormat.Long;
+            PrefixFormat = PrefixFormat.DateTimeAndType;
             LogLevel = LogRecordLevel.All;
 
 
@@ -43,7 +45,7 @@ namespace Flekosoft.Common.Logging
             _outputThread.CurrentCulture = _cultureInfo;
             _outputThread.CurrentUICulture = _uiCultureInfo;
 
-            var cancellationToken = (CancellationToken) o;
+            var cancellationToken = (CancellationToken)o;
 
             while (true)
             {
@@ -112,35 +114,71 @@ namespace Flekosoft.Common.Logging
             }
         }
 
+        public PrefixFormat PrefixFormat
+        {
+            get => _prefixFormat;
+            set
+            {
+                if (_prefixFormat != value)
+                {
+                    _prefixFormat = value;
+                    OnPropertyChanged(nameof(PrefixFormat));
+                }
+            }
+        }
+
+
+
         private string GetPrefixString(LogRecord logRecord)
         {
             var result = string.Empty;
+
+            var datetime = string.Empty;
+
             // ReSharper disable UseFormatSpecifierInInterpolation
             switch (DateTimeFormat)
             {
                 case DateTimeFormat.None:
                     break;
                 case DateTimeFormat.Short:
-                    result += $"{logRecord.DateTime.ToString("yy/MM/dd hh:mm:ss")}";
+                    datetime += $"{logRecord.DateTime.ToString("yy/MM/dd hh:mm:ss")}\t";
                     break;
                 case DateTimeFormat.Long:
-                    result += $"{logRecord.DateTime.ToString("yy/MM/dd hh:mm:ss.fffffff")}";
+                    datetime += $"{logRecord.DateTime.ToString("yy/MM/dd hh:mm:ss.fffffff")}\t";
                     break;
             }
+
+            var type = string.Empty;
             // ReSharper restore UseFormatSpecifierInInterpolation
             switch (logRecord.RecordType)
             {
                 case LogRecordLevel.Debug:
-                    result += "\tDEBUG\t";
+                    type += "DEBUG\t";
                     break;
                 case LogRecordLevel.Error:
-                    result += "\tERROR\t";
+                    type += "ERROR\t";
                     break;
                 case LogRecordLevel.Fatal:
-                    result += "\tFATAL\t";
+                    type += "FATAL\t";
                     break;
                 default:
-                    result += "\t\t";
+                    type += "\t";
+                    break;
+            }
+
+            switch (PrefixFormat)
+            {
+                case PrefixFormat.None:
+                    break;
+                case PrefixFormat.DateTime:
+                    result += datetime;
+                    break;
+                case PrefixFormat.Type:
+                    result += type;
+                    break;
+                case PrefixFormat.DateTimeAndType:
+                    result += datetime;
+                    result += type;
                     break;
             }
             return result;

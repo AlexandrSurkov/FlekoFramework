@@ -20,6 +20,14 @@ namespace Flekosoft.Common.Logging
         Long = 0x02,
     }
 
+    public enum PrefixFormat
+    {
+        None = 0,
+        DateTime = 0x01,
+        Type = 0x02,
+        DateTimeAndType = 0x03,
+    }
+
     public class LogEventArgs : EventArgs
     {
         public LogEventArgs(LogRecord logRecord)

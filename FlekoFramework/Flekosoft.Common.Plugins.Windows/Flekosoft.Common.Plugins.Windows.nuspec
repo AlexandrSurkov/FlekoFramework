@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd">
   <metadata>
     <id>Flekosoft.Common.Plugins.Windows</id>
-    <version>1.0.1</version>
+    <version>1.0.2</version>
     <authors>Alexandr Surkov</authors>
     <owners>Alexandr Surkov</owners>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
@@ -10,12 +10,12 @@
     <licenseUrl>https://licenses.nuget.org/MIT</licenseUrl>
     <projectUrl>https://github.com/AlexandrSurkov/FlekoFramework</projectUrl>
     <description>Contains Windows Controls that can be used in Flekosoft.Common.Plugins</description>
-    <copyright>Copyright © Alexandr Surkov 2017-2019</copyright>
+    <copyright>Copyright © Alexandr Surkov 2017-2020</copyright>
     <repository type="Git" url="https://github.com/AlexandrSurkov/FlekoFramework" />
     <dependencies>
       <group targetFramework=".NETStandard2.0">
-        <dependency id="Flekosoft.Common" version="1.0.2" exclude="Build,Analyzers" />
-        <dependency id="Flekosoft.Common.Plugins" version="1.0.0" exclude="Build,Analyzers" />
+        <dependency id="Flekosoft.Common" version="1.0.4" exclude="Build,Analyzers" />
+        <dependency id="Flekosoft.Common.Plugins" version="1.0.1" exclude="Build,Analyzers" />
       </group>
     </dependencies>
     <frameworkAssemblies>

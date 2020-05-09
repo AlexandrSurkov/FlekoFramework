@@ -9,7 +9,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Alexandr Surkov")]
 [assembly: AssemblyProduct("FlekoFramework")]
-[assembly: AssemblyCopyright("Copyright © Alexandr Surkov 2017-2019")]
+[assembly: AssemblyCopyright("Copyright © Alexandr Surkov 2017-2020")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

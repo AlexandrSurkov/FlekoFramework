@@ -4,7 +4,7 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <Product>FlekoFramework</Product>
     <Authors>Alexandr Surkov</Authors>
-    <Copyright>Copyright © Alexandr Surkov 2017-2019</Copyright>
+    <Copyright>Copyright © Alexandr Surkov 2017-2020</Copyright>
     <RepositoryUrl>https://github.com/AlexandrSurkov/FlekoFramework</RepositoryUrl>
     <RepositoryType>Git</RepositoryType>
     <NeutralLanguage>en</NeutralLanguage>

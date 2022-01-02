@@ -33,7 +33,19 @@ namespace Flekosoft.Common.Plugins
                         //var toLoad = filesList.Where(r => !loadedPaths.Contains(r, StringComparer.InvariantCultureIgnoreCase)).ToList();
                         //toLoad.ForEach(path => loadedAssemblies.Add(AppDomain.CurrentDomain.Load(AssemblyName.GetAssemblyName(path))));
 
-                        var dll = AppDomain.CurrentDomain.Load(AssemblyName.GetAssemblyName(s));
+                        System.Reflection.Assembly dll;
+
+                        if (Type.GetType("System.Runtime.Loader", false) != null)
+                        {
+                            //.NetCore
+                            dll = AppDomain.CurrentDomain.Load(AssemblyName.GetAssemblyName(s));
+                        }
+                        else
+                        {
+                            //.net
+                            dll = System.Reflection.Assembly.LoadFile(s);
+                        }
+
                         foreach (Type type in dll.GetExportedTypes())
                         {
                             var interfaces = type.GetInterfaces();

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Net;
 using System.Net.Sockets;
+using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using Flekosoft.Common.Network.Tcp.Internals;
 
@@ -23,6 +24,9 @@ namespace Flekosoft.Common.Network.Tcp
         // Define the cancellation token.
         readonly CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
         readonly EventWaitHandle _threadFinishedWaitHandle = new EventWaitHandle(false, EventResetMode.ManualReset);
+
+        //SSL/TLS part
+        static X509Certificate _serverCertificate = null;
 
 
         protected TcpServerBase()
@@ -81,6 +85,16 @@ namespace Flekosoft.Common.Network.Tcp
                 OnPropertyChanged(nameof(DataTrace));
             }
         }
+
+        /// <summary>
+        /// Is server use SSL/TLS encryption
+        /// </summary>
+        public bool IsEncrypted => ServerCertificate != null;
+
+        /// <summary>
+        /// Server X509 certificate
+        /// </summary>
+        public static X509Certificate ServerCertificate => _serverCertificate;
 
         #endregion
 
@@ -178,10 +192,31 @@ namespace Flekosoft.Common.Network.Tcp
         /// Start server
         /// </summary>
         /// <param name="endpoints">List of local ip endpoints which will used to wait connetion</param>
-        /// <returns>True - server succesfully started else false</returns>
+        /// <returns>True - server successfully started else false</returns>
         public void Start(ICollection<TcpServerLocalEndpoint> endpoints)
         {
+            Start(endpoints, string.Empty);
+        }
+
+        /// <summary>
+        /// Start server
+        /// </summary>
+        /// <param name="endpoints">List of local ip endpoints which will used to wait connetion</param>
+        /// <param name="serverCertificate"> path to the server x509 certificate</param>
+        /// <returns>True - server successfully started else false</returns>
+        public void Start(ICollection<TcpServerLocalEndpoint> endpoints, string serverCertificate)
+        {
             if (IsStarted) return;
+
+            try
+            {
+                _serverCertificate = X509Certificate.CreateFromCertFile(serverCertificate);
+            }
+            catch (Exception ex)
+            {
+                OnErrorEvent(ex);
+                return;
+            }
 
             Endpoints = new List<TcpServerLocalEndpoint>(endpoints).AsReadOnly();
 

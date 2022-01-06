@@ -3,7 +3,9 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Net;
+using System.Net.Security;
 using System.Net.Sockets;
+using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using Flekosoft.Common.Network.Tcp.Internals;
@@ -25,8 +27,13 @@ namespace Flekosoft.Common.Network.Tcp
         readonly CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
         readonly EventWaitHandle _threadFinishedWaitHandle = new EventWaitHandle(false, EventResetMode.ManualReset);
 
-        //SSL/TLS part
+        //SSL/TLS
         static X509Certificate _serverCertificate = null;
+        bool _clientCertificateRequired = false;
+        SslProtocols _enabledSslProtocols = SslProtocols.None;
+        bool _checkCertificateRevocation = false;
+        EncryptionPolicy _encryptionPolicy = EncryptionPolicy.AllowNoEncryption;
+        private bool _isEncrypted;
 
 
         protected TcpServerBase()
@@ -89,7 +96,18 @@ namespace Flekosoft.Common.Network.Tcp
         /// <summary>
         /// Is server use SSL/TLS encryption
         /// </summary>
-        public bool IsEncrypted => ServerCertificate != null;
+        public bool IsEncrypted
+        {
+            get { return _isEncrypted; }
+            set
+            {
+                if (_isEncrypted != value)
+                {
+                    _isEncrypted = value;
+                    OnPropertyChanged(nameof(IsEncrypted));
+                }
+            }
+        }
 
         /// <summary>
         /// Server X509 certificate
@@ -195,7 +213,7 @@ namespace Flekosoft.Common.Network.Tcp
         /// <returns>True - server successfully started else false</returns>
         public void Start(ICollection<TcpServerLocalEndpoint> endpoints)
         {
-            Start(endpoints, string.Empty);
+            Start(endpoints, null, false, SslProtocols.Default, false, EncryptionPolicy.AllowNoEncryption);
         }
 
         /// <summary>
@@ -204,19 +222,26 @@ namespace Flekosoft.Common.Network.Tcp
         /// <param name="endpoints">List of local ip endpoints which will used to wait connetion</param>
         /// <param name="serverCertificate"> path to the server x509 certificate</param>
         /// <returns>True - server successfully started else false</returns>
-        public void Start(ICollection<TcpServerLocalEndpoint> endpoints, string serverCertificate)
+        public void Start(ICollection<TcpServerLocalEndpoint> endpoints,
+            X509Certificate serverCertificate,
+            bool clientCertificateRequired,
+            SslProtocols enabledSslProtocols,
+            bool checkCertificateRevocation,
+            EncryptionPolicy encryptionPolicy)
         {
             if (IsStarted) return;
 
-            try
+            if (serverCertificate != null)
             {
-                _serverCertificate = X509Certificate.CreateFromCertFile(serverCertificate);
+                _serverCertificate = serverCertificate;
+                _clientCertificateRequired = clientCertificateRequired;
+                _enabledSslProtocols = enabledSslProtocols;
+                _checkCertificateRevocation = checkCertificateRevocation;
+                _encryptionPolicy = encryptionPolicy;
+                IsEncrypted = true;
             }
-            catch (Exception ex)
-            {
-                OnErrorEvent(ex);
-                return;
-            }
+            else
+                IsEncrypted = false;
 
             Endpoints = new List<TcpServerLocalEndpoint>(endpoints).AsReadOnly();
 
@@ -270,6 +295,13 @@ namespace Flekosoft.Common.Network.Tcp
         public virtual void Stop()
         {
             _connectRequestThreadPaused = true;
+            _serverCertificate = null;
+            _clientCertificateRequired = false;
+            _enabledSslProtocols = SslProtocols.None;
+            _checkCertificateRevocation = false;
+            _encryptionPolicy = EncryptionPolicy.AllowNoEncryption;
+            IsEncrypted = false;
+
             while (IsStarted)
             {
                 Thread.Sleep(1);
@@ -383,7 +415,21 @@ namespace Flekosoft.Common.Network.Tcp
                                 driver.ReceiveDataTraceEvent += Driver_ReceiveDataTraceEvent;
                                 driver.SendDataTraceEvent += Driver_SendDataTraceEvent;
                                 driver.DataTrace = DataTrace;
-                                driver.StartExchange(new SocketNetworkExchangeInterface(socket));
+                                if (!IsEncrypted)
+                                {
+                                    driver.StartExchange(new SocketNetworkExchangeInterface(socket));
+                                }
+                                else
+                                {
+                                    driver.StartExchange(new EncryptedSocketNetworkExchangeInterface(socket,
+                                        ServerCertificate,
+                                        _clientCertificateRequired,
+                                        _enabledSslProtocols,
+                                        _checkCertificateRevocation,
+                                        _encryptionPolicy,
+                                        ValidateClientCertificate,
+                                        SelectLocalCertificate));
+                                }
                                 listenSocket.ConnectedSockets.Add(driver);
 
                                 OnConnectedEvent(new ConnectionEventArgs(driver.ExchangeInterface.LocalEndPoint,
@@ -472,6 +518,9 @@ namespace Flekosoft.Common.Network.Tcp
         {
             SendDataTraceEvent?.Invoke(this, new NetworkDataEventArgs(data, localEndPoint, remoteEndPoint));
         }
+
+        public event RemoteCertificateValidationCallback ValidateClientCertificate;
+        public event LocalCertificateSelectionCallback SelectLocalCertificate;
         #endregion
 
         #region Disposable
@@ -480,6 +529,9 @@ namespace Flekosoft.Common.Network.Tcp
         {
             if (disposing)
             {
+                ValidateClientCertificate = null;
+                SelectLocalCertificate = null;
+
                 Stop();
                 if (_waitConnectionThread != null)
                 {

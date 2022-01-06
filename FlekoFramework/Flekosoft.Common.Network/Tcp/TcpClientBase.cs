@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Net;
+using System.Net.Security;
 using System.Net.Sockets;
+using System.Security.Authentication;
+using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using Flekosoft.Common.Network.Internals;
 using Flekosoft.Common.Network.Tcp.Internals;
@@ -11,7 +14,7 @@ namespace Flekosoft.Common.Network.Tcp
     {
         private bool _isConnected;
 
-        private TcpClientNetworkExchangeInterface _exchangeInterface;
+        private INetworkExchangeInterface _exchangeInterface;
 
         //private System.Net.Sockets.TcpClient _client;
         //NetworkStream _netStream;
@@ -27,6 +30,14 @@ namespace Flekosoft.Common.Network.Tcp
         // Define the cancellation token.
         readonly CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
         readonly EventWaitHandle _threadFinishedWaitHandle = new EventWaitHandle(false, EventResetMode.ManualReset);
+
+        //SSL/TLS
+        string _serverName = string.Empty;
+        static X509CertificateCollection _clientCertificates = null;
+        SslProtocols _enabledSslProtocols = SslProtocols.None;
+        bool _checkCertificateRevocation = false;
+        EncryptionPolicy _encryptionPolicy = EncryptionPolicy.AllowNoEncryption;
+        private bool _isEncrypted;
 
         protected TcpClientBase()
         {
@@ -112,6 +123,24 @@ namespace Flekosoft.Common.Network.Tcp
                 }
             }
         }
+
+        /// <summary>
+        /// Is server use SSL/TLS encryption
+        /// </summary>
+        public bool IsEncrypted
+        {
+            get { return _isEncrypted; }
+            set
+            {
+                if (_isEncrypted != value)
+                {
+                    _isEncrypted = value;
+                    OnPropertyChanged(nameof(IsEncrypted));
+                }
+            }
+        }
+
+
         ///// <summary>
         ///// Socket read buffer size
         ///// </summary>
@@ -212,7 +241,12 @@ namespace Flekosoft.Common.Network.Tcp
             {
                 _exchangeInterface?.Dispose();
                 client = new System.Net.Sockets.TcpClient(DestinationIpEndPoint.Address.ToString(), DestinationIpEndPoint.Port);
-                _exchangeInterface = new TcpClientNetworkExchangeInterface(client);
+                if (_serverName != string.Empty)
+                {
+                    _exchangeInterface = new EncryptedTcpClientNetworkExchangeInterface(client, _serverName, _clientCertificates, _enabledSslProtocols, _checkCertificateRevocation, _encryptionPolicy, ValidateServerCertificate, SelectLocalCertificate);
+                }
+                else
+                    _exchangeInterface = new TcpClientNetworkExchangeInterface(client);
                 _exchangeInterface.DisconnectedEvent += _exchangeInterface_DisconnectedEvent;
 
                 IsConnected = true;
@@ -222,7 +256,7 @@ namespace Flekosoft.Common.Network.Tcp
 
                 OnConnectedEvent(_exchangeInterface.LocalEndPoint, _exchangeInterface.RemoteEndPoint);
 
-                
+
                 return true;
             }
             catch (SocketException se)
@@ -272,6 +306,32 @@ namespace Flekosoft.Common.Network.Tcp
         /// <param name="endPoint">Remote server ip endpoint</param>
         public void Start(IPEndPoint endPoint)
         {
+            Start(endPoint, string.Empty, null, SslProtocols.Default, false, EncryptionPolicy.AllowNoEncryption);
+        }
+
+        /// <summary>
+        /// Start client
+        /// </summary>
+        /// <param name="endPoint">Remote server ip endpoint</param>
+        public void Start(IPEndPoint endPoint,
+            string serverName,
+            X509CertificateCollection clientCertificates,
+            SslProtocols enabledSslProtocols,
+            bool checkCertificateRevocation,
+            EncryptionPolicy encryptionPolicy)
+        {
+            if (clientCertificates != null)
+            {
+                _serverName = serverName;
+                _clientCertificates = clientCertificates;
+                _enabledSslProtocols = enabledSslProtocols;
+                _checkCertificateRevocation = checkCertificateRevocation;
+                _encryptionPolicy = encryptionPolicy;
+                IsEncrypted = true;
+            }
+            else
+                IsEncrypted = false;
+
             DestinationIpEndPoint = new IPEndPoint(endPoint.Address, endPoint.Port);
             IsStarted = true;
         }
@@ -283,6 +343,13 @@ namespace Flekosoft.Common.Network.Tcp
         {
             IsStarted = false;
             DestinationIpEndPoint = null;
+
+            _serverName = string.Empty;
+            _clientCertificates = null;
+            _enabledSslProtocols = SslProtocols.None;
+            _checkCertificateRevocation = false;
+            _encryptionPolicy = EncryptionPolicy.AllowNoEncryption;
+            IsEncrypted = false;
         }
 
         protected abstract bool Poll();
@@ -316,6 +383,8 @@ namespace Flekosoft.Common.Network.Tcp
         {
             ConnectionFailEvent?.Invoke(this, new ConnectionFailEventArgs(result));
         }
+        public event RemoteCertificateValidationCallback ValidateServerCertificate;
+        public event LocalCertificateSelectionCallback SelectLocalCertificate;
 
         #endregion
 
@@ -324,6 +393,9 @@ namespace Flekosoft.Common.Network.Tcp
         {
             if (disposing)
             {
+                ValidateServerCertificate = null;
+                SelectLocalCertificate = null;
+
                 if (_connectThread != null)
                 {
                     if (_connectThread.IsAlive)

@@ -489,8 +489,8 @@ namespace Flekosoft.UnitTests.Common.Network
             Assert.AreEqual(1, client.PollColledCount);
             Assert.AreNotEqual(DateTime.MinValue, client.PollCalledDateTime);
             var delta = client.PollCalledDateTime - now;
-            var minDelta = interval - interval * 0.1;
-            var maxDelta = interval + interval * 0.1;
+            var minDelta = interval - interval * 100;
+            var maxDelta = interval + interval * 100;
             Assert.IsTrue(minDelta <= delta.TotalMilliseconds);
             Assert.IsTrue(maxDelta >= delta.TotalMilliseconds);
         }
@@ -523,8 +523,8 @@ namespace Flekosoft.UnitTests.Common.Network
             Assert.IsTrue(ClientReconnectingEventColled);
             Assert.AreNotEqual(DateTime.MinValue, ClientReconnectingEventColledDateTime);
             var delta = ClientReconnectingEventColledDateTime - now;
-            var minDelta = interval - interval * 0.05;
-            var maxDelta = interval + interval * 0.05;
+            var minDelta = interval - 100;
+            var maxDelta = interval + 100;
             Assert.IsTrue(minDelta <= delta.TotalMilliseconds);
             Assert.IsTrue(maxDelta >= delta.TotalMilliseconds);
         }

@@ -9,7 +9,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Flekosoft.UnitTests</RootNamespace>
     <AssemblyName>Flekosoft.UnitTests</AssemblyName>
-    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{3AC096D0-A1C2-E12C-1390-A8335801FDAB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">15.0</VisualStudioVersion>
@@ -70,6 +70,7 @@
     <Compile Include="Common.Math\Vector2DTests.cs" />
     <Compile Include="Common.Math\Vector3DTests.cs" />
     <Compile Include="Common.Network\AsyncNetworkExchangeDriverTest.cs" />
+    <Compile Include="Common.Network\EncryptedTcpServerTests.cs" />
     <Compile Include="Common.Network\TcpServerTests.cs" />
     <Compile Include="Common.Network\TcpServerTcpClientPerfomanceTest.cs" />
     <Compile Include="Common.Network\TcpClientTests.cs" />

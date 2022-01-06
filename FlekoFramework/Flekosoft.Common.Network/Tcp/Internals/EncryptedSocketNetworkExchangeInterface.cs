@@ -2,6 +2,8 @@
 using System.Net;
 using System.Net.Security;
 using System.Net.Sockets;
+using System.Security.Authentication;
+using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using Flekosoft.Common.Network.Internals;
 
@@ -18,7 +20,7 @@ namespace Flekosoft.Common.Network.Tcp.Internals
         private readonly NetworkStream _networkStream;
         private readonly SslStream _sslStream;
 
-        public EncryptedSocketNetworkExchangeInterface(Socket socket)
+        public EncryptedSocketNetworkExchangeInterface(Socket socket, X509Certificate serverCertificate, bool clientCertificateRequired, SslProtocols enabledSslProtocols, bool checkCertificateRevocation, EncryptionPolicy encryptionPolicy, RemoteCertificateValidationCallback userCertificateValidationCallback, LocalCertificateSelectionCallback userCertificateSelectionCallback)
         {
             Socket = socket;
 
@@ -28,13 +30,24 @@ namespace Flekosoft.Common.Network.Tcp.Internals
             RemoteEndPoint = (IPEndPoint)Socket.RemoteEndPoint;
 
             _networkStream = new NetworkStream(Socket, false);
-            _sslStream = new SslStream(_networkStream, true);
+            _sslStream = new SslStream(_networkStream, true, 
+                new RemoteCertificateValidationCallback(userCertificateValidationCallback),
+                new LocalCertificateSelectionCallback(userCertificateSelectionCallback), encryptionPolicy
+                );
+            try
+            {
+                _sslStream.AuthenticateAsServer(serverCertificate, clientCertificateRequired, enabledSslProtocols, checkCertificateRevocation);
+            }
+            catch (Exception ex)
+            {
+                OnErrorEvent(ex);
+            }
 
             _sslStream.ReadTimeout = 5000;
             _sslStream.WriteTimeout = 5000;
 
             IsConnected = true;
-        }
+        }        
 
         public int Read(byte[] data, int timeout)
         {
@@ -43,6 +56,11 @@ namespace Flekosoft.Common.Network.Tcp.Internals
                 lock (_readSyncObject) //Can't read at the same time from different threads
                 {
                     if (_isSocketDisposed) return 0;
+
+                    if (Socket == null)
+                    {
+                        throw new NotConnectedException();
+                    }
 
                     if (_sslStream == null)
                     {
@@ -65,7 +83,7 @@ namespace Flekosoft.Common.Network.Tcp.Internals
                     Socket.ReceiveTimeout = timeout;
 
                     if (dataAvailable > 0)
-                        return Socket.Receive(data);
+                        return _sslStream.Read(data, 0, data.Length);
                     else
                         return 0;
                 }
@@ -117,31 +135,15 @@ namespace Flekosoft.Common.Network.Tcp.Internals
                 {
                     if (_isSocketDisposed) return 0;
                     if (Socket == null) throw new NotConnectedException();
+                    if (_sslStream == null) throw new NotConnectedException();
                     if (!Socket.Connected) throw new NotConnectedException();
 
                     Socket.SendTimeout = timeout;
 
-                    SocketError err;
-                    var sentBytes = Socket.Send(buffer, offset, size, SocketFlags.None, out err);
-
-                    if (err != SocketError.Success)
-                    {
-                        Exception ex;
-                        switch (err)
-                        {
-                            case SocketError.ConnectionAborted:
-                            case SocketError.ConnectionReset:
-                            case SocketError.ConnectionRefused:
-                            case SocketError.Interrupted:
-                            case SocketError.TimedOut:
-                                ex = new NotConnectedException();
-                                break;
-                            default:
-                                ex = new NetworkWriteException(err.ToString());
-                                break;
-                        }
-                        throw ex;
-                    }
+                    var buf = new byte[size];
+                    Array.Copy(buffer, offset, buf, 0, size);
+                    _sslStream.Write(buf);
+                    var sentBytes = size;
 
                     return sentBytes;
                 }

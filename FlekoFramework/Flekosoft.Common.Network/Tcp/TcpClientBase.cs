@@ -309,16 +309,28 @@ namespace Flekosoft.Common.Network.Tcp
             Start(endPoint, string.Empty, null, SslProtocols.Default, false, EncryptionPolicy.AllowNoEncryption);
         }
 
+        public void Start(IPEndPoint endPoint,
+            string serverName,
+            X509Certificate clientCertificate,
+            SslProtocols enabledSslProtocols,
+            bool checkCertificateRevocation,
+            EncryptionPolicy encryptionPolicy)
+        {
+            var certificateCollection = new X509CertificateCollection();
+            certificateCollection.Add(clientCertificate);
+            Start(endPoint, serverName, certificateCollection, enabledSslProtocols, checkCertificateRevocation, encryptionPolicy);
+        }
+
         /// <summary>
         /// Start client
         /// </summary>
         /// <param name="endPoint">Remote server ip endpoint</param>
         public void Start(IPEndPoint endPoint,
-            string serverName,
-            X509CertificateCollection clientCertificates,
-            SslProtocols enabledSslProtocols,
-            bool checkCertificateRevocation,
-            EncryptionPolicy encryptionPolicy)
+        string serverName,
+        X509CertificateCollection clientCertificates,
+        SslProtocols enabledSslProtocols,
+        bool checkCertificateRevocation,
+        EncryptionPolicy encryptionPolicy)
         {
             if (clientCertificates != null)
             {

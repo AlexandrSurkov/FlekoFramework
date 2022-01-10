@@ -34,17 +34,19 @@ namespace Flekosoft.Common.Network.Tcp.Internals
                 new RemoteCertificateValidationCallback(userCertificateValidationCallback),
                 new LocalCertificateSelectionCallback(userCertificateSelectionCallback), encryptionPolicy
                 );
+
+            _sslStream.ReadTimeout = 5000;
+            _sslStream.WriteTimeout = 5000;
+
             try
             {
                 _sslStream.AuthenticateAsServer(serverCertificate, clientCertificateRequired, enabledSslProtocols, checkCertificateRevocation);
             }
             catch (Exception ex)
             {
-                OnErrorEvent(ex);
-            }
-
-            _sslStream.ReadTimeout = 5000;
-            _sslStream.WriteTimeout = 5000;
+                Dispose();
+                throw;
+            }            
 
             IsConnected = true;
         }        
@@ -222,13 +224,13 @@ namespace Flekosoft.Common.Network.Tcp.Internals
                     {
                         try
                         {
-                            _sslStream.Close();
-                            _sslStream.Dispose();
-                            _networkStream.Close();
-                            _networkStream.Dispose();
-                            Socket.Shutdown(SocketShutdown.Both);
-                            Socket.Close();
-                            Socket.Dispose();
+                            _sslStream?.Close();
+                            _sslStream?.Dispose();
+                            _networkStream?.Close();
+                            _networkStream?.Dispose();
+                            Socket?.Shutdown(SocketShutdown.Both);
+                            Socket?.Close();
+                            Socket?.Dispose();
                         }
                         catch (ObjectDisposedException)
                         {

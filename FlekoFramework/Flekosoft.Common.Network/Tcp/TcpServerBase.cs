@@ -8,6 +8,7 @@ using System.Net.Sockets;
 using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
+using Flekosoft.Common.Network.Internals;
 using Flekosoft.Common.Network.Tcp.Internals;
 
 namespace Flekosoft.Common.Network.Tcp
@@ -40,6 +41,20 @@ namespace Flekosoft.Common.Network.Tcp
         {
             _waitConnectionThread = new Thread(ConnectRequestsThreadProc);
             _waitConnectionThread.Start(_cancellationTokenSource.Token);
+
+            ValidateClientCertificate += TcpServerBase_ValidateClientCertificate;
+            SelectLocalCertificate += TcpServerBase_SelectLocalCertificate;
+
+        }
+
+        private X509Certificate TcpServerBase_SelectLocalCertificate(object sender, string targetHost, X509CertificateCollection localCertificates, X509Certificate remoteCertificate, string[] acceptableIssuers)
+        {
+            throw new NotImplementedException();
+        }
+
+        private bool TcpServerBase_ValidateClientCertificate(object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors)
+        {
+            throw new NotImplementedException();
         }
 
         #region properties
@@ -407,9 +422,10 @@ namespace Flekosoft.Common.Network.Tcp
                         }
                         else
                         {
+                            SocketAsyncNetworkExchangeDriver driver = null;
                             try
                             {
-                                var driver = new SocketAsyncNetworkExchangeDriver();
+                                driver = new SocketAsyncNetworkExchangeDriver();
                                 driver.ErrorEvent += Driver_ErrorEvent;
                                 driver.NewByteEvent += Driver_NewByteEvent;
                                 driver.ReceiveDataTraceEvent += Driver_ReceiveDataTraceEvent;
@@ -430,18 +446,21 @@ namespace Flekosoft.Common.Network.Tcp
                                         ValidateClientCertificate,
                                         SelectLocalCertificate));
                                 }
-                                listenSocket.ConnectedSockets.Add(driver);
-
-                                OnConnectedEvent(new ConnectionEventArgs(driver.ExchangeInterface.LocalEndPoint,
-                                    driver.ExchangeInterface.RemoteEndPoint));
                             }
                             catch (Exception ex)
                             {
+                                socket.Close();
+                                driver?.Dispose();                                
                                 OnErrorEvent(ex);
+                                listenSocket.AcceptBegin = false;
+                                return;
                             }
-                        }
 
-                        listenSocket.AcceptBegin = false;
+                            listenSocket.ConnectedSockets.Add(driver);
+
+                            OnConnectedEvent(new ConnectionEventArgs(driver.ExchangeInterface.LocalEndPoint,
+                                driver.ExchangeInterface.RemoteEndPoint));
+                        }
                     }
                 }
             }

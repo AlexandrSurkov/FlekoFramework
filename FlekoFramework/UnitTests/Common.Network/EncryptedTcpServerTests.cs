@@ -113,6 +113,64 @@ namespace Flekosoft.UnitTests.Common.Network
             }
         }
 
+
+        [TestMethod]
+        public void EncryptedServerVsUnencryptedClientConnectDisconnectTests()
+        {
+            var serverName = "TestServer";
+            using (X509Certificate serverCert = MakeCert(serverName))
+            {
+                var server = new TcpServer();
+                server.ErrorEvent += Server_NonFailErrorEvent;
+
+                server.ConnectedEvent += Server_ConnectedEvent;
+                server.DisconnectedEvent += Server_DisconnectedEvent;
+
+                var epList = new List<TcpServerLocalEndpoint>();
+                var ipEp1 = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 7483);
+
+                epList.Add(new TcpServerLocalEndpoint(ipEp1, 1));
+
+                server.Start(epList, serverCert, false, SslProtocols.None, false, EncryptionPolicy.RequireEncryption);
+
+                var client = new TcpClient();
+                client.ConnectedEvent += Client_ConnectedEvent;
+                client.DisconnectedEvent += Client_DisconnectedEvent;
+                client.ConnectionFailEvent += Client_ConnectionFailEvent;
+
+                ServerConnectedEventArgs = null;
+                ServerDisconnectedEventArgs = null;
+                ClientConnectedEventEventArgs = null;
+                ServerErrorEvent = null;
+                ConnectionFailEventArgs = null;
+                Assert.IsNull(ServerConnectedEventArgs);
+                Assert.IsNull(ServerDisconnectedEventArgs);
+                Assert.IsNull(ClientConnectedEventEventArgs);
+                Assert.IsNull(ServerErrorEvent);
+                Assert.IsNull(ConnectionFailEventArgs);
+                Assert.IsFalse(ClientDisconnectedEventColled);
+
+                client.Start(ipEp1);
+
+                var waitStart = DateTime.Now;
+                while (ServerErrorEvent == null)
+                {
+                    var delta = DateTime.Now - waitStart;
+                    if (delta.TotalSeconds > 20) Assert.Fail("Wait Timeout");
+                }
+
+                Assert.IsNotNull(ServerErrorEvent);
+                Assert.IsNull(ConnectionFailEventArgs);
+                Assert.IsNotNull(ClientConnectedEventEventArgs);
+                Assert.IsTrue(ClientDisconnectedEventColled);
+                Assert.IsNull(ServerConnectedEventArgs);
+                Assert.IsNull(ServerDisconnectedEventArgs);
+
+                server.Dispose();
+                client.Dispose();
+            }
+        }
+
         [TestMethod]
         public void ConnectDisconnectServerTests()
         {
@@ -140,9 +198,13 @@ namespace Flekosoft.UnitTests.Common.Network
                 client.ConnectedEvent += Client_ConnectedEvent;
                 client.DisconnectedEvent += Client_DisconnectedEvent;
 
-                ConnectionTest(client, ipEp1);
-                ConnectionTest(client, ipEp2);
-                ConnectionTest(client, ipEp3);
+                X509Certificate clientCert1 = MakeCert(serverName);
+                X509Certificate clientCert2 = MakeCert(serverName);
+                X509Certificate clientCert3 = MakeCert(serverName);
+
+                ConnectionTest(client, ipEp1, serverName, clientCert1, SslProtocols.None, false, EncryptionPolicy.RequireEncryption);
+                ConnectionTest(client, ipEp2, serverName, clientCert2, SslProtocols.None, false, EncryptionPolicy.RequireEncryption);
+                ConnectionTest(client, ipEp3, serverName, clientCert3, SslProtocols.None, false, EncryptionPolicy.RequireEncryption);
 
                 while (server.GetConnections().Count != 0) { };
 
@@ -325,6 +387,10 @@ namespace Flekosoft.UnitTests.Common.Network
                 client1.Dispose();
                 client2.Dispose();
                 client3.Dispose();
+
+                clientCert1.Dispose();
+                clientCert2.Dispose();
+                clientCert3.Dispose();
             }
         }
 
@@ -631,6 +697,42 @@ namespace Flekosoft.UnitTests.Common.Network
             ServerReceiveDataTraceEvent.Add(e);
         }
 
+        public bool ClientDisconnectedEventColled { get; set; }
+        private void Client_DisconnectedEvent(object sender, System.EventArgs e)
+        {
+            ClientDisconnectedEventColled = true;
+        }
+
+        public ConnectionEventArgs ClientConnectedEventEventArgs { get; set; }
+        private void Client_ConnectedEvent(object sender, ConnectionEventArgs e)
+        {
+            ClientConnectedEventEventArgs = e;
+        }
+
+        public ConnectionFailEventArgs ConnectionFailEventArgs { get; set; }
+        private void Client_ConnectionFailEvent(object sender, ConnectionFailEventArgs e)
+        {
+            ConnectionFailEventArgs = e;
+        }
+
+        public bool Client3DisconnectedEventColled { get; set; }
+        private void Client3_DisconnectedEvent(object sender, System.EventArgs e)
+        {
+            Client3DisconnectedEventColled = true;
+        }
+
+        public bool Client2DisconnectedEventColled { get; set; }
+        private void Client2_DisconnectedEvent(object sender, System.EventArgs e)
+        {
+            Client2DisconnectedEventColled = true;
+        }
+
+        public bool Client1DisconnectedEventColled { get; set; }
+        private void Client1_DisconnectedEvent(object sender, System.EventArgs e)
+        {
+            Client1DisconnectedEventColled = true;
+        }
+
         void ConnectionTest(TcpServerLocalEndpoint tslep)
         {
             List<TcpClient> clientsList = new List<TcpClient>();
@@ -680,43 +782,10 @@ namespace Flekosoft.UnitTests.Common.Network
             clientsList.Clear();
         }
 
-        public bool ClientDisconnectedEventColled { get; set; }
-        private void Client_DisconnectedEvent(object sender, System.EventArgs e)
-        {
-            ClientDisconnectedEventColled = true;
-        }
-
-        public ConnectionEventArgs ClientConnectedEventEventArgs { get; set; }
-        private void Client_ConnectedEvent(object sender, ConnectionEventArgs e)
-        {
-            ClientConnectedEventEventArgs = e;
-        }
-
-        public ConnectionFailEventArgs ConnectionFailEventArgs { get; set; }
-        private void Client_ConnectionFailEvent(object sender, ConnectionFailEventArgs e)
-        {
-            ConnectionFailEventArgs = e;
-        }
-
-        public bool Client3DisconnectedEventColled { get; set; }
-        private void Client3_DisconnectedEvent(object sender, System.EventArgs e)
-        {
-            Client3DisconnectedEventColled = true;
-        }
-
-        public bool Client2DisconnectedEventColled { get; set; }
-        private void Client2_DisconnectedEvent(object sender, System.EventArgs e)
-        {
-            Client2DisconnectedEventColled = true;
-        }
-
-        public bool Client1DisconnectedEventColled { get; set; }
-        private void Client1_DisconnectedEvent(object sender, System.EventArgs e)
-        {
-            Client1DisconnectedEventColled = true;
-        }
-
-        void ConnectionTest(TcpClient client, IPEndPoint endPoint)
+        void ConnectionTest(TcpClient client, IPEndPoint endPoint, string serverName, X509Certificate clientCertificate,
+            SslProtocols enabledSslProtocols,
+            bool checkCertificateRevocation,
+            EncryptionPolicy encryptionPolicy)
         {
             ServerConnectedEventArgs = null;
             //ServerDisconnectedEventArgs = null;
@@ -724,12 +793,14 @@ namespace Flekosoft.UnitTests.Common.Network
             Assert.IsNull(ServerConnectedEventArgs);
             //Assert.IsNull(ServerDisconnectedEventArgs);
             Assert.IsNull(ClientConnectedEventEventArgs);
-            client.Start(endPoint);
+            client.Start(endPoint, serverName, clientCertificate, enabledSslProtocols, checkCertificateRevocation, encryptionPolicy);
+
+
             var waitStart = DateTime.Now;
             while (ServerConnectedEventArgs == null || ClientConnectedEventEventArgs == null)
             {
                 var delta = DateTime.Now - waitStart;
-                if (delta.TotalSeconds > 5) Assert.Fail("Wait Timeout");
+                if (delta.TotalSeconds > 60) Assert.Fail("Wait Timeout");
             }
             Assert.IsNotNull(ClientConnectedEventEventArgs);
             Assert.IsNotNull(ServerConnectedEventArgs);
@@ -750,7 +821,7 @@ namespace Flekosoft.UnitTests.Common.Network
             while (!Equals(ServerDisconnectedEventArgs?.RemoteEndPoint, clientLocalEp))
             {
                 var delta = DateTime.Now - waitStart;
-                if (delta.TotalSeconds > 5) Assert.Fail("Wait Timeout");
+                if (delta.TotalSeconds > 500) Assert.Fail("Wait Timeout");
             }
 
             Assert.IsNull(ServerConnectedEventArgs);
@@ -871,6 +942,13 @@ namespace Flekosoft.UnitTests.Common.Network
         private void Server_ErrorEvent(object sender, System.IO.ErrorEventArgs e)
         {
             Assert.Fail(e.GetException().ToString());
+        }
+
+        System.IO.ErrorEventArgs ServerErrorEvent { get; set; }
+
+        private void Server_NonFailErrorEvent(object sender, System.IO.ErrorEventArgs e)
+        {
+            ServerErrorEvent = e;
         }
 
         public PropertyChangedEventArgs ServerPropertyChangedEventArgs { get; set; }

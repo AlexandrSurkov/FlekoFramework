@@ -19,11 +19,17 @@ namespace Flekosoft.UnitTests.Common.Network
 
         static X509Certificate MakeCert(string commonName)
         {
-            using (var ecdsa = ECDsa.Create()) // generate asymmetric key pair  
+            using (var rsa = RSA.Create()) // generate asymmetric key pair  
             {
-                var req = new CertificateRequest($"cn={commonName}", ecdsa, HashAlgorithmName.SHA256);
+                var req = new CertificateRequest($"cn={commonName}", rsa, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
                 var cert = req.CreateSelfSigned(DateTimeOffset.Now, DateTimeOffset.Now.AddYears(5));
-                return cert;
+                var key = cert.PrivateKey;
+
+                var arr = cert.Export(X509ContentType.Pkcs12);
+                cert.Dispose();
+                X509Certificate2 certRes = new X509Certificate2();
+                certRes.Import(arr);
+                return certRes;
             }
         }
 
@@ -212,7 +218,7 @@ namespace Flekosoft.UnitTests.Common.Network
                 ServerDisconnectedEventArgs = null;
                 Assert.IsNull(ServerConnectedEventArgs);
                 Assert.IsNull(ServerDisconnectedEventArgs);
-                client.Start(ipEp1);
+                client.Start(ipEp1, serverName, clientCert1, SslProtocols.None, false, EncryptionPolicy.RequireEncryption);
                 var waitStart = DateTime.Now;
                 while (ServerConnectedEventArgs == null)
                 {
@@ -249,7 +255,7 @@ namespace Flekosoft.UnitTests.Common.Network
                 ServerDisconnectedEventArgs = null;
                 Assert.IsNull(ServerConnectedEventArgs);
                 Assert.IsNull(ServerDisconnectedEventArgs);
-                client1.Start(ipEp1);
+                client1.Start(ipEp1, serverName, clientCert1, SslProtocols.None, false, EncryptionPolicy.RequireEncryption);
                 waitStart = DateTime.Now;
                 while (ServerConnectedEventArgs == null)
                 {
@@ -263,7 +269,7 @@ namespace Flekosoft.UnitTests.Common.Network
                 ServerDisconnectedEventArgs = null;
                 Assert.IsNull(ServerConnectedEventArgs);
                 Assert.IsNull(ServerDisconnectedEventArgs);
-                client2.Start(ipEp2);
+                client2.Start(ipEp2, serverName, clientCert2, SslProtocols.None, false, EncryptionPolicy.RequireEncryption);
                 waitStart = DateTime.Now;
                 while (ServerConnectedEventArgs == null)
                 {
@@ -277,7 +283,7 @@ namespace Flekosoft.UnitTests.Common.Network
                 ServerDisconnectedEventArgs = null;
                 Assert.IsNull(ServerConnectedEventArgs);
                 Assert.IsNull(ServerDisconnectedEventArgs);
-                client3.Start(ipEp3);
+                client3.Start(ipEp3, serverName, clientCert3, SslProtocols.None, false, EncryptionPolicy.RequireEncryption);
                 waitStart = DateTime.Now;
                 while (ServerConnectedEventArgs == null)
                 {
@@ -310,7 +316,7 @@ namespace Flekosoft.UnitTests.Common.Network
                 Assert.IsFalse(client2.IsConnected);
                 Assert.IsFalse(client3.IsConnected);
 
-                server.Start(epList);
+                server.Start(epList, serverCert, false, SslProtocols.None, false, EncryptionPolicy.RequireEncryption);
                 Thread.Sleep(1000);
 
                 Assert.IsTrue(client1.IsConnected);
@@ -394,270 +400,207 @@ namespace Flekosoft.UnitTests.Common.Network
             }
         }
 
-        //[TestMethod]
-        //public void ConnectionCountTest()
-        //{
-        //    var server = new TcpServer();
-        //    server.ErrorEvent += Server_ErrorEvent;
+        [TestMethod]
+        public void ConnectionCountTest()
+        {
+            var serverName = "TestServer";
+            using (X509Certificate serverCert = MakeCert(serverName))
+            {
+                var server = new TcpServer();
+                server.ErrorEvent += Server_ErrorEvent;
 
-        //    server.ConnectedEvent += Server_ConnectedEvent;
-        //    server.DisconnectedEvent += Server_DisconnectedEvent;
+                server.ConnectedEvent += Server_ConnectedEvent;
+                server.DisconnectedEvent += Server_DisconnectedEvent;
 
-        //    var epList = new List<TcpServerLocalEndpoint>();
-        //    var ipEp1 = (new TcpServerLocalEndpoint(new IPEndPoint(IPAddress.Parse("127.0.0.1"), 1111), 1));
-        //    var ipEp2 = (new TcpServerLocalEndpoint(new IPEndPoint(IPAddress.Parse("127.0.0.1"), 2222), 2));
-        //    var ipEp3 = (new TcpServerLocalEndpoint(new IPEndPoint(IPAddress.Parse("127.0.0.1"), 3333), 3));
+                var epList = new List<TcpServerLocalEndpoint>();
+                var ipEp1 = (new TcpServerLocalEndpoint(new IPEndPoint(IPAddress.Parse("127.0.0.1"), 1111), 1));
+                var ipEp2 = (new TcpServerLocalEndpoint(new IPEndPoint(IPAddress.Parse("127.0.0.1"), 2222), 2));
+                var ipEp3 = (new TcpServerLocalEndpoint(new IPEndPoint(IPAddress.Parse("127.0.0.1"), 3333), 3));
 
-        //    epList.Add(ipEp1);
-        //    epList.Add(ipEp2);
-        //    epList.Add(ipEp3);
+                epList.Add(ipEp1);
+                epList.Add(ipEp2);
+                epList.Add(ipEp3);
 
-        //    server.Start(epList);
+                server.Start(epList, serverCert, false, SslProtocols.None, false, EncryptionPolicy.RequireEncryption);
 
-        //    ConnectionTest(ipEp1);
-        //    ConnectionTest(ipEp2);
-        //    ConnectionTest(ipEp3);
+                ConnectionTest(ipEp1, serverName, SslProtocols.None, false, EncryptionPolicy.RequireEncryption);
+                ConnectionTest(ipEp2, serverName, SslProtocols.None, false, EncryptionPolicy.RequireEncryption);
+                ConnectionTest(ipEp3, serverName, SslProtocols.None, false, EncryptionPolicy.RequireEncryption);
 
-        //    server.Dispose();
-        //}
+                server.Dispose();
+            }
+        }
 
-        //[TestMethod]
-        //public void SendReceiveTest()
-        //{
-        //    var server = new TcpServer();
-        //    server.ErrorEvent += Server_ErrorEvent;
+        [TestMethod]
+        public void ClientCertNotRequiredCheckTest()
+        {
+            var serverName = "TestServer";
+            using (X509Certificate serverCert = MakeCert(serverName))
+            {
+                var server = new EncryptionTestTcpServer();
+                server.ErrorEvent += Server_ErrorEvent;
 
-        //    server.DataReceivedEvent += Server_DataReceivedEvent;
+                var epList = new List<TcpServerLocalEndpoint>();
+                var ipEp1 = (new TcpServerLocalEndpoint(new IPEndPoint(IPAddress.Parse("127.0.0.1"), 1234), 1));
 
-        //    var epList = new List<TcpServerLocalEndpoint>();
-        //    var ipEp1 = (new TcpServerLocalEndpoint(new IPEndPoint(IPAddress.Parse("127.0.0.1"), 1234), 1));
+                epList.Add(ipEp1);
+                server.Start(epList, serverCert, false, SslProtocols.None, false, EncryptionPolicy.RequireEncryption);
+                X509Certificate clientCert = MakeCert(serverName);
+                var client = new TcpClient();
 
-        //    epList.Add(ipEp1);
-        //    server.Start(epList);
+                server.ClientCertificate = null;
+                client.Start(ipEp1.EndPoint, serverName, clientCert, SslProtocols.None, false, EncryptionPolicy.RequireEncryption);
+                Thread.Sleep(5000);
+                Assert.IsNull(server.ClientCertificate);
 
-        //    var client = new TcpClient();
-        //    client.DataReceivedEvent += Client_DataReceivedEvent;
-        //    client.Start(ipEp1.EndPoint);
-        //    Thread.Sleep(200);
+                client.Stop();
+                server.Stop();
 
-        //    for (int i = 1; i < 10; i++)
-        //    {
-        //        var data = BitConverter.GetBytes(i);
-        //        ServerDataReceivedEvent.Clear();
-        //        Assert.AreEqual(0, ServerDataReceivedEvent.Count);
-        //        client.SendData(data);
-        //        Thread.Sleep(100);
-        //        Assert.AreEqual(1, ServerDataReceivedEvent.Count);
-        //        Assert.AreEqual(data.Length, ServerDataReceivedEvent[0].Data.Length);
-        //        for (int j = 0; j < data.Length; j++)
-        //        {
-        //            Assert.AreEqual(data[j], ServerDataReceivedEvent[0].Data[j]);
-        //            Assert.AreEqual(client.ExchangeInterface.LocalEndPoint, ServerDataReceivedEvent[0].RemoteEndPoint);
-        //            Assert.AreEqual(client.ExchangeInterface.RemoteEndPoint, ServerDataReceivedEvent[0].LocalEndPoint);
-        //        }
-        //    }
+                server.Dispose();
+                client.Dispose();
+                clientCert.Dispose();
+            }
+        }
 
-        //    for (int i = 1; i < 10; i++)
-        //    {
-        //        var data = BitConverter.GetBytes(i);
-        //        ClientDataReceivedEvent.Clear();
-        //        Assert.AreEqual(0, ClientDataReceivedEvent.Count);
-        //        server.Write(data, client.ExchangeInterface.RemoteEndPoint, client.ExchangeInterface.LocalEndPoint);
-        //        Thread.Sleep(100);
-        //        Assert.AreEqual(1, ServerDataReceivedEvent.Count);
-        //        Assert.AreEqual(data.Length, ServerDataReceivedEvent[0].Data.Length);
-        //        for (int j = 0; j < data.Length; j++)
-        //        {
-        //            Assert.AreEqual(data[j], ClientDataReceivedEvent[0].Data[j]);
-        //            Assert.AreEqual(ipEp1.EndPoint, ClientDataReceivedEvent[0].RemoteEndPoint);
-        //        }
-        //    }
+        [TestMethod]
+        public void ClientCertRequiredCheckTest()
+        {
+            var serverName = "TestServer";
+            using (X509Certificate serverCert = MakeCert(serverName))
+            {
+                var server = new EncryptionTestTcpServer();
+                server.ErrorEvent += Server_ErrorEvent;
 
-        //    server.Dispose();
-        //}
+                var epList = new List<TcpServerLocalEndpoint>();
+                var ipEp1 = (new TcpServerLocalEndpoint(new IPEndPoint(IPAddress.Parse("127.0.0.1"), 1234), 1));
 
-        //[TestMethod]
-        //public void DisconnectClient_Tests()
-        //{
-        //    var server = new TcpServer();
-        //    server.ErrorEvent += Server_ErrorEvent;
+                epList.Add(ipEp1);
+                server.Start(epList, serverCert, true, SslProtocols.None, false, EncryptionPolicy.RequireEncryption);
+                X509Certificate clientCert = MakeCert(serverName);
+                var client = new TcpClient();
 
-        //    server.ConnectedEvent += Server_ConnectedEvent;
-        //    server.DisconnectedEvent += Server_DisconnectedEvent;
+                server.ClientCertificate = null;
+                client.Start(ipEp1.EndPoint, serverName, clientCert, SslProtocols.None, false, EncryptionPolicy.RequireEncryption);
+                var waitStart = DateTime.Now;
+                while (server.ClientCertificate == null)
+                {
+                    var delta = DateTime.Now - waitStart;
+                    if (delta.TotalSeconds > 5) Assert.Fail("Wait Timeout");
+                }
+                Assert.IsNotNull(server.ClientCertificate);
+                Assert.AreEqual(clientCert, server.ClientCertificate);
 
-        //    var epList = new List<TcpServerLocalEndpoint>();
-        //    var ipEp1 = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 7777);
-        //    var ipEp2 = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 8888);
-        //    var ipEp3 = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 9999);
+                client.Stop();
+                server.Stop();
 
-        //    epList.Add(new TcpServerLocalEndpoint(ipEp1, 1));
-        //    epList.Add(new TcpServerLocalEndpoint(ipEp2, 1));
-        //    epList.Add(new TcpServerLocalEndpoint(ipEp3, 1));
+                server.Dispose();
+                client.Dispose();
+                clientCert.Dispose();
+            }
+        }
 
-        //    server.Start(epList);
+        [TestMethod]
+        public void SendReceiveTest()
+        {
+            var serverName = "TestServer";
+            using (X509Certificate serverCert = MakeCert(serverName))
+            {
+                var server = new TcpServer();
+                server.ErrorEvent += Server_ErrorEvent;
 
-        //    var client = new TcpClient();
-        //    client.ConnectedEvent += Client_ConnectedEvent;
-        //    client.DisconnectedEvent += Client_DisconnectedEvent;
+                server.DataReceivedEvent += Server_DataReceivedEvent;
 
-        //    DisconnectClientTest(client, server, ipEp1);
-        //    DisconnectClientTest(client, server, ipEp2);
-        //    DisconnectClientTest(client, server, ipEp3);
+                var epList = new List<TcpServerLocalEndpoint>();
+                var ipEp1 = (new TcpServerLocalEndpoint(new IPEndPoint(IPAddress.Parse("127.0.0.1"), 1234), 1));
 
-        //    server.Dispose();
+                epList.Add(ipEp1);
+                server.Start(epList, serverCert, false, SslProtocols.None, false, EncryptionPolicy.RequireEncryption);
 
-        //    client.Dispose();
-        //}
+                X509Certificate clientCert = MakeCert(serverName);
+                var client = new TcpClient();
+                client.DataReceivedEvent += Client_DataReceivedEvent;
+                client.Start(ipEp1.EndPoint, serverName, clientCert, SslProtocols.None, false, EncryptionPolicy.RequireEncryption);
+                Thread.Sleep(200);
 
-        //[TestMethod]
-        //public void DataTraceTest()
-        //{
-        //    var server = new TcpServer();
-        //    server.ErrorEvent += Server_ErrorEvent;
+                for (int i = 1; i < 10; i++)
+                {
+                    var data = BitConverter.GetBytes(i);
+                    ServerDataReceivedEvent.Clear();
+                    Assert.AreEqual(0, ServerDataReceivedEvent.Count);
+                    client.SendData(data);
+                    Thread.Sleep(100);
+                    Assert.AreEqual(1, ServerDataReceivedEvent.Count);
+                    Assert.AreEqual(data.Length, ServerDataReceivedEvent[0].Data.Length);
+                    for (int j = 0; j < data.Length; j++)
+                    {
+                        Assert.AreEqual(data[j], ServerDataReceivedEvent[0].Data[j]);
+                        Assert.AreEqual(client.ExchangeInterface.LocalEndPoint, ServerDataReceivedEvent[0].RemoteEndPoint);
+                        Assert.AreEqual(client.ExchangeInterface.RemoteEndPoint, ServerDataReceivedEvent[0].LocalEndPoint);
+                    }
+                }
 
-        //    server.ReceiveDataTraceEvent += Server_ReceiveDataTraceEvent;
-        //    server.SendDataTraceEvent += Server_SendDataTraceEvent;
-        //    server.DataReceivedEvent += Server_DataReceivedEvent;
+                for (int i = 1; i < 10; i++)
+                {
+                    var data = BitConverter.GetBytes(i);
+                    ClientDataReceivedEvent.Clear();
+                    Assert.AreEqual(0, ClientDataReceivedEvent.Count);
+                    server.Write(data, client.ExchangeInterface.RemoteEndPoint, client.ExchangeInterface.LocalEndPoint);
+                    Thread.Sleep(100);
+                    Assert.AreEqual(1, ServerDataReceivedEvent.Count);
+                    Assert.AreEqual(data.Length, ServerDataReceivedEvent[0].Data.Length);
+                    for (int j = 0; j < data.Length; j++)
+                    {
+                        Assert.AreEqual(data[j], ClientDataReceivedEvent[0].Data[j]);
+                        Assert.AreEqual(ipEp1.EndPoint, ClientDataReceivedEvent[0].RemoteEndPoint);
+                    }
+                }
 
-        //    var epList = new List<TcpServerLocalEndpoint>();
-        //    var ipEp1 = (new TcpServerLocalEndpoint(new IPEndPoint(IPAddress.Parse("127.0.0.1"), 2345), 1));
+                server.Dispose();
+                client.Dispose();
+                clientCert.Dispose();
+            }
+        }
 
-        //    epList.Add(ipEp1);
-        //    server.Start(epList);
+        [TestMethod]
+        public void DisconnectClient_Tests()
+        {
+            var serverName = "TestServer";
+            using (X509Certificate serverCert = MakeCert(serverName))
+            {
+                var server = new TcpServer();
+                server.ErrorEvent += Server_ErrorEvent;
 
-        //    var client = new TcpClient();
-        //    client.ConnectedEvent += Client_ConnectedEvent;
-        //    client.DisconnectedEvent += Client_DisconnectedEvent;
-        //    client.DataReceivedEvent += Client_DataReceivedEvent;
-        //    client.ReceiveDataTraceEvent += Client_ReceiveDataTraceEvent;
-        //    client.SendDataTraceEvent += Client_SendDataTraceEvent;
+                server.ConnectedEvent += Server_ConnectedEvent;
+                server.DisconnectedEvent += Server_DisconnectedEvent;
 
-        //    ClientConnectedEventEventArgs = null;
-        //    client.Start(ipEp1.EndPoint);
-        //    var waitStart = DateTime.Now;
-        //    while (ClientConnectedEventEventArgs == null)
-        //    {
-        //        var delta = DateTime.Now - waitStart;
-        //        if (delta.TotalSeconds > 5) Assert.Fail("ClientConnectedEventEventArgs Timeout");
-        //    }
+                var epList = new List<TcpServerLocalEndpoint>();
+                var ipEp1 = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 7777);
+                var ipEp2 = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 8888);
+                var ipEp3 = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 9999);
 
-        //    client.DataTrace = false;
-        //    server.DataTrace = false;
+                epList.Add(new TcpServerLocalEndpoint(ipEp1, 1));
+                epList.Add(new TcpServerLocalEndpoint(ipEp2, 1));
+                epList.Add(new TcpServerLocalEndpoint(ipEp3, 1));
 
-        //    for (int i = 1; i < 10; i++)
-        //    {
-        //        var data = BitConverter.GetBytes(i);
-        //        ServerDataReceivedEvent.Clear();
-        //        ClientSendDataTraceEvent.Clear();
-        //        ServerReceiveDataTraceEvent.Clear();
-        //        Assert.AreEqual(0, ServerDataReceivedEvent.Count);
-        //        Assert.AreEqual(0, ClientSendDataTraceEvent.Count);
-        //        Assert.AreEqual(0, ServerReceiveDataTraceEvent.Count);
-        //        client.SendData(data);
-        //        Thread.Sleep(100);
-        //        Assert.AreEqual(1, ServerDataReceivedEvent.Count);
-        //        Assert.AreEqual(data.Length, ServerDataReceivedEvent[0].Data.Length);
-        //        Assert.AreEqual(0, ClientSendDataTraceEvent.Count);
-        //        Assert.AreEqual(0, ServerReceiveDataTraceEvent.Count);
-        //        for (int j = 0; j < data.Length; j++)
-        //        {
-        //            Assert.AreEqual(data[j], ServerDataReceivedEvent[0].Data[j]);
-        //            Assert.AreEqual(client.ExchangeInterface.LocalEndPoint, ServerDataReceivedEvent[0].RemoteEndPoint);
-        //            Assert.AreEqual(client.ExchangeInterface.RemoteEndPoint, ServerDataReceivedEvent[0].LocalEndPoint);
-        //        }
-        //    }
+                server.Start(epList, serverCert, false, SslProtocols.None, false, EncryptionPolicy.RequireEncryption);
 
-        //    for (int i = 1; i < 10; i++)
-        //    {
-        //        var data = BitConverter.GetBytes(i);
-        //        ClientDataReceivedEvent.Clear();
-        //        ServerSendDataTraceEvent.Clear();
-        //        ClientReceiveDataTraceEvent.Clear();
-        //        Assert.AreEqual(0, ClientDataReceivedEvent.Count);
-        //        Assert.AreEqual(0, ServerSendDataTraceEvent.Count);
-        //        Assert.AreEqual(0, ClientReceiveDataTraceEvent.Count);
-        //        server.Write(data, client.ExchangeInterface.RemoteEndPoint, client.ExchangeInterface.LocalEndPoint);
-        //        Thread.Sleep(100);
-        //        Assert.AreEqual(1, ServerDataReceivedEvent.Count);
-        //        Assert.AreEqual(data.Length, ServerDataReceivedEvent[0].Data.Length);
-        //        Assert.AreEqual(0, ServerSendDataTraceEvent.Count);
-        //        Assert.AreEqual(0, ClientReceiveDataTraceEvent.Count);
-        //        for (int j = 0; j < data.Length; j++)
-        //        {
-        //            Assert.AreEqual(data[j], ClientDataReceivedEvent[0].Data[j]);
-        //            Assert.AreEqual(ipEp1.EndPoint, ClientDataReceivedEvent[0].RemoteEndPoint);
-        //        }
-        //    }
+                var client = new TcpClient();
+                client.ConnectedEvent += Client_ConnectedEvent;
+                client.DisconnectedEvent += Client_DisconnectedEvent;
 
+                X509Certificate clientCert = MakeCert(serverName);
 
-        //    client.DataTrace = true;
-        //    server.DataTrace = true;
+                DisconnectClientTest(client, server, ipEp1, serverName, clientCert, SslProtocols.None, false, EncryptionPolicy.RequireEncryption);
+                DisconnectClientTest(client, server, ipEp2, serverName, clientCert, SslProtocols.None, false, EncryptionPolicy.RequireEncryption);
+                DisconnectClientTest(client, server, ipEp3, serverName, clientCert, SslProtocols.None, false, EncryptionPolicy.RequireEncryption);
 
-        //    for (int i = 1; i < 10; i++)
-        //    {
-        //        var data = BitConverter.GetBytes(i);
-        //        ServerDataReceivedEvent.Clear();
-        //        ClientSendDataTraceEvent.Clear();
-        //        ServerReceiveDataTraceEvent.Clear();
-        //        Assert.AreEqual(0, ServerDataReceivedEvent.Count);
-        //        Assert.AreEqual(0, ClientSendDataTraceEvent.Count);
-        //        Assert.AreEqual(0, ServerReceiveDataTraceEvent.Count);
-        //        client.SendData(data);
-        //        Thread.Sleep(100);
-        //        Assert.AreEqual(1, ServerDataReceivedEvent.Count);
-        //        Assert.AreEqual(data.Length, ServerDataReceivedEvent[0].Data.Length);
-        //        Assert.AreEqual(1, ClientSendDataTraceEvent.Count);
-        //        Assert.AreEqual(1, ServerReceiveDataTraceEvent.Count);
-        //        for (int j = 0; j < data.Length; j++)
-        //        {
-        //            Assert.AreEqual(data[j], ServerDataReceivedEvent[0].Data[j]);
-        //            Assert.AreEqual(client.ExchangeInterface.LocalEndPoint, ServerDataReceivedEvent[0].RemoteEndPoint);
-        //            Assert.AreEqual(client.ExchangeInterface.RemoteEndPoint, ServerDataReceivedEvent[0].LocalEndPoint);
+                server.Dispose();
 
-        //            Assert.AreEqual(data[j], ClientSendDataTraceEvent[0].Data[j]);
-        //            Assert.AreEqual(data[j], ServerReceiveDataTraceEvent[0].Data[j]);
-        //        }
+                client.Dispose();
 
-
-        //        Assert.AreEqual(ipEp1.EndPoint, ClientSendDataTraceEvent[0].RemoteEndPoint);
-
-
-        //        Assert.AreEqual(client.ExchangeInterface.LocalEndPoint, ServerReceiveDataTraceEvent[0].RemoteEndPoint);
-        //        Assert.AreEqual(client.ExchangeInterface.RemoteEndPoint, ServerReceiveDataTraceEvent[0].LocalEndPoint);
-        //    }
-
-        //    for (int i = 1; i < 10; i++)
-        //    {
-        //        var data = BitConverter.GetBytes(i);
-        //        ClientDataReceivedEvent.Clear();
-        //        ServerSendDataTraceEvent.Clear();
-        //        ClientReceiveDataTraceEvent.Clear();
-        //        Assert.AreEqual(0, ClientDataReceivedEvent.Count);
-        //        Assert.AreEqual(0, ServerSendDataTraceEvent.Count);
-        //        Assert.AreEqual(0, ClientReceiveDataTraceEvent.Count);
-        //        server.Write(data, client.ExchangeInterface.RemoteEndPoint, client.ExchangeInterface.LocalEndPoint);
-        //        Thread.Sleep(100);
-        //        Assert.AreEqual(1, ServerDataReceivedEvent.Count);
-        //        Assert.AreEqual(data.Length, ServerDataReceivedEvent[0].Data.Length);
-        //        Assert.AreEqual(1, ServerSendDataTraceEvent.Count);
-        //        Assert.AreEqual(1, ClientReceiveDataTraceEvent.Count);
-        //        for (int j = 0; j < data.Length; j++)
-        //        {
-        //            Assert.AreEqual(data[j], ClientDataReceivedEvent[0].Data[j]);
-        //            Assert.AreEqual(ipEp1.EndPoint, ClientDataReceivedEvent[0].RemoteEndPoint);
-
-        //            Assert.AreEqual(data[j], ServerSendDataTraceEvent[0].Data[j]);
-        //            Assert.AreEqual(data[j], ClientReceiveDataTraceEvent[0].Data[j]);
-        //        }
-
-        //        Assert.AreEqual(client.ExchangeInterface.LocalEndPoint, ServerReceiveDataTraceEvent[0].RemoteEndPoint);
-        //        Assert.AreEqual(client.ExchangeInterface.RemoteEndPoint, ServerReceiveDataTraceEvent[0].LocalEndPoint);
-
-        //        Assert.AreEqual(ipEp1.EndPoint, ClientReceiveDataTraceEvent[0].RemoteEndPoint);
-        //    }
-
-        //    server.Dispose();
-        //}
+                clientCert.Dispose();
+            }
+        }
 
         public List<NetworkDataEventArgs> ClientDataReceivedEvent { get; } = new List<NetworkDataEventArgs>();
         private void Client_DataReceivedEvent(object sender, NetworkDataEventArgs e)
@@ -733,14 +676,21 @@ namespace Flekosoft.UnitTests.Common.Network
             Client1DisconnectedEventColled = true;
         }
 
-        void ConnectionTest(TcpServerLocalEndpoint tslep)
+        void ConnectionTest(TcpServerLocalEndpoint tslep, string serverName,
+            SslProtocols enabledSslProtocols,
+            bool checkCertificateRevocation,
+            EncryptionPolicy encryptionPolicy)
         {
             List<TcpClient> clientsList = new List<TcpClient>();
+            List<X509Certificate> clientsCerts = new List<X509Certificate>();
+            X509Certificate clientCert;
 
             TcpClient client;
 
             for (int i = 0; i < tslep.MaxClients; i++)
             {
+                clientCert = MakeCert(serverName);
+                clientsCerts.Add(clientCert);
                 client = new TcpClient();
                 client.ConnectionFailEvent += Client_ConnectionFailEvent;
                 client.DisconnectedEvent += Client_DisconnectedEvent;
@@ -751,7 +701,7 @@ namespace Flekosoft.UnitTests.Common.Network
                 Assert.IsNull(ServerConnectedEventArgs);
                 Assert.IsNull(ConnectionFailEventArgs);
                 //Assert.IsNull(ServerDisconnectedEventArgs);
-                client.Start(tslep.EndPoint);
+                client.Start(tslep.EndPoint, serverName, clientCert, enabledSslProtocols, checkCertificateRevocation, encryptionPolicy);
                 Thread.Sleep(200);
                 Assert.IsNull(ConnectionFailEventArgs);
                 Assert.IsNotNull(ServerConnectedEventArgs);
@@ -760,6 +710,8 @@ namespace Flekosoft.UnitTests.Common.Network
 
             }
 
+            clientCert = MakeCert(serverName);
+            clientsCerts.Add(clientCert);
             client = new TcpClient();
             client.ConnectionFailEvent += Client_ConnectionFailEvent;
             client.DisconnectedEvent += Client_DisconnectedEvent;
@@ -770,7 +722,7 @@ namespace Flekosoft.UnitTests.Common.Network
             Assert.IsNull(ServerConnectedEventArgs);
             Assert.IsNull(ConnectionFailEventArgs);
             Assert.IsFalse(ClientDisconnectedEventColled);
-            client.Start(tslep.EndPoint);
+            client.Start(tslep.EndPoint, serverName, clientCert, enabledSslProtocols, checkCertificateRevocation, encryptionPolicy);
             Thread.Sleep(400);
             Assert.IsNull(ServerConnectedEventArgs);
             Assert.IsTrue(ConnectionFailEventArgs != null || ClientDisconnectedEventColled);
@@ -780,6 +732,12 @@ namespace Flekosoft.UnitTests.Common.Network
                 tcpClient.Dispose();
             }
             clientsList.Clear();
+
+            foreach (X509Certificate cert in clientsCerts)
+            {
+                cert.Dispose();
+            }
+            clientsCerts.Clear();
         }
 
         void ConnectionTest(TcpClient client, IPEndPoint endPoint, string serverName, X509Certificate clientCertificate,
@@ -821,7 +779,7 @@ namespace Flekosoft.UnitTests.Common.Network
             while (!Equals(ServerDisconnectedEventArgs?.RemoteEndPoint, clientLocalEp))
             {
                 var delta = DateTime.Now - waitStart;
-                if (delta.TotalSeconds > 500) Assert.Fail("Wait Timeout");
+                if (delta.TotalSeconds > 5) Assert.Fail("Wait Timeout");
             }
 
             Assert.IsNull(ServerConnectedEventArgs);
@@ -830,7 +788,10 @@ namespace Flekosoft.UnitTests.Common.Network
             Assert.AreEqual(remoteIp, ServerDisconnectedEventArgs.RemoteEndPoint);
         }
 
-        void DisconnectClientTest(TcpClient client, TcpServer server, IPEndPoint endPoint)
+        void DisconnectClientTest(TcpClient client, TcpServer server, IPEndPoint endPoint, string serverName, X509Certificate clientCertificate,
+            SslProtocols enabledSslProtocols,
+            bool checkCertificateRevocation,
+            EncryptionPolicy encryptionPolicy)
         {
             ServerConnectedEventArgs = null;
             ServerDisconnectedEventArgs = null;
@@ -838,7 +799,7 @@ namespace Flekosoft.UnitTests.Common.Network
             Assert.IsNull(ServerConnectedEventArgs);
             Assert.IsNull(ServerDisconnectedEventArgs);
             Assert.IsNull(ClientConnectedEventEventArgs);
-            client.Start(endPoint);
+            client.Start(endPoint, serverName, clientCertificate, enabledSslProtocols, checkCertificateRevocation, encryptionPolicy);
             var waitStart = DateTime.Now;
             while (ServerConnectedEventArgs == null || ClientConnectedEventEventArgs == null)
             {
@@ -956,6 +917,18 @@ namespace Flekosoft.UnitTests.Common.Network
         private void Server_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
             ServerPropertyChangedEventArgs = e;
+        }
+    }
+
+
+    class EncryptionTestTcpServer : TcpServer
+    {
+        public X509Certificate ClientCertificate { get; set; }
+        protected override bool ValidateClientCertificate(X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors)
+        {
+            if (certificate != null)
+                ClientCertificate = new X509Certificate(certificate);
+            return true;
         }
     }
 }

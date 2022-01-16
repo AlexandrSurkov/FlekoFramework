@@ -41,6 +41,9 @@ namespace Flekosoft.Common.Network.Tcp
 
         protected TcpClientBase()
         {
+            ValidateServerCertificateEvent += TcpClientBase_ValidateServerCertificateEvent;
+            SelectLocalCertificateEvent += TcpClientBase_SelectLocalCertificateEvent;
+
             PollFailLimit = 3;
             PollInterval = 1000;
             ConnectInterval = 1000;
@@ -241,9 +244,10 @@ namespace Flekosoft.Common.Network.Tcp
             {
                 _exchangeInterface?.Dispose();
                 client = new System.Net.Sockets.TcpClient(DestinationIpEndPoint.Address.ToString(), DestinationIpEndPoint.Port);
-                if (_serverName != string.Empty)
+                if (IsEncrypted)
                 {
-                    _exchangeInterface = new EncryptedTcpClientNetworkExchangeInterface(client, _serverName, _clientCertificates, _enabledSslProtocols, _checkCertificateRevocation, _encryptionPolicy, ValidateServerCertificate, SelectLocalCertificate);
+                    _exchangeInterface = new EncryptedTcpClientNetworkExchangeInterface(client, _serverName, _clientCertificates, _enabledSslProtocols, _checkCertificateRevocation, _encryptionPolicy, ValidateServerCertificateEvent, SelectLocalCertificateEvent);
+
                 }
                 else
                     _exchangeInterface = new TcpClientNetworkExchangeInterface(client);
@@ -256,11 +260,11 @@ namespace Flekosoft.Common.Network.Tcp
 
                 OnConnectedEvent(_exchangeInterface.LocalEndPoint, _exchangeInterface.RemoteEndPoint);
 
-
                 return true;
             }
             catch (SocketException se)
             {
+                _exchangeInterface?.Dispose();
                 client?.Close();
                 OnConnectionFailEvent(se.SocketErrorCode.ToString());
                 return false;
@@ -271,6 +275,7 @@ namespace Flekosoft.Common.Network.Tcp
             }
             catch (Exception ex)
             {
+                _exchangeInterface?.Dispose();
                 client?.Close();
                 OnConnectionFailEvent(ex.Message);
                 return false;
@@ -306,7 +311,7 @@ namespace Flekosoft.Common.Network.Tcp
         /// <param name="endPoint">Remote server ip endpoint</param>
         public void Start(IPEndPoint endPoint)
         {
-            Start(endPoint, string.Empty, null, SslProtocols.Default, false, EncryptionPolicy.AllowNoEncryption);
+            Start(endPoint, string.Empty, (X509CertificateCollection)null, SslProtocols.Default, false, EncryptionPolicy.AllowNoEncryption);
         }
 
         public void Start(IPEndPoint endPoint,
@@ -366,9 +371,20 @@ namespace Flekosoft.Common.Network.Tcp
 
         protected abstract bool Poll();
 
+        protected virtual X509Certificate SelectLocalCertificate(string targetHost, X509CertificateCollection localCertificates, X509Certificate remoteCertificate, string[] acceptableIssuers)
+        {
+            if (localCertificates.Count > 0) return localCertificates[0];
+            else return null;
+        }
+
+        protected virtual bool ValidateServerCertificate(X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors)
+        {
+            return true;
+        }
+
         #endregion
 
-        #region events
+        #region Events
         /// <summary>
         /// Client connected
         /// </summary>
@@ -395,9 +411,21 @@ namespace Flekosoft.Common.Network.Tcp
         {
             ConnectionFailEvent?.Invoke(this, new ConnectionFailEventArgs(result));
         }
-        public event RemoteCertificateValidationCallback ValidateServerCertificate;
-        public event LocalCertificateSelectionCallback SelectLocalCertificate;
+        private event RemoteCertificateValidationCallback ValidateServerCertificateEvent;
+        private event LocalCertificateSelectionCallback SelectLocalCertificateEvent;
 
+        #endregion
+
+        #region EventHandlers
+        private X509Certificate TcpClientBase_SelectLocalCertificateEvent(object sender, string targetHost, X509CertificateCollection localCertificates, X509Certificate remoteCertificate, string[] acceptableIssuers)
+        {
+            return SelectLocalCertificate(targetHost, localCertificates, remoteCertificate, acceptableIssuers);
+        }
+
+        private bool TcpClientBase_ValidateServerCertificateEvent(object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors)
+        {
+            return ValidateServerCertificate(certificate, chain, sslPolicyErrors);
+        }
         #endregion
 
         #region Dispodable
@@ -405,8 +433,8 @@ namespace Flekosoft.Common.Network.Tcp
         {
             if (disposing)
             {
-                ValidateServerCertificate = null;
-                SelectLocalCertificate = null;
+                ValidateServerCertificateEvent = null;
+                SelectLocalCertificateEvent = null;
 
                 if (_connectThread != null)
                 {

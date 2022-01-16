@@ -39,25 +39,16 @@ namespace Flekosoft.Common.Network.Tcp
 
         protected TcpServerBase()
         {
+            ValidateClientCertificateEvent += TcpServerBase_ValidateClientCertificate;
+            SelectLocalCertificateEvent += TcpServerBase_SelectLocalCertificate;
+
             _waitConnectionThread = new Thread(ConnectRequestsThreadProc);
             _waitConnectionThread.Start(_cancellationTokenSource.Token);
-
-            ValidateClientCertificate += TcpServerBase_ValidateClientCertificate;
-            SelectLocalCertificate += TcpServerBase_SelectLocalCertificate;
-
         }
 
-        private X509Certificate TcpServerBase_SelectLocalCertificate(object sender, string targetHost, X509CertificateCollection localCertificates, X509Certificate remoteCertificate, string[] acceptableIssuers)
-        {
-            throw new NotImplementedException();
-        }
+        
 
-        private bool TcpServerBase_ValidateClientCertificate(object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors)
-        {
-            throw new NotImplementedException();
-        }
-
-        #region properties
+        #region Properties
 
         /// <summary>
         /// Is server started
@@ -219,7 +210,7 @@ namespace Flekosoft.Common.Network.Tcp
 
         #endregion
 
-        #region Methods
+        #region Methods        
 
         /// <summary>
         /// Start server
@@ -402,9 +393,20 @@ namespace Flekosoft.Common.Network.Tcp
 
         protected abstract void ProcessDataInternal(NetworkDataEventArgs e);
 
+        protected virtual X509Certificate SelectLocalCertificate(string targetHost, X509CertificateCollection localCertificates, X509Certificate remoteCertificate, string[] acceptableIssuers)
+        {
+            if (localCertificates.Count > 0) return localCertificates[0];
+            else return null;
+        }
+
+        protected virtual bool ValidateClientCertificate(X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors)
+        {
+            return true;
+        }
+
         #endregion
 
-        #region event handlers
+        #region Event handlers
         private void AcceptCallback(IAsyncResult ar)
         {
             try
@@ -443,14 +445,14 @@ namespace Flekosoft.Common.Network.Tcp
                                         _enabledSslProtocols,
                                         _checkCertificateRevocation,
                                         _encryptionPolicy,
-                                        ValidateClientCertificate,
-                                        SelectLocalCertificate));
+                                        ValidateClientCertificateEvent,
+                                        SelectLocalCertificateEvent));
                                 }
                             }
                             catch (Exception ex)
                             {
                                 socket.Close();
-                                driver?.Dispose();                                
+                                driver?.Dispose();
                                 OnErrorEvent(ex);
                                 listenSocket.AcceptBegin = false;
                                 return;
@@ -462,6 +464,7 @@ namespace Flekosoft.Common.Network.Tcp
                                 driver.ExchangeInterface.RemoteEndPoint));
                         }
                     }
+                    listenSocket.AcceptBegin = false;
                 }
             }
             catch (ObjectDisposedException)
@@ -472,29 +475,33 @@ namespace Flekosoft.Common.Network.Tcp
                 OnErrorEvent(ex);
             }
         }
-
         private void Driver_SendDataTraceEvent(object sender, NetworkDataEventArgs e)
         {
             OnSendDataTraceEvent(e.Data, e.LocalEndPoint, e.RemoteEndPoint);
         }
-
         private void Driver_ReceiveDataTraceEvent(object sender, NetworkDataEventArgs e)
         {
             OnReceiveDataTraceEvent(e.Data, e.LocalEndPoint, e.RemoteEndPoint);
         }
-
         private void Driver_NewByteEvent(object sender, NetworkDataEventArgs e)
         {
             ProcessDataInternal(e);
         }
-
         private void Driver_ErrorEvent(object sender, System.IO.ErrorEventArgs e)
         {
             OnErrorEvent(e.GetException());
         }
+        private X509Certificate TcpServerBase_SelectLocalCertificate(object sender, string targetHost, X509CertificateCollection localCertificates, X509Certificate remoteCertificate, string[] acceptableIssuers)
+        {
+            return SelectLocalCertificate(targetHost, localCertificates, remoteCertificate, acceptableIssuers);
+        }
+        private bool TcpServerBase_ValidateClientCertificate(object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors)
+        {
+            return ValidateClientCertificate(certificate, chain, sslPolicyErrors);
+        }
         #endregion
 
-        #region events
+        #region Events
         public event EventHandler StartedEvent;
         private void OnStartedEvent()
         {
@@ -538,8 +545,8 @@ namespace Flekosoft.Common.Network.Tcp
             SendDataTraceEvent?.Invoke(this, new NetworkDataEventArgs(data, localEndPoint, remoteEndPoint));
         }
 
-        public event RemoteCertificateValidationCallback ValidateClientCertificate;
-        public event LocalCertificateSelectionCallback SelectLocalCertificate;
+        private event RemoteCertificateValidationCallback ValidateClientCertificateEvent;
+        private event LocalCertificateSelectionCallback SelectLocalCertificateEvent;
         #endregion
 
         #region Disposable
@@ -548,8 +555,8 @@ namespace Flekosoft.Common.Network.Tcp
         {
             if (disposing)
             {
-                ValidateClientCertificate = null;
-                SelectLocalCertificate = null;
+                ValidateClientCertificateEvent = null;
+                SelectLocalCertificateEvent = null;
 
                 Stop();
                 if (_waitConnectionThread != null)

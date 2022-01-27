@@ -13,7 +13,7 @@
     <Company />
     <Description>Network Framework. Contains basic TCP server and TCP client, Simple WebSocket, HTTP, IGMP clients and servers and some useful helpers</Description>
     <PackageProjectUrl>https://github.com/AlexandrSurkov/FlekoFramework</PackageProjectUrl>
-    <Version>1.1.0</Version>
+    <Version>1.1.1</Version>
   </PropertyGroup>
 
   <ItemGroup>

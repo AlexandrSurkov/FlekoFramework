@@ -528,7 +528,14 @@ namespace Flekosoft.UnitTests.Common.Network
                     ServerDataReceivedEvent.Clear();
                     Assert.AreEqual(0, ServerDataReceivedEvent.Count);
                     client.SendData(data);
-                    Thread.Sleep(100);
+                    
+                    var waitStart = DateTime.Now;
+                    while (ServerDataReceivedEvent.Count == 0)
+                    {
+                        var delta = DateTime.Now - waitStart;
+                        if (delta.TotalMilliseconds > 100) Assert.Fail("Data not received");
+                    }
+
                     Assert.AreEqual(1, ServerDataReceivedEvent.Count);
                     Assert.AreEqual(data.Length, ServerDataReceivedEvent[0].Data.Length);
                     for (int j = 0; j < data.Length; j++)
@@ -545,9 +552,16 @@ namespace Flekosoft.UnitTests.Common.Network
                     ClientDataReceivedEvent.Clear();
                     Assert.AreEqual(0, ClientDataReceivedEvent.Count);
                     server.Write(data, client.ExchangeInterface.RemoteEndPoint, client.ExchangeInterface.LocalEndPoint);
-                    Thread.Sleep(100);
-                    Assert.AreEqual(1, ServerDataReceivedEvent.Count);
-                    Assert.AreEqual(data.Length, ServerDataReceivedEvent[0].Data.Length);
+
+                    var waitStart = DateTime.Now;
+                    while (ClientDataReceivedEvent.Count == 0)
+                    {
+                        var delta = DateTime.Now - waitStart;
+                        if (delta.TotalMilliseconds > 100) Assert.Fail("Data not received");
+                    }
+
+                    Assert.AreEqual(1, ClientDataReceivedEvent.Count);
+                    Assert.AreEqual(data.Length, ClientDataReceivedEvent[0].Data.Length);
                     for (int j = 0; j < data.Length; j++)
                     {
                         Assert.AreEqual(data[j], ClientDataReceivedEvent[0].Data[j]);

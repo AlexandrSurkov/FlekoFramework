@@ -71,6 +71,7 @@ namespace Flekosoft.Common.Network.Tcp.Internals
 
                     SocketError err;
                     var sendedBytes = TcpClient.Client.Send(buffer, offset, size, SocketFlags.None, out err);
+                    _netStream.Flush();
                     if (err != SocketError.Success)
                     {
                         Exception ex;

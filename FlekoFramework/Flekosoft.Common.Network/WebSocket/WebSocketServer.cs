@@ -230,6 +230,9 @@ namespace Flekosoft.Common.Network.WebSocket
 
         private void ParseData(EndpointDataParser parser, NetworkDataEventArgs e)
         {
+#if DEBUG
+            AppendDebugLogMessage($"{this}: {e.RemoteEndPoint} Data received {e.Data.Length}");
+#endif
             foreach (byte b in e.Data)
             {
                 if (parser.IsFirstDataByte)
@@ -324,10 +327,17 @@ namespace Flekosoft.Common.Network.WebSocket
 
         private void ParseFrame(EndpointDataParser parser, NetworkDataEventArgs e)
         {
-            //AppendDebugLogMessage($"{this}: {e.RemoteEndPoint} New Frame Received");
+#if DEBUG
+            AppendDebugLogMessage($"{this}: {e.RemoteEndPoint} New Frame Received");
+#endif
             var startDateTime = DateTime.Now;
             var data = new List<byte>();
             var payloadStartIndex = 2 + parser.PayloadLenLenght + parser.MaskingKeyLenght;
+
+#if DEBUG
+            AppendDebugLogMessage($"{this}: {e.RemoteEndPoint} Start parce frame {(WebSocketOpcode)parser.Opcode}...");
+#endif
+
             switch ((WebSocketOpcode)parser.Opcode)
             {
                 case WebSocketOpcode.Ping:
@@ -351,7 +361,9 @@ namespace Flekosoft.Common.Network.WebSocket
             }
             var endDateTime = DateTime.Now;
             var delta = endDateTime - startDateTime;
-            //AppendDebugLogMessage($"{this}: {e.RemoteEndPoint} Frame {(WebSocketOpcode)parser.Opcode} Parsed. Time spent {delta}");
+#if DEBUG
+            AppendDebugLogMessage($"{this}: {e.RemoteEndPoint} Frame {(WebSocketOpcode)parser.Opcode} Parsed. Time spent {delta}");
+#endif
         }
 
         private void SendClose(ConnectionCloseReason connectionCloseReason, IPEndPoint localEndPoint, IPEndPoint remoteEndPoint)

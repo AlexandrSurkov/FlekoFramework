@@ -71,7 +71,7 @@ namespace Flekosoft.Common.Network.Tcp.Internals
                         throw new NotConnectedException();
                     }
 
-                    if (_netStream.CanRead && _netStream.DataAvailable)
+                    if (_sslStream.CanRead && _netStream.DataAvailable)
                     {
                         TcpClient.ReceiveTimeout = timeout;
                         return _sslStream.Read(data, 0, data.Length);

@@ -1,10 +1,12 @@
 ﻿using System;
+using System.IO;
 using System.Net;
 using System.Net.Security;
 using System.Net.Sockets;
 using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
+using System.Threading.Tasks;
 using Flekosoft.Common.Network.Internals;
 
 namespace Flekosoft.Common.Network.Tcp.Internals
@@ -30,7 +32,7 @@ namespace Flekosoft.Common.Network.Tcp.Internals
             RemoteEndPoint = (IPEndPoint)Socket.RemoteEndPoint;
 
             _networkStream = new NetworkStream(Socket, false);
-            _sslStream = new SslStream(_networkStream, true, 
+            _sslStream = new SslStream(_networkStream, true,
                 new RemoteCertificateValidationCallback(userCertificateValidationCallback),
                 new LocalCertificateSelectionCallback(userCertificateSelectionCallback), encryptionPolicy
                 );
@@ -46,10 +48,10 @@ namespace Flekosoft.Common.Network.Tcp.Internals
             {
                 Dispose();
                 throw;
-            }            
+            }
 
             IsConnected = true;
-        }        
+        }
 
         public int Read(byte[] data, int timeout)
         {
@@ -82,12 +84,17 @@ namespace Flekosoft.Common.Network.Tcp.Internals
                         throw new NotConnectedException();
                     }
 
+                    if (!_sslStream.CanRead) return 0;
+
                     Socket.ReceiveTimeout = timeout;
 
-                    if (dataAvailable > 0)
-                        return _sslStream.Read(data, 0, data.Length);
-                    else
-                        return 0;
+                    //if (dataAvailable > 0)
+                    ////if (_sslStream.CanRead && _networkStream.DataAvailable)
+                    ////if (_networkStream.DataAvailable)
+                    ////if (_networkStream.DataAvailable)
+                    return _sslStream.Read(data, 0, data.Length);
+                    //else
+                    //    return 0;
                 }
             }
             catch (ThreadAbortException)
@@ -118,6 +125,10 @@ namespace Flekosoft.Common.Network.Tcp.Internals
             {
 
             }
+            catch(IOException ioex)
+            {
+
+            }
             catch (Exception ex)
             {
                 var type = ex.GetType();
@@ -145,6 +156,7 @@ namespace Flekosoft.Common.Network.Tcp.Internals
                     var buf = new byte[size];
                     Array.Copy(buffer, offset, buf, 0, size);
                     _sslStream.Write(buf);
+                    _sslStream.Flush();
                     var sentBytes = size;
 
                     return sentBytes;

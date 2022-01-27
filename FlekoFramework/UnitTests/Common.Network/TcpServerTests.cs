@@ -404,8 +404,8 @@ namespace Flekosoft.UnitTests.Common.Network
                 Assert.AreEqual(0, ClientDataReceivedEvent.Count);
                 server.Write(data, client.ExchangeInterface.RemoteEndPoint, client.ExchangeInterface.LocalEndPoint);
                 Thread.Sleep(100);
-                Assert.AreEqual(1, ServerDataReceivedEvent.Count);
-                Assert.AreEqual(data.Length, ServerDataReceivedEvent[0].Data.Length);
+                Assert.AreEqual(1, ClientDataReceivedEvent.Count);
+                Assert.AreEqual(data.Length, ClientDataReceivedEvent[0].Data.Length);
                 for (int j = 0; j < data.Length; j++)
                 {
                     Assert.AreEqual(data[j], ClientDataReceivedEvent[0].Data[j]);

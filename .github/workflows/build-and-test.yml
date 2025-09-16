@@ -13,14 +13,12 @@ jobs:
     env:
       SOLUTION: FlekoFramework/FlekoFramework.sln
       CONFIGURATION: Release
-      # Путь к тестовой сборке после компиляции
       TEST_ASSEMBLY: FlekoFramework/UnitTests/bin/Release/Flekosoft.UnitTests.dll
-      # Кэш для папки с пакетами (в решении используется packages/, а не ~/.nuget)
       NUGET_PACKAGES_DIR: FlekoFramework/packages
 
     steps:
       - name: Checkout
-      - uses: actions/checkout@v4
+        uses: actions/checkout@v4
 
       - name: Cache NuGet packages (solution-local packages/)
         uses: actions/cache@v4
@@ -53,16 +51,14 @@ jobs:
             -requires Microsoft.Component.MSBuild `
             -property installationPath
           $candidates = @(
-            Join-Path $vsPath "Common7\IDE\CommonExtensions\Microsoft\TestWindow\vstest.console.exe"),
+            (Join-Path $vsPath "Common7\IDE\CommonExtensions\Microsoft\TestWindow\vstest.console.exe"),
             (Join-Path $vsPath "Common7\IDE\Extensions\TestPlatform\vstest.console.exe")
+          )
           foreach ($c in $candidates) {
             if (Test-Path $c) {
               "VSTEST_PATH=$c" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
               break
             }
-          }
-          if (-not "${{ steps.locate-vstest.outputs.VSTEST_PATH }}") {
-            Write-Error "vstest.console.exe not found"
           }
 
       - name: Run unit tests (MSTest)

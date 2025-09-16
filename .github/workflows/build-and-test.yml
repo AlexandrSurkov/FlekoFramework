@@ -8,7 +8,7 @@ on:
 
 jobs:
   build-and-test:
-    runs-on: windows-latest
+    runs-on: windows-2019  # <-- фикс: образ с предустановленным .NET 4.6.1 targeting pack
 
     env:
       SOLUTION: FlekoFramework/FlekoFramework.sln
@@ -35,38 +35,8 @@ jobs:
         run: nuget restore $env:SOLUTION
         shell: pwsh
 
-      - name: Setup MSBuild (VS 2022)
+      - name: Setup MSBuild (VS)
         uses: microsoft/setup-msbuild@v2
-
-      - name: Ensure .NET Framework 4.6.1 Dev Pack
-        shell: pwsh
-        run: |
-          $tfmPath = "${env:ProgramFiles(x86)}\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.6.1"
-          if (-not (Test-Path $tfmPath)) {
-            Write-Host "v4.6.1 reference assemblies not found. Trying winget..."
-            $winget = "$env:LOCALAPPDATA\Microsoft\WindowsApps\winget.exe"
-            if (-not (Test-Path $winget)) { $winget = "winget" }
-            try {
-              & $winget install Microsoft.DotNet.Framework.DeveloperPack_4 -v 4.6.1 -e --silent --accept-package-agreements --accept-source-agreements
-            } catch {
-              Write-Warning "winget install failed, will try direct offline installer..."
-            }
-          }
-
-          if (-not (Test-Path $tfmPath)) {
-            $url = "https://download.microsoft.com/download/F/1/D/F1DEB8DB-D277-4EF9-9F48-3A65D4D8F965/NDP461-DevPack-KB3105179-ENU.exe"
-            $exe = "$env:RUNNER_TEMP\NDP461-DevPack-KB3105179-ENU.exe"
-            Write-Host "Downloading 4.6.1 Dev Pack from $url ..."
-            Invoke-WebRequest -Uri $url -OutFile $exe
-            Write-Host "Installing 4.6.1 Dev Pack silently..."
-            Start-Process -FilePath $exe -ArgumentList "/q /norestart" -Wait -NoNewWindow
-          }
-
-          if (-not (Test-Path $tfmPath)) {
-            throw "Failed to provision .NET Framework 4.6.1 Developer Pack (reference assemblies still missing at $tfmPath)."
-          } else {
-            Write-Host "4.6.1 Developer Pack is present."
-          }
 
       - name: Build solution
         run: msbuild $env:SOLUTION /p:Configuration=$env:CONFIGURATION /m /verbosity:minimal

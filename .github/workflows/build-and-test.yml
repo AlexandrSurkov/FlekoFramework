@@ -1,0 +1,83 @@
+name: CI
+
+on:
+  push:
+    branches: [ "**" ]
+  pull_request:
+    branches: [ "**" ]
+
+jobs:
+  build-and-test:
+    runs-on: windows-latest
+
+    env:
+      SOLUTION: FlekoFramework/FlekoFramework.sln
+      CONFIGURATION: Release
+      # Путь к тестовой сборке после компиляции
+      TEST_ASSEMBLY: FlekoFramework/UnitTests/bin/Release/Flekosoft.UnitTests.dll
+      # Кэш для папки с пакетами (в решении используется packages/, а не ~/.nuget)
+      NUGET_PACKAGES_DIR: FlekoFramework/packages
+
+    steps:
+      - name: Checkout
+      - uses: actions/checkout@v4
+
+      - name: Cache NuGet packages (solution-local packages/)
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.NUGET_PACKAGES_DIR }}
+          key: nuget-${{ runner.os }}-${{ hashFiles('**/packages.config') }}
+          restore-keys: |
+            nuget-${{ runner.os }}-
+
+      - name: Setup NuGet
+        uses: NuGet/setup-nuget@v2
+
+      - name: Restore NuGet packages
+        run: nuget restore $env:SOLUTION
+        shell: pwsh
+
+      - name: Setup MSBuild (VS 2022)
+        uses: microsoft/setup-msbuild@v2
+
+      - name: Build solution
+        run: msbuild $env:SOLUTION /p:Configuration=$env:CONFIGURATION /m /verbosity:minimal
+        shell: pwsh
+
+      - name: Locate VSTest.console.exe
+        id: locate-vstest
+        shell: pwsh
+        run: |
+          $vsPath = & "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe" `
+            -latest -products * `
+            -requires Microsoft.Component.MSBuild `
+            -property installationPath
+          $candidates = @(
+            Join-Path $vsPath "Common7\IDE\CommonExtensions\Microsoft\TestWindow\vstest.console.exe"),
+            (Join-Path $vsPath "Common7\IDE\Extensions\TestPlatform\vstest.console.exe")
+          foreach ($c in $candidates) {
+            if (Test-Path $c) {
+              "VSTEST_PATH=$c" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+              break
+            }
+          }
+          if (-not "${{ steps.locate-vstest.outputs.VSTEST_PATH }}") {
+            Write-Error "vstest.console.exe not found"
+          }
+
+      - name: Run unit tests (MSTest)
+        shell: pwsh
+        run: |
+          $vstest = "${{ steps.locate-vstest.outputs.VSTEST_PATH }}"
+          if (-not (Test-Path $env:TEST_ASSEMBLY)) {
+            Write-Error "Test assembly not found at $env:TEST_ASSEMBLY. Check paths and configuration."
+          }
+          & $vstest "$env:TEST_ASSEMBLY" /Platform:x64 /logger:trx
+
+      - name: Publish test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-trx
+          path: |
+            **/*.trx

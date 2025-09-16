@@ -71,7 +71,6 @@ jobs:
           foreach ($r in $roots) {
             $dlls += Get-ChildItem -Path $r -Recurse -ErrorAction SilentlyContinue -Include *.dll
           }
-          # Берём только типичные имена тестовых сборок
           $tests = $dlls | Where-Object {
             $_.FullName -match '\\(Test|Tests|UnitTests)\\|\\(Test|Tests|UnitTests)\.dll$' -or
             $_.Name -match '(^|\.)(Test|Tests|UnitTests)\.dll$'

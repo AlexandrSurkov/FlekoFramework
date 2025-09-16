@@ -38,26 +38,8 @@ jobs:
       - name: Setup MSBuild (VS 2022)
         uses: microsoft/setup-msbuild@v2
 
-      # >>> ВАЖНО: устанавливаем таргетинг-пак .NET Framework 4.6.1
-      - name: Install .NET Framework 4.6.1 Targeting Pack
-        shell: pwsh
-        run: |
-          $vsPath = & "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe" `
-            -latest -products * `
-            -requires Microsoft.Component.MSBuild `
-            -property installationPath
-          if (-not $vsPath) { throw "Visual Studio not found" }
-
-          $installer = Join-Path "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer" "vs_installer.exe"
-          if (-not (Test-Path $installer)) { throw "vs_installer.exe not found" }
-
-          & $installer modify `
-            --installPath "$vsPath" `
-            --add Microsoft.Net.Component.4.6.1.TargetingPack `
-            --quiet --norestart --wait
-
-      - name: Build solution
-        run: msbuild $env:SOLUTION /p:Configuration=$env:CONFIGURATION /m /verbosity:minimal
+      - name: Build solution (force TFMs to v4.8 at CI)
+        run: msbuild $env:SOLUTION /p:Configuration=$env:CONFIGURATION /p:TargetFrameworkVersion=v4.8 /m /verbosity:minimal
         shell: pwsh
 
       - name: Locate VSTest.console.exe
